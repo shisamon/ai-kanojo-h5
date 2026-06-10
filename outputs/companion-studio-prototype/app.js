@@ -491,12 +491,18 @@ function makeResultImage(template, character, count) {
 }
 
 function renderAll() {
-  qs("#userAvatar").src = characters[2].image;
-  qs("#profileAvatar").src = characters[2].image;
-  qs("#albumHero").src = characters[8].image;
-  qs("#albumThumbOne").src = characters[8].image;
-  qs("#albumThumbTwo").src = characters[1].image;
-  qs("#albumThumbThree").src = characters[2].image;
+  const optionalImages = [
+    ["#userAvatar", characters[2].image],
+    ["#profileAvatar", characters[2].image],
+    ["#albumHero", characters[8].image],
+    ["#albumThumbOne", characters[8].image],
+    ["#albumThumbTwo", characters[1].image],
+    ["#albumThumbThree", characters[2].image]
+  ];
+  optionalImages.forEach(([selector, image]) => {
+    const element = qs(selector);
+    if (element) element.src = image;
+  });
   renderTemplates();
   renderGallery();
   renderExplore();
@@ -864,7 +870,10 @@ function generateMock() {
 }
 
 function updateBalance() {
-  qs("#coinBalance").textContent = balance >= 1000 ? `${(balance / 1000).toFixed(1)}${t.thousand}` : String(balance);
+  const coinBalance = qs("#coinBalance");
+  if (coinBalance) {
+    coinBalance.textContent = balance >= 1000 ? `${(balance / 1000).toFixed(1)}${t.thousand}` : String(balance);
+  }
 }
 
 function switchView(view) {
@@ -971,12 +980,15 @@ qsa("[data-plan]").forEach((button) => {
   });
 });
 
-qs("#globalSearch").addEventListener("input", (event) => {
-  const query = event.target.value.trim().toLowerCase();
-  qsa(".template-card, .gallery-card, .character-card, .share-card, .conversation-item").forEach((item) => {
-    item.style.display = item.textContent.toLowerCase().includes(query) ? "" : "none";
+const globalSearch = qs("#globalSearch");
+if (globalSearch) {
+  globalSearch.addEventListener("input", (event) => {
+    const query = event.target.value.trim().toLowerCase();
+    qsa(".template-card, .gallery-card, .character-card, .share-card, .conversation-item").forEach((item) => {
+      item.style.display = item.textContent.toLowerCase().includes(query) ? "" : "none";
+    });
   });
-});
+}
 
 renderAll();
 loadWorksFromApi();

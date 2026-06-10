@@ -8,7 +8,9 @@ export const metadata = {
 export default function JapanesePage() {
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: "document.documentElement.lang='ja';" }} />
+      <Script id="set-ja-lang" strategy="afterInteractive">
+        {"document.documentElement.lang='ja';"}
+      </Script>
       <div dangerouslySetInnerHTML={{ __html: getPrototypeBody("ja") }} />
       <Script src="/prototype/app.js" strategy="afterInteractive" />
     </>
