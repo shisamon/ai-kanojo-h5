@@ -2616,6 +2616,55 @@ body {
   gap: 10px;
 }
 
+.payment-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  text-align: left;
+}
+
+.payment-card span {
+  display: grid;
+  min-width: 58px;
+  min-height: 38px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(49, 214, 200, 0.14);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.payment-card strong {
+  font-size: 15px;
+}
+
+.field-block input {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 0 12px;
+}
+
+.field-block input:disabled {
+  color: var(--muted);
+  opacity: 0.72;
+}
+
 @media (max-width: 380px) {
   .person-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

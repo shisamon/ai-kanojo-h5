@@ -4,7 +4,6 @@ const dictionary = {
   zh: {
     activePlan: "标准版",
     ageSuffix: "岁",
-    chatCompanion: "新聊天",
     coins: "钻石",
     complete: "已完成",
     download: "下载",
@@ -14,9 +13,9 @@ const dictionary = {
     modeName: { image: "图片", video: "视频" },
     noHistory: "还没有创作记录。",
     ready: "准备就绪",
-    repeat: "复用",
     resultLabel: (count) => `作品 #${count}`,
-    selectedPlan: (plan) => `已选择 ${plan}，下一步进入支付确认。`,
+    selectedPayment: (payment) => `已选择 ${payment}，下一步进入支付确认。`,
+    profileSaved: "昵称已保存。",
     uploadedName: "上传图片",
     uploadedReady: "已选择上传图片。",
     deleteSubmitted: "账户删除请求已提交。",
@@ -110,7 +109,6 @@ const dictionary = {
   ja: {
     activePlan: "スタンダード",
     ageSuffix: "歳",
-    chatCompanion: "新規チャット",
     coins: "ダイヤ",
     complete: "完了",
     download: "ダウンロード",
@@ -120,9 +118,9 @@ const dictionary = {
     modeName: { image: "画像", video: "動画" },
     noHistory: "創作履歴はまだありません。",
     ready: "準備完了",
-    repeat: "再利用",
     resultLabel: (count) => `作品 #${count}`,
-    selectedPlan: (plan) => `${plan} を選択しました。次は支払い確認です。`,
+    selectedPayment: (payment) => `${payment} を選択しました。次は支払い確認です。`,
+    profileSaved: "ニックネームを保存しました。",
     uploadedName: "アップロード画像",
     uploadedReady: "アップロード画像を選択しました。",
     deleteSubmitted: "アカウント削除リクエストを送信しました。",
@@ -299,6 +297,7 @@ const characterModalGrid = qs("#characterModalGrid");
 const characterModal = qs("#characterModal");
 const upgradeModal = qs("#upgradeModal");
 const deleteConfirmModal = qs("#deleteConfirmModal");
+const profileEditModal = qs("#profileEditModal");
 const shareModal = qs("#shareModal");
 const sharePlatformGrid = qs("#sharePlatformGrid");
 const toast = qs("#toast");
@@ -600,30 +599,6 @@ function renderExplore() {
   exploreGrid.innerHTML = visiblePosts
     .map((post) => shareCard(post))
     .join("");
-  exploreGrid.querySelectorAll("[data-repeat-post]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const post = sharedPosts.find((item) => item.id === button.dataset.repeatPost);
-      const template = {
-        id: post.id,
-        name: post.title,
-        category: t.galleryTag,
-        cost: post.cost,
-        mode: post.mode,
-        image: post.image
-      };
-      openCreateFlow(template, characters.find((item) => item.name === post.character) || characters[0]);
-    });
-  });
-  exploreGrid.querySelectorAll("[data-chat-post]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const post = sharedPosts.find((item) => item.id === button.dataset.chatPost);
-      activeChat = characters.find((item) => item.name === post.character) || characters[8];
-      chatScreen = "detail";
-      renderChat();
-      switchView("chat");
-      showToast(t.chatStarted(activeChat.name));
-    });
-  });
   exploreGrid.querySelectorAll("[data-share-post]").forEach((button) => {
     button.addEventListener("click", () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.sharePost);
@@ -694,8 +669,6 @@ function shareCard(post) {
           <button class="like-button ${post.liked ? "is-liked" : ""}" data-like-post="${post.id}" aria-pressed="${post.liked}">
             <span>♥</span><b>${post.likes.toLocaleString()}</b>
           </button>
-          <button data-repeat-post="${post.id}">${t.repeat}</button>
-          <button data-chat-post="${post.id}">${t.chatCompanion}</button>
           <button data-share-post="${post.id}">${t.share}</button>
         </div>
       </div>
@@ -959,6 +932,25 @@ qsa("[data-close-upgrade]").forEach((button) => {
 qsa("[data-open-delete]").forEach((button) => {
   button.addEventListener("click", () => openDialog(deleteConfirmModal));
 });
+qsa("[data-open-profile-edit]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const nicknameInput = qs("#nicknameInput");
+    if (nicknameInput) nicknameInput.value = qs("#profileTitle").textContent.trim();
+    openDialog(profileEditModal);
+  });
+});
+qsa("[data-close-profile-edit]").forEach((button) => {
+  button.addEventListener("click", () => closeDialog(profileEditModal));
+});
+qsa("[data-save-profile]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const nicknameInput = qs("#nicknameInput");
+    const nickname = nicknameInput ? nicknameInput.value.trim() : "";
+    if (nickname) qs("#profileTitle").textContent = nickname;
+    closeDialog(profileEditModal);
+    showToast(t.profileSaved);
+  });
+});
 qsa("[data-close-delete]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(deleteConfirmModal));
 });
@@ -1021,14 +1013,6 @@ if (removeCharacter) {
   });
 }
 qs("#generateButton").addEventListener("click", generateMock);
-qs("#shareResultButton").addEventListener("click", () => {
-  shareToExplore({
-    title: `${currentCharacter.name} · ${currentTemplate.name}`,
-    mode,
-    cost: currentTemplate.cost,
-    image: qs("#composePreview").src
-  }, currentCharacter.name);
-});
 qsa("[data-chat-create]").forEach((button) => {
   button.addEventListener("click", () => {
     openCreateFlow(videoTemplates[0], activeChat);
@@ -1080,9 +1064,10 @@ qsa(".segmented-control button").forEach((button) => {
   });
 });
 
-qsa("[data-plan]").forEach((button) => {
+qsa("[data-payment]").forEach((button) => {
   button.addEventListener("click", () => {
-    showToast(t.selectedPlan(button.dataset.plan));
+    showToast(t.selectedPayment(button.dataset.payment));
+    closeDialog(upgradeModal);
   });
 });
 

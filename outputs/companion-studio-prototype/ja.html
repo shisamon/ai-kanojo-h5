@@ -25,7 +25,7 @@
         </nav>
 
         <div class="side-actions">
-          <button class="upgrade-button" data-open-upgrade>ダイヤ購入</button>
+          <button class="upgrade-button" data-open-upgrade>チャージ</button>
         </div>
 
         <p class="legal">
@@ -80,10 +80,9 @@
               <div class="create-summary">
                 <div><span>人物</span><strong id="characterName"></strong></div>
                 <div><span>スタイル</span><strong id="poseName"></strong></div>
-                <div><span>消費</span><strong><span id="generateCost">96</span> ダイヤ</strong></div>
+                <div><span>消費</span><strong><span id="generateCost">96</span></strong></div>
               </div>
               <button class="primary-button" id="generateButton">動画を生成</button>
-              <button class="secondary-button" id="shareResultButton">ホームに共有</button>
             </section>
           </div>
         </section>
@@ -151,7 +150,7 @@
                 <h1 id="profileTitle">User-mW4X6YPx</h1>
                 <span>kouki@telegram</span>
               </div>
-              <button class="ghost-button">プロフィール編集</button>
+              <button class="ghost-button" data-open-profile-edit>プロフィール編集</button>
             </section>
             <div class="metric-grid">
               <div><strong>0</strong><span>フォロワー ›</span></div>
@@ -159,17 +158,13 @@
             </div>
             <section class="membership-band">
               <div>
-                <h2>570 ダイヤ</h2>
+                <h2>残高 570</h2>
                 <span>現在の残高</span>
               </div>
-              <button class="primary-button" data-open-upgrade>ダイヤ購入</button>
-              <strong>購入 ›</strong>
+              <button class="primary-button" data-open-upgrade>チャージ</button>
+              <strong>チャージ ›</strong>
             </section>
             <section class="settings-list">
-              <button class="settings-row profile-link-row">
-                <span>アカウント情報</span>
-                <b>›</b>
-              </button>
               <div class="settings-row language-row">
                 <span>言語</span>
                 <div class="locale-switch profile-locale" aria-label="言語切替">
@@ -177,10 +172,6 @@
                   <a class="is-active" href="ja.html">日本語</a>
                 </div>
               </div>
-              <button class="settings-row profile-link-row">
-                <span>ヘルプとフィードバック</span>
-                <b>›</b>
-              </button>
             </section>
             <button class="delete-account-button" data-open-delete>アカウント削除</button>
           </div>
@@ -203,64 +194,48 @@
     <dialog id="upgradeModal" class="modal upgrade-modal">
       <div class="modal-head">
         <div>
-          <h2>ダイヤ購入</h2>
-          <span>現在の残高：570 ダイヤ</span>
+          <h2>チャージ</h2>
+          <span>支払い方法を選択</span>
         </div>
         <button class="icon-button" data-close-upgrade>×</button>
       </div>
       <div class="deal-strip">
-        <strong>ダイヤは動画生成と創作リクエストに使います。</strong>
-        <span>ダイヤパックを選ぶと、次に支払い確認へ進みます。</span>
+        <strong>支払い方法を選ぶと確認画面へ進みます。</strong>
+        <span>これはデモのため、実際の決済は発生しません。</span>
       </div>
-      <div class="plan-grid">
-        <article class="plan-card is-current">
-          <span class="plan-badge">入門</span>
-          <strong class="plan-tier">600 ダイヤ</strong>
-          <div class="plan-price"><strong>$9.9</strong><span>$19.9</span></div>
-          <p>動画生成を試す方向け。</p>
-          <ul>
-            <li>複数の短い動画を生成</li>
-            <li>人物画像アップロード対応</li>
-            <li>購入後すぐに利用可能</li>
-          </ul>
-          <button class="primary-button" data-plan="600 ダイヤ">購入</button>
-        </article>
-        <article class="plan-card is-featured">
-          <span class="plan-badge">おすすめ</span>
-          <strong class="plan-tier">1,500 ダイヤ</strong>
-          <div class="plan-price"><strong>$19.9</strong><span>$39.9</span></div>
-          <p>動画をより高頻度で創作する方向け。</p>
-          <ul>
-            <li>高いコストパフォーマンス</li>
-            <li>動画生成優先</li>
-            <li>日常創作に最適</li>
-          </ul>
-          <button class="primary-button" data-plan="1,500 ダイヤ">購入</button>
-        </article>
-        <article class="plan-card">
-          <strong class="plan-tier">3,800 ダイヤ</strong>
-          <div class="plan-price"><strong>$29.9</strong><span>$59.9</span></div>
-          <p>連続創作と共有に向いています。</p>
-          <ul>
-            <li>大容量ダイヤ</li>
-            <li>一括生成に向いています</li>
-            <li>履歴保存数アップ</li>
-          </ul>
-          <button class="primary-button" data-plan="3,800 ダイヤ">購入</button>
-        </article>
-        <article class="plan-card">
-          <strong class="plan-tier">8,800 ダイヤ</strong>
-          <div class="plan-price"><strong>$49.9</strong><span>$99.9</span></div>
-          <p>動画創作を高頻度で使う方向け。</p>
-          <ul>
-            <li>最大ダイヤ枠</li>
-            <li>高頻度の動画生成</li>
-            <li>上位スタイル特典</li>
-          </ul>
-          <button class="primary-button" data-plan="8,800 ダイヤ">購入</button>
-        </article>
+      <div class="payment-grid">
+        <button class="payment-card" data-payment="WeChat Pay">
+          <span>WeChat</span>
+          <strong>WeChat Pay</strong>
+        </button>
+        <button class="payment-card" data-payment="Alipay">
+          <span>Alipay</span>
+          <strong>Alipay</strong>
+        </button>
       </div>
-      <p class="upgrade-note">購入後、ダイヤ残高は「私」ページに同期されます。</p>
+      <p class="upgrade-note">支払い方法を選択すると、次の確認へ進みます。</p>
+    </dialog>
+
+    <dialog id="profileEditModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>プロフィール編集</h2>
+          <span>ID は変更できません。ニックネームのみ変更できます。</span>
+        </div>
+        <button class="icon-button" data-close-profile-edit>×</button>
+      </div>
+      <label class="field-block">
+        <span>ニックネーム</span>
+        <input id="nicknameInput" type="text" value="User-mW4X6YPx" />
+      </label>
+      <label class="field-block">
+        <span>ID</span>
+        <input type="text" value="kouki@telegram" disabled />
+      </label>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-profile-edit>キャンセル</button>
+        <button class="primary-button" data-save-profile>保存</button>
+      </div>
     </dialog>
 
     <dialog id="deleteConfirmModal" class="modal confirm-modal">
