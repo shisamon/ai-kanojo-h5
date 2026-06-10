@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OpenLover - 创作专区",
-  description: "作品广场、创作专区、聊天与会员计划原型。"
+  title: "OpenLover - 作品广场",
+  description: "作品广场、自己创作、聊天窗口与个人主页原型。"
 };
 
 export default function RootLayout({

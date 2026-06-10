@@ -534,15 +534,52 @@ h2 {
   gap: 10px;
 }
 
+#view-explore {
+  height: calc(100vh - 36px);
+  overflow: hidden;
+}
+
+#view-explore .section-head {
+  position: relative;
+  z-index: 4;
+  margin-bottom: 8px;
+}
+
+#view-explore .filter-row {
+  position: relative;
+  z-index: 4;
+  margin-bottom: 10px;
+}
+
 .share-grid {
-  gap: 12px;
+  display: block;
+  width: min(520px, 100%);
+  height: calc(100vh - 178px);
+  margin: 0 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 14px;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.share-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .share-card {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  background: var(--panel);
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 178px);
+  min-height: 620px;
+  margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: #050505;
   box-shadow: var(--shadow);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .share-card em {
@@ -562,11 +599,11 @@ h2 {
 .share-card-body {
   position: absolute;
   z-index: 2;
-  right: 12px;
-  bottom: 12px;
-  left: 12px;
+  right: 92px;
+  bottom: 22px;
+  left: 18px;
   display: grid;
-  gap: 5px;
+  gap: 7px;
 }
 
 .share-card-body span {
@@ -580,26 +617,34 @@ h2 {
 .share-card-body strong {
   overflow: hidden;
   color: #fff;
-  font-size: 16px;
+  font-size: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .like-button {
-  justify-self: start;
-  min-height: 26px;
-  padding: 0 9px;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  min-height: 54px;
+  padding: 7px 6px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.28);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.38);
   color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
 }
 
 .like-button span {
   color: var(--pink-2);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.like-button b {
+  font-size: 11px;
 }
 
 .like-button.is-liked {
@@ -609,20 +654,24 @@ h2 {
 }
 
 .share-actions {
+  position: absolute;
+  right: -78px;
+  bottom: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 4px;
+  width: 64px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .share-actions button {
-  min-height: 32px;
-  border: 0;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #111;
-  font-size: 12px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+  font-size: 11px;
   font-weight: 900;
+  backdrop-filter: blur(14px);
 }
 
 .gallery-card .repeat-button {
@@ -1745,6 +1794,21 @@ h2 {
     padding: 12px 12px 88px;
   }
 
+  #view-explore {
+    height: calc(100dvh - 100px);
+  }
+
+  .share-grid {
+    height: calc(100dvh - 198px);
+    border-radius: 12px;
+  }
+
+  .share-card {
+    height: calc(100dvh - 198px);
+    min-height: 540px;
+    border-radius: 12px;
+  }
+
   .topbar {
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
@@ -1816,16 +1880,39 @@ h2 {
   .template-grid,
   .gallery-grid,
   .character-grid,
-  .share-grid,
   .modal-grid {
     grid-template-columns: 1fr;
   }
 
   .template-card,
   .gallery-card,
-  .character-card,
-  .share-card {
+  .character-card {
     min-height: 0;
+  }
+
+  .share-grid {
+    width: 100%;
+    height: calc(100dvh - 188px);
+  }
+
+  .share-card {
+    height: calc(100dvh - 188px);
+    min-height: 500px;
+  }
+
+  .share-card-body {
+    right: 82px;
+    bottom: 18px;
+    left: 14px;
+  }
+
+  .share-card-body strong {
+    font-size: 18px;
+  }
+
+  .share-actions {
+    right: -72px;
+    width: 58px;
   }
 
   .creator-options,

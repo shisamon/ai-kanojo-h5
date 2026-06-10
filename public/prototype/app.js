@@ -642,10 +642,10 @@ function shareCard(post) {
       <div class="share-card-body">
         <span>${post.creator} · ${post.character}</span>
         <strong>${post.title}</strong>
-        <button class="like-button ${post.liked ? "is-liked" : ""}" data-like-post="${post.id}" aria-pressed="${post.liked}">
-          <span>♥</span> ${post.likes.toLocaleString()}
-        </button>
         <div class="share-actions">
+          <button class="like-button ${post.liked ? "is-liked" : ""}" data-like-post="${post.id}" aria-pressed="${post.liked}">
+            <span>♥</span><b>${post.likes.toLocaleString()}</b>
+          </button>
           <button data-repeat-post="${post.id}">${t.repeat}</button>
           <button data-chat-post="${post.id}">${t.chatCompanion}</button>
           <button data-share-post="${post.id}">${t.share}</button>
