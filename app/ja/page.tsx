@@ -2,7 +2,7 @@ import Script from "next/script";
 import { getPrototypeBody } from "@/lib/prototype-html";
 
 export const metadata = {
-  title: "OpenLover - 投稿広場"
+  title: "OpenLover - ホーム"
 };
 
 export default function JapanesePage() {

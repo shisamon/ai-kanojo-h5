@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OpenLover - 作品广场</title>
+    <title>OpenLover - 首页</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -18,14 +18,14 @@
         </div>
 
         <nav class="nav" aria-label="主导航">
-          <button class="nav-item is-active" data-view="explore"><span>作品广场</span></button>
-          <button class="nav-item" data-view="generate"><span>自己创作</span></button>
-          <button class="nav-item" data-view="chat"><span>聊天窗口</span></button>
-          <button class="nav-item" data-view="profile"><span>个人主页</span></button>
+          <button class="nav-item is-active" data-view="explore"><span>首页</span></button>
+          <button class="nav-item" data-view="generate"><span>创作</span></button>
+          <button class="nav-item" data-view="chat"><span>消息</span></button>
+          <button class="nav-item" data-view="profile"><span>我</span></button>
         </nav>
 
         <div class="side-actions">
-          <button class="upgrade-button" data-open-upgrade>升级</button>
+          <button class="upgrade-button" data-open-upgrade>充钻石</button>
         </div>
 
         <p class="legal">
@@ -36,80 +36,59 @@
       <main class="workspace">
 
         <section class="view" id="view-generate" aria-labelledby="generateTitle">
-          <div id="templateScreen">
-            <div class="section-head generate-head">
-              <div>
-                <p class="eyebrow">自己创作</p>
-                <h1 id="generateTitle">自己创作</h1>
-              </div>
-              <button class="ghost-button" id="historyButton">历史</button>
+          <div class="section-head generate-head">
+            <div>
+              <p class="eyebrow">视频创作</p>
+              <h1 id="generateTitle">创作</h1>
             </div>
-
-            <div class="template-grid" id="templateGrid"></div>
-            <button class="load-more" id="loadMoreButton">加载更多</button>
-
-            <div class="section-head gallery-head">
-              <div>
-                <h2>灵感展廊</h2>
-              </div>
-            </div>
-            <div class="gallery-grid" id="galleryGrid"></div>
           </div>
 
-          <div id="composeScreen" class="compose-screen" hidden>
-            <div class="section-head">
-              <div>
-                <p class="eyebrow" id="composeModeLabel">创作视频</p>
-                <h1>选择角色</h1>
+          <div class="create-flow">
+            <section class="create-step">
+              <div class="step-head">
+                <b>1</b>
+                <div>
+                  <strong>选择人物图片</strong>
+                  <span>选择已有人物，或上传一张人物图片。</span>
+                </div>
               </div>
-              <button class="ghost-button" id="backToTemplates">返回</button>
-            </div>
+              <div class="person-grid" id="personGrid"></div>
+              <label class="upload-card" id="uploadCard">
+                <input id="personUploadInput" type="file" accept="image/*" />
+                <span>＋</span>
+                <strong>上传人物图片</strong>
+                <small id="uploadHint">支持 JPG / PNG</small>
+              </label>
+            </section>
 
-            <div class="compose-layout">
-              <section class="compose-main">
-                <div class="preview-stage">
-                  <img id="composePreview" alt="创作预览" />
-                  <div class="preview-state" id="previewState">准备就绪</div>
+            <section class="create-step">
+              <div class="step-head">
+                <b>2</b>
+                <div>
+                  <strong>选择风格</strong>
+                  <span>选择当前视频生成风格。</span>
                 </div>
-                <label class="field-block">
-                  <span>提示词</span>
-                  <textarea id="promptInput" maxlength="1000"></textarea>
-                </label>
-                <div class="privacy-row">
-                  <span>可见范围</span>
-                  <div class="segmented-control">
-                    <button class="is-active" data-privacy="private">私密</button>
-                    <button data-privacy="public">公开</button>
-                  </div>
-                </div>
-              </section>
+              </div>
+              <div class="style-grid" id="styleGrid"></div>
+            </section>
 
-              <aside class="reference-panel">
-                <h2>参考</h2>
-                <div class="reference-card">
-                  <img id="posePreview" alt="姿势参考" />
-                  <div>
-                    <span>模板</span>
-                    <strong id="poseName"></strong>
-                  </div>
-                </div>
-                <div class="reference-card">
-                  <img id="characterPreview" alt="角色参考" />
-                  <div>
-                    <span>角色</span>
-                    <strong id="characterName"></strong>
-                  </div>
-                  <button class="mini-button" id="removeCharacter">移除</button>
-                </div>
-                <button class="secondary-button" id="selectCharacterAgain">选择角色</button>
-                <button class="primary-button" id="generateButton"><span id="generateCost">96</span> 创作</button>
-                <button class="secondary-button" id="shareResultButton">分享作品</button>
-              </aside>
-            </div>
+            <section class="create-preview-panel">
+              <div class="preview-stage">
+                <img id="composePreview" alt="视频生成预览" />
+                <div class="preview-state" id="previewState">准备就绪</div>
+              </div>
+              <div class="create-summary">
+                <div><span>人物</span><strong id="characterName"></strong></div>
+                <div><span>风格</span><strong id="poseName"></strong></div>
+                <div><span>消耗</span><strong><span id="generateCost">96</span> 钻石</strong></div>
+              </div>
+              <button class="primary-button" id="generateButton">生成视频</button>
+              <button class="secondary-button" id="shareResultButton">分享到首页</button>
+            </section>
           </div>
         </section>
 
-        <section class="view is-visible video-feed-view" id="view-explore" aria-label="作品广场">
+        <section class="view is-visible video-feed-view" id="view-explore" aria-label="首页">
           <div class="share-grid" id="exploreGrid"></div>
         </section>
 
@@ -118,7 +97,7 @@
             <aside class="conversation-list">
               <div class="section-head compact">
                 <div>
-                  <h1 id="chatTitle">聊天窗口</h1>
+                  <h1 id="chatTitle">消息</h1>
                 </div>
               </div>
               <div id="conversationList"></div>
@@ -168,7 +147,7 @@
             <section class="profile-hero">
               <img id="profileAvatar" alt="资料头像" />
               <div>
-                <span class="profile-kicker">个人主页</span>
+                <span class="profile-kicker">我</span>
                 <h1 id="profileTitle">User-mW4X6YPx</h1>
                 <span>kouki@telegram</span>
               </div>
@@ -180,11 +159,11 @@
             </div>
             <section class="membership-band">
               <div>
-                <h2>Standard</h2>
-                <span>剩余钻石</span>
+                <h2>570 钻石</h2>
+                <span>当前余额</span>
               </div>
-              <button class="primary-button" data-open-upgrade>升级</button>
-              <strong>💎 570 ›</strong>
+              <button class="primary-button" data-open-upgrade>充钻石</button>
+              <strong>充值 ›</strong>
             </section>
             <section class="settings-list">
               <button class="settings-row profile-link-row">
@@ -203,11 +182,7 @@
                 <b>›</b>
               </button>
             </section>
-            <section class="danger-panel">
-              <h2>⚠ 危险区域</h2>
-              <p>不可逆账户操作</p>
-              <button>删除账户</button>
-            </section>
+            <button class="delete-account-button" data-open-delete>删除账户</button>
           </div>
         </section>
 
@@ -228,64 +203,78 @@
     <dialog id="upgradeModal" class="modal upgrade-modal">
       <div class="modal-head">
         <div>
-          <h2>会员计划</h2>
-          <span>当前计划：标准版 · 剩余钻石 570</span>
+          <h2>充钻石</h2>
+          <span>当前余额：570 钻石</span>
         </div>
         <button class="icon-button" data-close-upgrade>×</button>
       </div>
       <div class="deal-strip">
-        <strong>当前 Plan：Standard</strong>
-        <span>可继续使用当前额度，也可以选择更高套餐。</span>
+        <strong>钻石用于生成视频和发起创作请求。</strong>
+        <span>选择一个钻石包，下一步进入支付确认。</span>
       </div>
       <div class="plan-grid">
         <article class="plan-card is-current">
-          <span class="plan-badge">当前计划</span>
-          <strong class="plan-tier">Standard</strong>
+          <span class="plan-badge">入门</span>
+          <strong class="plan-tier">600 钻石</strong>
           <div class="plan-price"><strong>$9.9</strong><span>$19.9</span></div>
-          <p>适合轻量创作和日常聊天。</p>
+          <p>适合体验视频生成。</p>
           <ul>
-            <li>570 钻石余额</li>
-            <li>图片与视频创作</li>
-            <li>作品分享与复用</li>
+            <li>可生成多条短视频</li>
+            <li>支持上传人物图片</li>
+            <li>到账后立即可用</li>
           </ul>
-          <button class="secondary-button" disabled>当前使用中</button>
+          <button class="primary-button" data-plan="600 钻石">充值</button>
         </article>
         <article class="plan-card is-featured">
           <span class="plan-badge">推荐</span>
-          <strong class="plan-tier">Premium</strong>
+          <strong class="plan-tier">1,500 钻石</strong>
           <div class="plan-price"><strong>$19.9</strong><span>$39.9</span></div>
-          <p>适合更高频的图片、视频创作。</p>
+          <p>适合更高频的视频创作。</p>
           <ul>
-            <li>更多月度钻石</li>
-            <li>更快创作队列</li>
-            <li>高清视频优先</li>
+            <li>更高性价比</li>
+            <li>视频生成优先</li>
+            <li>适合日常创作</li>
           </ul>
-          <button class="primary-button" data-plan="Premium">升级</button>
+          <button class="primary-button" data-plan="1,500 钻石">充值</button>
         </article>
         <article class="plan-card">
-          <strong class="plan-tier">Pro</strong>
+          <strong class="plan-tier">3,800 钻石</strong>
           <div class="plan-price"><strong>$29.9</strong><span>$59.9</span></div>
-          <p>适合持续运营作品广场内容。</p>
+          <p>适合连续创作和分享。</p>
           <ul>
             <li>大额钻石包</li>
-            <li>批量创作支持</li>
-            <li>更多历史保存</li>
+            <li>更适合批量生成</li>
+            <li>历史记录保留更多</li>
           </ul>
-          <button class="primary-button" data-plan="Pro">升级</button>
+          <button class="primary-button" data-plan="3,800 钻石">充值</button>
         </article>
         <article class="plan-card">
-          <strong class="plan-tier">Max</strong>
+          <strong class="plan-tier">8,800 钻石</strong>
           <div class="plan-price"><strong>$49.9</strong><span>$99.9</span></div>
-          <p>适合重度创作和高频视频创作。</p>
+          <p>适合重度视频创作。</p>
           <ul>
             <li>最高钻石额度</li>
-            <li>视频创作优先</li>
-            <li>高级模板权益</li>
+            <li>高频视频生成</li>
+            <li>高级风格权益</li>
           </ul>
-          <button class="primary-button" data-plan="Max">升级</button>
+          <button class="primary-button" data-plan="8,800 钻石">充值</button>
         </article>
       </div>
-      <p class="upgrade-note">当前套餐会在顶部余额和个人中心同步显示。</p>
+      <p class="upgrade-note">充值成功后，钻石余额会在「我」页面同步显示。</p>
+    </dialog>
+
+    <dialog id="deleteConfirmModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>确认删除账户？</h2>
+          <span>确认后将提交账户删除请求。</span>
+        </div>
+        <button class="icon-button" data-close-delete>×</button>
+      </div>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-delete>取消</button>
+        <button class="primary-button" data-confirm-delete>确认删除</button>
+      </div>
     </dialog>
 
     <dialog id="shareModal" class="modal share-modal">

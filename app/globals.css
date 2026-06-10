@@ -2388,3 +2388,236 @@ body {
 .danger-panel {
   border-radius: 16px;
 }
+
+.create-flow {
+  display: grid;
+  gap: 14px;
+}
+
+.create-step,
+.create-preview-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(18, 18, 22, 0.84);
+}
+
+.step-head {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.step-head b {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--teal);
+  color: #071011;
+  font-size: 14px;
+}
+
+.step-head strong,
+.step-head span {
+  display: block;
+}
+
+.step-head strong {
+  font-size: 15px;
+}
+
+.step-head span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.person-grid,
+.style-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.person-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.style-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.person-card,
+.style-card,
+.upload-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.person-card {
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  text-align: center;
+}
+
+.person-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.person-card strong {
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.style-card {
+  display: grid;
+  min-height: 148px;
+  padding: 8px;
+  text-align: left;
+}
+
+.style-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
+}
+
+.style-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.78));
+}
+
+.style-card span,
+.style-card strong,
+.style-card em {
+  position: relative;
+  z-index: 1;
+}
+
+.style-card span {
+  align-self: start;
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.style-card strong {
+  align-self: end;
+  font-size: 15px;
+}
+
+.style-card em {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.person-card.is-active,
+.style-card.is-active,
+.upload-card.is-active {
+  border-color: rgba(49, 214, 200, 0.78);
+  box-shadow: 0 0 0 2px rgba(49, 214, 200, 0.16);
+}
+
+.upload-card {
+  display: grid;
+  min-height: 86px;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+}
+
+.upload-card input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-card > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(49, 214, 200, 0.16);
+  color: var(--teal);
+  font-size: 24px;
+}
+
+.upload-card strong,
+.upload-card small {
+  display: block;
+}
+
+.upload-card small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.create-preview-panel .preview-stage {
+  min-height: 320px;
+}
+
+.create-preview-panel .preview-stage img {
+  height: 320px;
+}
+
+.create-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.create-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.create-summary span {
+  color: var(--muted);
+}
+
+.delete-account-button {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(18, 18, 22, 0.82);
+  color: #d9d8de;
+  font-weight: 900;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 380px) {
+  .person-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

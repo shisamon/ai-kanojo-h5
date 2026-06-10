@@ -17,8 +17,11 @@ const dictionary = {
     repeat: "复用",
     resultLabel: (count) => `作品 #${count}`,
     selectedPlan: (plan) => `已选择 ${plan}，下一步进入支付确认。`,
+    uploadedName: "上传图片",
+    uploadedReady: "已选择上传图片。",
+    deleteSubmitted: "账户删除请求已提交。",
     share: "分享",
-    shareDone: "分享链接已创建，作品已加入作品广场。",
+    shareDone: "分享链接已创建，作品已加入首页。",
     shareOpened: "选择要分享的聊天软件。",
     shareCopied: (platform) => `已为 ${platform} 准备分享链接。`,
     sharePlatforms: ["微信", "QQ", "Telegram", "LINE", "WhatsApp"],
@@ -28,7 +31,7 @@ const dictionary = {
     thousand: "K",
     toastDone: "创作已完成，并保存到历史。",
     prompt: (template, character) =>
-      `${template.name}，${character.name}，保持角色一致，OpenLover 创作风格，替换素材版本。`,
+      `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
     chatMessages: [
       "星期日中午。你坐在床边等待，出租屋今天显得格外安静。",
       "门铃响了。你打开门，站在门口的人是 Lina Hsu。",
@@ -120,8 +123,11 @@ const dictionary = {
     repeat: "再利用",
     resultLabel: (count) => `作品 #${count}`,
     selectedPlan: (plan) => `${plan} を選択しました。次は支払い確認です。`,
+    uploadedName: "アップロード画像",
+    uploadedReady: "アップロード画像を選択しました。",
+    deleteSubmitted: "アカウント削除リクエストを送信しました。",
     share: "共有",
-    shareDone: "共有リンクを作成し、作品を投稿広場に追加しました。",
+    shareDone: "共有リンクを作成し、作品をホームに追加しました。",
     shareOpened: "共有先のチャットアプリを選択してください。",
     shareCopied: (platform) => `${platform} の共有リンクを準備しました。`,
     sharePlatforms: ["LINE", "Telegram", "WhatsApp", "Messenger", "X"],
@@ -131,7 +137,7 @@ const dictionary = {
     thousand: "K",
     toastDone: "創作が完了し、履歴に保存しました。",
     prompt: (template, character) =>
-      `${template.name}、${character.name}、キャラクターの一貫性、OpenLover創作スタイル、差し替え素材版。`,
+      `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
     chatMessages: [
       "日曜の昼。あなたはベッドに座って待っていた。部屋はいつもより静かに感じた。",
       "ドアベルが鳴った。扉を開けると、そこに立っていたのは Lina Hsu だった。",
@@ -274,6 +280,7 @@ let exploreSort = "latest";
 let exploreType = "video";
 let currentTemplate = videoTemplates[0];
 let currentCharacter = characters[0];
+let uploadedCharacterImage = "";
 let balance = 570;
 let history = [];
 let activeChat = characters[8];
@@ -285,9 +292,13 @@ const qsa = (selector) => Array.from(document.querySelectorAll(selector));
 const templateGrid = qs("#templateGrid");
 const galleryGrid = qs("#galleryGrid");
 const exploreGrid = qs("#exploreGrid");
+const personGrid = qs("#personGrid");
+const styleGrid = qs("#styleGrid");
+const uploadInput = qs("#personUploadInput");
 const characterModalGrid = qs("#characterModalGrid");
 const characterModal = qs("#characterModal");
 const upgradeModal = qs("#upgradeModal");
+const deleteConfirmModal = qs("#deleteConfirmModal");
 const shareModal = qs("#shareModal");
 const sharePlatformGrid = qs("#sharePlatformGrid");
 const toast = qs("#toast");
@@ -509,8 +520,7 @@ function renderAll() {
     const element = qs(selector);
     if (element) element.src = image;
   });
-  renderTemplates();
-  renderGallery();
+  renderCreatorFlow();
   renderExplore();
   renderCharacterModal();
   renderChat();
@@ -518,53 +528,70 @@ function renderAll() {
   updateBalance();
 }
 
-function renderTemplates() {
-  const source = videoTemplates;
-  const visible = expanded ? source : source.slice(0, 8);
-  templateGrid.innerHTML = visible.map(templateCard).join("");
-  templateGrid.querySelectorAll(".template-card").forEach((card) => {
-    card.addEventListener("click", () => beginTemplate(card.dataset.id));
-  });
-  qs("#loadMoreButton").hidden = visible.length === source.length;
+function renderCreatorFlow() {
+  renderPersonChoices();
+  renderStyleChoices();
+  renderCreatorPreview();
 }
 
-function templateCard(item) {
+function renderPersonChoices() {
+  if (!personGrid) return;
+  personGrid.innerHTML = characters
+    .slice(0, 8)
+    .map((character) => personCard(character))
+    .join("");
+  personGrid.querySelectorAll(".person-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      currentCharacter = characters.find((item) => item.id === card.dataset.id) || characters[0];
+      renderCreatorFlow();
+    });
+  });
+  const uploadCard = qs("#uploadCard");
+  if (uploadCard) uploadCard.classList.toggle("is-active", currentCharacter.id === "uploaded");
+}
+
+function personCard(character) {
   return `
-    <button class="template-card" data-id="${item.id}">
-      <img src="${item.image}" alt="${item.name}" />
-      <strong>${item.name}</strong>
+    <button class="person-card ${character.id === currentCharacter.id ? "is-active" : ""}" data-id="${character.id}">
+      <img src="${character.image}" alt="${character.name}" />
+      <strong>${character.name}</strong>
     </button>
   `;
 }
 
-function renderGallery() {
-  galleryGrid.innerHTML = gallery
-    .filter((item) => item.mode === "video")
+function renderStyleChoices() {
+  if (!styleGrid) return;
+  styleGrid.innerHTML = videoTemplates
     .map(
-      (item) => `
-      <article class="gallery-card">
-        <img src="${item.image}" alt="${item.title}" />
-        <span>${item.creator}</span>
-        <button class="repeat-button" data-repeat="${item.id}">${t.repeat}</button>
-      </article>
+      (template) => `
+      <button class="style-card ${template.id === currentTemplate.id ? "is-active" : ""}" data-id="${template.id}">
+        <img src="${template.image}" alt="${template.name}" />
+        <span>${template.category}</span>
+        <strong>${template.name}</strong>
+        <em>${template.cost} ${t.coins}</em>
+      </button>
     `
     )
     .join("");
-  galleryGrid.querySelectorAll("[data-repeat]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const item = gallery.find((entry) => entry.id === button.dataset.repeat);
-      const template = {
-        id: item.id,
-        name: item.title,
-        category: t.galleryTag,
-        cost: item.cost,
-        mode: item.mode,
-        image: item.image
-      };
-      openCreateFlow(template, characters[(gallery.indexOf(item) + 4) % characters.length]);
+  styleGrid.querySelectorAll(".style-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      currentTemplate = videoTemplates.find((template) => template.id === card.dataset.id) || videoTemplates[0];
+      renderCreatorFlow();
     });
   });
+}
+
+function renderCreatorPreview() {
+  const preview = qs("#composePreview");
+  if (preview) preview.src = makeResultImage(currentTemplate, currentCharacter, history.length + 1);
+  const poseName = qs("#poseName");
+  if (poseName) poseName.textContent = currentTemplate.name;
+  const characterName = qs("#characterName");
+  if (characterName) characterName.textContent = currentCharacter.name;
+  const generateCost = qs("#generateCost");
+  if (generateCost) generateCost.textContent = currentTemplate.cost;
+  const previewState = qs("#previewState");
+  if (previewState) previewState.textContent = t.ready;
 }
 
 function renderExplore() {
@@ -677,6 +704,7 @@ function shareCard(post) {
 }
 
 function renderCharacterModal() {
+  if (!characterModalGrid) return;
   characterModalGrid.innerHTML = characters
     .map((character) => characterCard(character))
     .join("");
@@ -684,7 +712,7 @@ function renderCharacterModal() {
     card.addEventListener("click", () => {
       currentCharacter = characters.find((item) => item.id === card.dataset.id);
       closeDialog(characterModal);
-      showCompose();
+      renderCreatorFlow();
     });
   });
 }
@@ -742,33 +770,22 @@ function renderChat() {
 
 function beginTemplate(id) {
   currentTemplate = videoTemplates.find((template) => template.id === id);
-  openDialog(characterModal);
+  renderCreatorFlow();
 }
 
 function showCompose() {
-  qs("#templateScreen").hidden = true;
-  qs("#composeScreen").hidden = false;
-  qs("#composeModeLabel").textContent = t.modeLabel[mode];
-  qs("#posePreview").src = currentTemplate.image;
-  qs("#poseName").textContent = currentTemplate.name;
-  qs("#characterPreview").src = currentCharacter.image;
-  qs("#characterName").textContent = currentCharacter.name;
-  qs("#composePreview").src = makeResultImage(currentTemplate, currentCharacter, history.length + 1);
-  qs("#promptInput").value = t.prompt(currentTemplate, currentCharacter);
-  qs("#generateCost").textContent = currentTemplate.cost;
-  qs("#previewState").textContent = t.ready;
+  renderCreatorFlow();
 }
 
 function showTemplates() {
-  qs("#composeScreen").hidden = true;
-  qs("#templateScreen").hidden = false;
+  renderCreatorFlow();
 }
 
 function setMode(nextMode, shouldRender = true) {
   mode = "video";
   expanded = false;
   qsa(".mode-tab").forEach((item) => item.classList.toggle("is-active", item.dataset.mode === mode));
-  if (shouldRender) renderTemplates();
+  if (shouldRender) renderCreatorFlow();
 }
 
 function openCreateFlow(template, character) {
@@ -776,7 +793,7 @@ function openCreateFlow(template, character) {
   currentCharacter = character;
   setMode("video", true);
   switchView("generate");
-  showCompose();
+  renderCreatorFlow();
 }
 
 function shareToExplore(item, characterName = currentCharacter.name) {
@@ -939,10 +956,23 @@ qsa("[data-open-upgrade]").forEach((button) => {
 qsa("[data-close-upgrade]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(upgradeModal));
 });
+qsa("[data-open-delete]").forEach((button) => {
+  button.addEventListener("click", () => openDialog(deleteConfirmModal));
+});
+qsa("[data-close-delete]").forEach((button) => {
+  button.addEventListener("click", () => closeDialog(deleteConfirmModal));
+});
+qsa("[data-confirm-delete]").forEach((button) => {
+  button.addEventListener("click", () => {
+    closeDialog(deleteConfirmModal);
+    showToast(t.deleteSubmitted);
+  });
+});
 qsa("[data-close-share]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(shareModal));
 });
-qs("[data-close-modal]").addEventListener("click", () => closeDialog(characterModal));
+const closeCharacterModal = qs("[data-close-modal]");
+if (closeCharacterModal) closeCharacterModal.addEventListener("click", () => closeDialog(characterModal));
 
 const sortFilter = qs("#sortFilter");
 if (sortFilter) {
@@ -966,20 +996,30 @@ qsa(".mode-tab").forEach((tab) => {
   });
 });
 
-qs("#loadMoreButton").addEventListener("click", () => {
-  expanded = true;
-  renderTemplates();
-});
+const loadMoreButton = qs("#loadMoreButton");
+if (loadMoreButton) {
+  loadMoreButton.addEventListener("click", () => {
+    expanded = true;
+    renderCreatorFlow();
+  });
+}
 
-qs("#backToTemplates").addEventListener("click", showTemplates);
-qs("#historyButton").addEventListener("click", () => qs("#historyDrawer").classList.add("is-open"));
-qs("#closeHistory").addEventListener("click", () => qs("#historyDrawer").classList.remove("is-open"));
-qs("#selectCharacterAgain").addEventListener("click", () => openDialog(characterModal));
-qs("#removeCharacter").addEventListener("click", () => {
-  currentCharacter = characters[0];
-  showCompose();
-  openDialog(characterModal);
-});
+const backToTemplates = qs("#backToTemplates");
+if (backToTemplates) backToTemplates.addEventListener("click", showTemplates);
+const historyButton = qs("#historyButton");
+if (historyButton) historyButton.addEventListener("click", () => qs("#historyDrawer").classList.add("is-open"));
+const closeHistory = qs("#closeHistory");
+if (closeHistory) closeHistory.addEventListener("click", () => qs("#historyDrawer").classList.remove("is-open"));
+const selectCharacterAgain = qs("#selectCharacterAgain");
+if (selectCharacterAgain) selectCharacterAgain.addEventListener("click", () => openDialog(characterModal));
+const removeCharacter = qs("#removeCharacter");
+if (removeCharacter) {
+  removeCharacter.addEventListener("click", () => {
+    currentCharacter = characters[0];
+    renderCreatorFlow();
+    openDialog(characterModal);
+  });
+}
 qs("#generateButton").addEventListener("click", generateMock);
 qs("#shareResultButton").addEventListener("click", () => {
   shareToExplore({
@@ -994,6 +1034,30 @@ qsa("[data-chat-create]").forEach((button) => {
     openCreateFlow(videoTemplates[0], activeChat);
   });
 });
+
+if (uploadInput) {
+  uploadInput.addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      uploadedCharacterImage = String(reader.result);
+      currentCharacter = {
+        id: "uploaded",
+        name: t.uploadedName,
+        age: "",
+        tag: t.uploadedName,
+        vibe: t.uploadedName,
+        image: uploadedCharacterImage
+      };
+      const uploadHint = qs("#uploadHint");
+      if (uploadHint) uploadHint.textContent = file.name;
+      renderCreatorFlow();
+      showToast(t.uploadedReady);
+    });
+    reader.readAsDataURL(file);
+  });
+}
 
 const chatAlbumButton = qs("[data-chat-album]");
 if (chatAlbumButton) {
