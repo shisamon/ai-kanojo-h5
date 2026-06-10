@@ -1,4 +1,4 @@
-const locale = document.documentElement.lang.startsWith("ja") ? "ja" : "zh";
+const locale = document.documentElement.lang.startsWith("ja") || location.pathname.startsWith("/ja") ? "ja" : "zh";
 
 const dictionary = {
   zh: {
@@ -259,6 +259,8 @@ let sharedPosts = gallery.map((item, index) => ({
   character: characters[(index + 1) % characters.length].name,
   createdAt: Date.now() - index * 1000 * 60 * 47
 }));
+let fallbackPosts = sharedPosts.map((post) => ({ ...post }));
+let worksRequestId = 0;
 
 let currentView = "explore";
 let mode = "image";
@@ -600,6 +602,38 @@ function renderExplore() {
   });
 }
 
+async function loadWorksFromApi() {
+  const requestId = (worksRequestId += 1);
+  try {
+    const response = await fetch(`/api/works?mode=${exploreType}&sort=${exploreSort}`, {
+      headers: { Accept: "application/json" }
+    });
+    if (!response.ok) throw new Error("Failed to load works");
+    const payload = await response.json();
+    if (requestId !== worksRequestId) return;
+    if (Array.isArray(payload.works) && payload.works.length > 0) {
+      sharedPosts = payload.works.map((post) => ({
+        id: post.id,
+        title: post.title,
+        creator: post.creator,
+        mode: post.mode,
+        cost: post.cost || 0,
+        image: post.image,
+        mediaUrl: post.mediaUrl,
+        likes: post.likes || 0,
+        liked: false,
+        character: post.character,
+        createdAt: post.createdAt || Date.now()
+      }));
+    } else {
+      sharedPosts = fallbackPosts.map((post) => ({ ...post }));
+    }
+  } catch (error) {
+    sharedPosts = fallbackPosts.map((post) => ({ ...post }));
+  }
+  renderExplore();
+}
+
 function shareCard(post) {
   return `
     <article class="share-card">
@@ -876,12 +910,12 @@ qs("[data-close-modal]").addEventListener("click", () => closeDialog(characterMo
 
 qs("#sortFilter").addEventListener("change", (event) => {
   exploreSort = event.target.value;
-  renderExplore();
+  loadWorksFromApi();
 });
 
 qs("#typeFilter").addEventListener("change", (event) => {
   exploreType = event.target.value;
-  renderExplore();
+  loadWorksFromApi();
 });
 
 qsa(".mode-tab").forEach((tab) => {
@@ -945,3 +979,4 @@ qs("#globalSearch").addEventListener("input", (event) => {
 });
 
 renderAll();
+loadWorksFromApi();
