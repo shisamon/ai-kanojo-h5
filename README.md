@@ -22,7 +22,7 @@ cp .env.example .env.local
 ## Database
 
 The first Supabase schema is in `supabase/schema.sql`.
-Optional demo seed data is in `supabase/seed.sql`.
+Optional demo seed data for the home video feed is in `supabase/seed.sql`.
 
 It covers:
 
@@ -35,7 +35,7 @@ It covers:
 - creation jobs
 - diamond transactions
 
-Run `schema.sql` first, then `seed.sql` if you want sample public works for the gallery.
+Run `schema.sql` first, then `seed.sql` if you want sample public video works on the home feed.
 
 ## Deploy
 
