@@ -45,11 +45,6 @@
               <button class="ghost-button" id="historyButton">履歴</button>
             </div>
 
-            <div class="mode-tabs" role="tablist" aria-label="創作モード">
-              <button class="mode-tab is-active" data-mode="image">画像</button>
-              <button class="mode-tab" data-mode="video">動画 <span>-20% 割引</span></button>
-            </div>
-
             <div class="template-grid" id="templateGrid"></div>
             <button class="load-more" id="loadMoreButton">もっと見る</button>
 
@@ -64,7 +59,7 @@
           <div id="composeScreen" class="compose-screen" hidden>
             <div class="section-head">
               <div>
-                <p class="eyebrow" id="composeModeLabel">画像創作</p>
+                <p class="eyebrow" id="composeModeLabel">動画創作</p>
                 <h1>キャラクターを選択</h1>
               </div>
               <button class="ghost-button" id="backToTemplates">戻る</button>
@@ -107,45 +102,30 @@
                   <button class="mini-button" id="removeCharacter">削除</button>
                 </div>
                 <button class="secondary-button" id="selectCharacterAgain">キャラクターを選択</button>
-                <button class="primary-button" id="generateButton"><span id="generateCost">40</span> 創作</button>
+                <button class="primary-button" id="generateButton"><span id="generateCost">96</span> 創作</button>
                 <button class="secondary-button" id="shareResultButton">作品を共有</button>
               </aside>
             </div>
           </div>
         </section>
 
-        <section class="view is-visible" id="view-explore" aria-labelledby="exploreTitle">
-          <div class="section-head">
-            <div>
-              <h1 id="exploreTitle">投稿広場</h1>
-            </div>
-          </div>
-          <div class="filter-row">
-            <select id="sortFilter">
-              <option value="likes">並び替え：いいね数</option>
-              <option value="latest">並び替え：最新</option>
-            </select>
-            <select id="typeFilter">
-              <option value="image">タイプ：画像</option>
-              <option value="video">タイプ：動画</option>
-            </select>
-          </div>
+        <section class="view is-visible video-feed-view" id="view-explore" aria-label="投稿広場">
           <div class="share-grid" id="exploreGrid"></div>
         </section>
 
         <section class="view" id="view-chat" aria-labelledby="chatTitle">
-          <div class="chat-layout logged-chat-layout">
+          <div class="chat-layout logged-chat-layout chat-list-mode" id="chatLayout">
             <aside class="conversation-list">
               <div class="section-head compact">
                 <div>
                   <h1 id="chatTitle">チャット画面</h1>
                 </div>
-              <button class="ghost-button">新規チャット</button>
               </div>
               <div id="conversationList"></div>
             </aside>
             <section class="chat-panel">
               <div class="chat-header">
+                <button class="icon-button chat-back" id="backToConversations">‹</button>
                 <img id="chatAvatar" alt="チャット画像" />
                 <div>
                   <strong id="chatName">Lina Hsu</strong>
@@ -154,7 +134,6 @@
               </div>
               <div class="chat-messages" id="chatMessages"></div>
               <div class="chat-quick-actions">
-                <button data-chat-create="image">画像をリクエスト</button>
                 <button data-chat-create="video">動画をリクエスト</button>
                 <button data-chat-album>アルバム</button>
               </div>
@@ -189,6 +168,7 @@
             <section class="profile-hero">
               <img id="profileAvatar" alt="プロフィール画像" />
               <div>
+                <span class="profile-kicker">マイページ</span>
                 <h1 id="profileTitle">User-mW4X6YPx</h1>
                 <span>kouki@telegram</span>
               </div>
@@ -206,12 +186,22 @@
               <button class="primary-button" data-open-upgrade>アップグレード</button>
               <strong>💎 570 ›</strong>
             </section>
-            <section class="settings-row language-row">
-              <span>言語</span>
-              <div class="locale-switch profile-locale" aria-label="言語切替">
-                <a href="index.html">中文</a>
-                <a class="is-active" href="ja.html">日本語</a>
+            <section class="settings-list">
+              <button class="settings-row profile-link-row">
+                <span>アカウント情報</span>
+                <b>›</b>
+              </button>
+              <div class="settings-row language-row">
+                <span>言語</span>
+                <div class="locale-switch profile-locale" aria-label="言語切替">
+                  <a href="index.html">中文</a>
+                  <a class="is-active" href="ja.html">日本語</a>
+                </div>
               </div>
+              <button class="settings-row profile-link-row">
+                <span>ヘルプとフィードバック</span>
+                <b>›</b>
+              </button>
             </section>
             <section class="danger-panel">
               <h2>⚠ 危険エリア</h2>

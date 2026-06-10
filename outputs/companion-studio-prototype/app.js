@@ -247,31 +247,37 @@ const gallery = t.gallery.map((item, index) => ({
   image: makeScene(index + 120, item[0], item[2])
 }));
 
-let sharedPosts = gallery.map((item, index) => ({
-  id: `post-${index}`,
-  title: item.title,
-  creator: item.creator,
-  mode: item.mode,
-  cost: item.cost,
-  image: item.image,
-  likes: [1280, 942, 816, 705, 690, 533, 476, 412][index] || 300,
-  liked: false,
-  character: characters[(index + 1) % characters.length].name,
-  createdAt: Date.now() - index * 1000 * 60 * 47
-}));
+const videoGallery = gallery.filter((item) => item.mode === "video");
+
+let sharedPosts = Array.from({ length: 18 }, (_, index) => {
+  const item = videoGallery[index % videoGallery.length];
+  return {
+    id: `post-${index}`,
+    title: item.title,
+    creator: item.creator,
+    mode: "video",
+    cost: item.cost,
+    image: makeScene(index + 180, item.title, "video"),
+    likes: [1280, 942, 816, 705, 690, 533, 476, 412][index % 8] + index * 9,
+    liked: false,
+    character: characters[(index + 8) % characters.length].name,
+    createdAt: Date.now() - index * 1000 * 60 * 47
+  };
+});
 let fallbackPosts = sharedPosts.map((post) => ({ ...post }));
 let worksRequestId = 0;
 
 let currentView = "explore";
-let mode = "image";
+let mode = "video";
 let expanded = false;
-let exploreSort = "likes";
-let exploreType = "image";
-let currentTemplate = imageTemplates[0];
+let exploreSort = "latest";
+let exploreType = "video";
+let currentTemplate = videoTemplates[0];
 let currentCharacter = characters[0];
 let balance = 570;
 let history = [];
 let activeChat = characters[8];
+let chatScreen = "list";
 
 const qs = (selector) => document.querySelector(selector);
 const qsa = (selector) => Array.from(document.querySelectorAll(selector));
@@ -513,7 +519,7 @@ function renderAll() {
 }
 
 function renderTemplates() {
-  const source = mode === "image" ? imageTemplates : videoTemplates;
+  const source = videoTemplates;
   const visible = expanded ? source : source.slice(0, 8);
   templateGrid.innerHTML = visible.map(templateCard).join("");
   templateGrid.querySelectorAll(".template-card").forEach((card) => {
@@ -533,6 +539,7 @@ function templateCard(item) {
 
 function renderGallery() {
   galleryGrid.innerHTML = gallery
+    .filter((item) => item.mode === "video")
     .map(
       (item) => `
       <article class="gallery-card">
@@ -562,8 +569,7 @@ function renderGallery() {
 
 function renderExplore() {
   const visiblePosts = sharedPosts
-    .filter((post) => post.mode === exploreType)
-    .sort((a, b) => (exploreSort === "latest" ? b.createdAt - a.createdAt : b.likes - a.likes));
+    .filter((post) => post.mode === "video");
   exploreGrid.innerHTML = visiblePosts
     .map((post) => shareCard(post))
     .join("");
@@ -585,6 +591,7 @@ function renderExplore() {
     button.addEventListener("click", () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.chatPost);
       activeChat = characters.find((item) => item.name === post.character) || characters[8];
+      chatScreen = "detail";
       renderChat();
       switchView("chat");
       showToast(t.chatStarted(activeChat.name));
@@ -611,18 +618,18 @@ function renderExplore() {
 async function loadWorksFromApi() {
   const requestId = (worksRequestId += 1);
   try {
-    const response = await fetch(`/api/works?mode=${exploreType}&sort=${exploreSort}`, {
+    const response = await fetch("/api/works?mode=video&sort=latest", {
       headers: { Accept: "application/json" }
     });
     if (!response.ok) throw new Error("Failed to load works");
     const payload = await response.json();
     if (requestId !== worksRequestId) return;
     if (Array.isArray(payload.works) && payload.works.length > 0) {
-      sharedPosts = payload.works.map((post) => ({
+      const loadedPosts = payload.works.map((post) => ({
         id: post.id,
         title: post.title,
         creator: post.creator,
-        mode: post.mode,
+        mode: "video",
         cost: post.cost || 0,
         image: post.image,
         mediaUrl: post.mediaUrl,
@@ -631,6 +638,14 @@ async function loadWorksFromApi() {
         character: post.character,
         createdAt: post.createdAt || Date.now()
       }));
+      sharedPosts =
+        loadedPosts.length >= 8
+          ? loadedPosts
+          : Array.from({ length: 18 }, (_, index) => ({
+              ...loadedPosts[index % loadedPosts.length],
+              id: `${loadedPosts[index % loadedPosts.length].id}-feed-${index}`,
+              likes: loadedPosts[index % loadedPosts.length].likes + index
+            }));
     } else {
       sharedPosts = fallbackPosts.map((post) => ({ ...post }));
     }
@@ -644,7 +659,7 @@ function shareCard(post) {
   return `
     <article class="share-card">
       <img src="${post.image}" alt="${post.title}" />
-      <em>${t.modeName[post.mode]}</em>
+      <div class="video-play">▶</div>
       <div class="share-card-body">
         <span>${post.creator} · ${post.character}</span>
         <strong>${post.title}</strong>
@@ -703,6 +718,7 @@ function renderChat() {
   qsa(".conversation-item").forEach((item) => {
     item.addEventListener("click", () => {
       activeChat = characters.find((character) => character.id === item.dataset.id);
+      chatScreen = "detail";
       renderChat();
     });
   });
@@ -721,11 +737,11 @@ function renderChat() {
   qs("#albumThumbTwo").src = characters[(characters.indexOf(activeChat) + 1) % characters.length].image;
   qs("#albumThumbThree").src = characters[(characters.indexOf(activeChat) + 2) % characters.length].image;
   qs("#albumName").textContent = `${activeChat.name}, ${activeChat.age}`;
+  updateChatScreen();
 }
 
 function beginTemplate(id) {
-  const source = mode === "image" ? imageTemplates : videoTemplates;
-  currentTemplate = source.find((template) => template.id === id);
+  currentTemplate = videoTemplates.find((template) => template.id === id);
   openDialog(characterModal);
 }
 
@@ -749,28 +765,26 @@ function showTemplates() {
 }
 
 function setMode(nextMode, shouldRender = true) {
-  mode = nextMode;
+  mode = "video";
   expanded = false;
   qsa(".mode-tab").forEach((item) => item.classList.toggle("is-active", item.dataset.mode === mode));
   if (shouldRender) renderTemplates();
 }
 
 function openCreateFlow(template, character) {
-  currentTemplate = template;
+  currentTemplate = template.mode === "video" ? template : videoTemplates[0];
   currentCharacter = character;
-  setMode(template.mode, true);
+  setMode("video", true);
   switchView("generate");
   showCompose();
 }
 
 function shareToExplore(item, characterName = currentCharacter.name) {
-  exploreType = item.mode;
-  qs("#typeFilter").value = item.mode;
   sharedPosts.unshift({
     id: `post-${Date.now()}`,
     title: item.title,
     creator: "@User-mW4X6YPx",
-    mode: item.mode,
+    mode: "video",
     cost: item.cost,
     image: item.image,
     likes: 0,
@@ -781,6 +795,13 @@ function shareToExplore(item, characterName = currentCharacter.name) {
   renderExplore();
   switchView("explore");
   showToast(t.shareDone);
+}
+
+function updateChatScreen() {
+  const layout = qs("#chatLayout");
+  if (!layout) return;
+  layout.classList.toggle("chat-list-mode", chatScreen === "list");
+  layout.classList.toggle("chat-detail-mode", chatScreen === "detail");
 }
 
 function shareLink(platform, post) {
@@ -902,7 +923,13 @@ function showToast(message) {
 }
 
 qsa("[data-view]").forEach((button) => {
-  button.addEventListener("click", () => switchView(button.dataset.view));
+  button.addEventListener("click", () => {
+    if (button.dataset.view === "chat") {
+      chatScreen = "list";
+      updateChatScreen();
+    }
+    switchView(button.dataset.view);
+  });
 });
 
 qsa("[data-open-upgrade]").forEach((button) => {
@@ -917,15 +944,21 @@ qsa("[data-close-share]").forEach((button) => {
 });
 qs("[data-close-modal]").addEventListener("click", () => closeDialog(characterModal));
 
-qs("#sortFilter").addEventListener("change", (event) => {
-  exploreSort = event.target.value;
-  loadWorksFromApi();
-});
+const sortFilter = qs("#sortFilter");
+if (sortFilter) {
+  sortFilter.addEventListener("change", (event) => {
+    exploreSort = event.target.value;
+    loadWorksFromApi();
+  });
+}
 
-qs("#typeFilter").addEventListener("change", (event) => {
-  exploreType = event.target.value;
-  loadWorksFromApi();
-});
+const typeFilter = qs("#typeFilter");
+if (typeFilter) {
+  typeFilter.addEventListener("change", (event) => {
+    exploreType = event.target.value;
+    loadWorksFromApi();
+  });
+}
 
 qsa(".mode-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -958,15 +991,24 @@ qs("#shareResultButton").addEventListener("click", () => {
 });
 qsa("[data-chat-create]").forEach((button) => {
   button.addEventListener("click", () => {
-    const nextMode = button.dataset.chatCreate;
-    const source = nextMode === "image" ? imageTemplates : videoTemplates;
-    openCreateFlow(source[0], activeChat);
+    openCreateFlow(videoTemplates[0], activeChat);
   });
 });
 
-qs("[data-chat-album]").addEventListener("click", () => {
-  qs(".album-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
-});
+const chatAlbumButton = qs("[data-chat-album]");
+if (chatAlbumButton) {
+  chatAlbumButton.addEventListener("click", () => {
+    qs(".album-panel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+const backToConversations = qs("#backToConversations");
+if (backToConversations) {
+  backToConversations.addEventListener("click", () => {
+    chatScreen = "list";
+    updateChatScreen();
+  });
+}
 
 qsa(".segmented-control button").forEach((button) => {
   button.addEventListener("click", () => {
