@@ -23,6 +23,9 @@ cp .env.example .env.local
 
 The first Supabase schema is in `supabase/schema.sql`.
 Optional demo seed data for the home video feed is in `supabase/seed.sql`.
+Generation templates (styles) table and seed are in `supabase/templates.sql`.
+
+Run order: `schema.sql` -> `templates.sql` -> `seed.sql` (optional).
 
 It covers:
 

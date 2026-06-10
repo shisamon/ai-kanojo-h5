@@ -215,7 +215,7 @@ const dictionary = {
 
 const t = dictionary[locale];
 
-const characters = t.characters.map((item, index) => ({
+let characters = t.characters.map((item, index) => ({
   id: `char-${index}`,
   name: item[0],
   age: item[1],
@@ -224,7 +224,7 @@ const characters = t.characters.map((item, index) => ({
   image: makePortrait(index + 8, item[0], item[2])
 }));
 
-const imageTemplates = t.imageTemplates.map((item, index) => ({
+let imageTemplates = t.imageTemplates.map((item, index) => ({
   id: `image-${index}`,
   name: item[0],
   category: item[1],
@@ -233,7 +233,7 @@ const imageTemplates = t.imageTemplates.map((item, index) => ({
   image: makeScene(index + 40, item[0], "image")
 }));
 
-const videoTemplates = t.videoTemplates.map((item, index) => ({
+let videoTemplates = t.videoTemplates.map((item, index) => ({
   id: `video-${index}`,
   name: item[0],
   category: item[1],
@@ -241,6 +241,8 @@ const videoTemplates = t.videoTemplates.map((item, index) => ({
   mode: "video",
   image: makeScene(index + 70, item[0], "video")
 }));
+
+const charAt = (index) => characters[index % characters.length];
 
 const gallery = t.gallery.map((item, index) => ({
   id: `gallery-${index}`,
@@ -281,7 +283,7 @@ let currentCharacter = characters[0];
 let uploadedCharacterImage = "";
 let balance = 570;
 let history = [];
-let activeChat = characters[8];
+let activeChat = charAt(8);
 let chatScreen = "list";
 
 const qs = (selector) => document.querySelector(selector);
@@ -508,12 +510,12 @@ function makeResultImage(template, character, count) {
 
 function renderAll() {
   const optionalImages = [
-    ["#userAvatar", characters[2].image],
-    ["#profileAvatar", characters[2].image],
-    ["#albumHero", characters[8].image],
-    ["#albumThumbOne", characters[8].image],
-    ["#albumThumbTwo", characters[1].image],
-    ["#albumThumbThree", characters[2].image]
+    ["#userAvatar", charAt(2).image],
+    ["#profileAvatar", charAt(2).image],
+    ["#albumHero", charAt(8).image],
+    ["#albumThumbOne", charAt(8).image],
+    ["#albumThumbTwo", charAt(1).image],
+    ["#albumThumbThree", charAt(2).image]
   ];
   optionalImages.forEach(([selector, image]) => {
     const element = qs(selector);
@@ -620,7 +622,7 @@ function renderExplore() {
 async function loadWorksFromApi() {
   const requestId = (worksRequestId += 1);
   try {
-    const response = await fetch("/api/works?mode=video&sort=latest", {
+    const response = await fetch(`/api/works?mode=${exploreType}&sort=${exploreSort}`, {
       headers: { Accept: "application/json" }
     });
     if (!response.ok) throw new Error("Failed to load works");
@@ -655,6 +657,67 @@ async function loadWorksFromApi() {
     sharedPosts = fallbackPosts.map((post) => ({ ...post }));
   }
   renderExplore();
+}
+
+async function loadCharactersFromApi() {
+  try {
+    const response = await fetch("/api/characters", {
+      headers: { Accept: "application/json" }
+    });
+    if (!response.ok) throw new Error("Failed to load characters");
+    const payload = await response.json();
+    if (!Array.isArray(payload.characters) || payload.characters.length === 0) return;
+    characters = payload.characters.map((character, index) => ({
+      id: character.id,
+      name: character.name,
+      age: character.age ?? "",
+      tag: character.tag || "",
+      vibe: character.vibe || "",
+      image: character.image || makePortrait(index + 8, character.name, character.tag || "")
+    }));
+    currentCharacter = characters[0];
+    activeChat = charAt(8);
+    renderAll();
+  } catch (error) {
+    // Keep the local fallback data when the API is unavailable.
+  }
+}
+
+async function loadTemplatesFromApi() {
+  try {
+    const response = await fetch(`/api/templates?locale=${locale}`, {
+      headers: { Accept: "application/json" }
+    });
+    if (!response.ok) throw new Error("Failed to load templates");
+    const payload = await response.json();
+    if (!Array.isArray(payload.templates) || payload.templates.length === 0) return;
+    const imageRows = payload.templates.filter((template) => template.mode === "image");
+    const videoRows = payload.templates.filter((template) => template.mode === "video");
+    if (imageRows.length > 0) {
+      imageTemplates = imageRows.map((template, index) => ({
+        id: template.id,
+        name: template.name,
+        category: t.modeName.image,
+        cost: template.cost,
+        mode: "image",
+        image: template.image || makeScene(index + 40, template.name, "image")
+      }));
+    }
+    if (videoRows.length > 0) {
+      videoTemplates = videoRows.map((template, index) => ({
+        id: template.id,
+        name: template.name,
+        category: t.modeName.video,
+        cost: template.cost,
+        mode: "video",
+        image: template.image || makeScene(index + 70, template.name, "video")
+      }));
+      currentTemplate = videoTemplates[0];
+    }
+    renderCreatorFlow();
+  } catch (error) {
+    // Keep the local fallback data when the API is unavailable.
+  }
 }
 
 function shareCard(post) {
@@ -706,7 +769,7 @@ function renderChat() {
   qs("#conversationList").innerHTML = conversations
     .map(
       (row, index) => {
-        const character = characters[index === 0 ? 8 : index];
+        const character = charAt(index === 0 ? 8 : index);
         return `
       <button class="conversation-item ${character.id === activeChat.id ? "is-active" : ""}" data-id="${character.id}">
         <img src="${character.image}" alt="${character.name}" />
@@ -1083,3 +1146,5 @@ if (globalSearch) {
 
 renderAll();
 loadWorksFromApi();
+loadCharactersFromApi();
+loadTemplatesFromApi();
