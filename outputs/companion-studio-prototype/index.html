@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenLover - 创作专区</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">♡</div>
+          <div>
+            <strong>OPENLOVER</strong>
+            <span>AI 女友</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="主导航">
+          <button class="nav-item is-active" data-view="explore"><span>作品广场</span></button>
+          <button class="nav-item" data-view="generate"><span>创作专区</span></button>
+          <button class="nav-item" data-view="chat"><span>聊天</span></button>
+          <button class="nav-item" data-view="profile"><span>个人中心</span></button>
+        </nav>
+
+        <div class="side-actions">
+          <button class="upgrade-button" data-open-upgrade>升级</button>
+        </div>
+
+        <p class="legal">
+          登录即表示你同意我们的服务条款、隐私政策、投诉政策、内容移除政策、18 U.S.C. 2257 合规声明、关于我们、退款与退货政策。默认情况下，你确认自己已年满 18 岁。
+        </p>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="search-wrap" aria-hidden="true">
+            <input id="globalSearch" type="search" placeholder="" />
+          </div>
+          <div class="locale-switch" aria-label="语言切换">
+            <a class="is-active" href="index.html">中文</a>
+            <a href="ja.html">日本語</a>
+          </div>
+        <button class="balance-button" data-open-upgrade><span id="coinBalance">570</span> | 标准版</button>
+          <button class="avatar-button" data-view="profile"><img id="userAvatar" alt="用户头像" /></button>
+        </header>
+
+        <section class="view" id="view-generate" aria-labelledby="generateTitle">
+          <div id="templateScreen">
+            <div class="section-head generate-head">
+              <div>
+                <p class="eyebrow">创作专区</p>
+                <h1 id="generateTitle">创作专区</h1>
+              </div>
+              <button class="ghost-button" id="historyButton">历史</button>
+            </div>
+
+            <div class="mode-tabs" role="tablist" aria-label="创作模式">
+              <button class="mode-tab is-active" data-mode="image">图片</button>
+              <button class="mode-tab" data-mode="video">视频 <span>-20% 优惠</span></button>
+            </div>
+
+            <div class="template-grid" id="templateGrid"></div>
+            <button class="load-more" id="loadMoreButton">加载更多</button>
+
+            <div class="section-head gallery-head">
+              <div>
+                <h2>灵感展廊</h2>
+              </div>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+          </div>
+
+          <div id="composeScreen" class="compose-screen" hidden>
+            <div class="section-head">
+              <div>
+                <p class="eyebrow" id="composeModeLabel">创作图片</p>
+                <h1>选择角色</h1>
+              </div>
+              <button class="ghost-button" id="backToTemplates">返回</button>
+            </div>
+
+            <div class="compose-layout">
+              <section class="compose-main">
+                <div class="preview-stage">
+                  <img id="composePreview" alt="创作预览" />
+                  <div class="preview-state" id="previewState">准备就绪</div>
+                </div>
+                <label class="field-block">
+                  <span>提示词</span>
+                  <textarea id="promptInput" maxlength="1000"></textarea>
+                </label>
+                <div class="privacy-row">
+                  <span>可见范围</span>
+                  <div class="segmented-control">
+                    <button class="is-active" data-privacy="private">私密</button>
+                    <button data-privacy="public">公开</button>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="reference-panel">
+                <h2>参考</h2>
+                <div class="reference-card">
+                  <img id="posePreview" alt="姿势参考" />
+                  <div>
+                    <span>模板</span>
+                    <strong id="poseName"></strong>
+                  </div>
+                </div>
+                <div class="reference-card">
+                  <img id="characterPreview" alt="角色参考" />
+                  <div>
+                    <span>角色</span>
+                    <strong id="characterName"></strong>
+                  </div>
+                  <button class="mini-button" id="removeCharacter">移除</button>
+                </div>
+                <button class="secondary-button" id="selectCharacterAgain">选择角色</button>
+                <button class="primary-button" id="generateButton"><span id="generateCost">40</span> 创作</button>
+                <button class="secondary-button" id="shareResultButton">分享作品</button>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="view is-visible" id="view-explore" aria-labelledby="exploreTitle">
+          <div class="section-head">
+            <div>
+              <h1 id="exploreTitle">作品广场</h1>
+            </div>
+          </div>
+          <div class="filter-row">
+            <select id="sortFilter">
+              <option value="likes">排序：点赞量</option>
+              <option value="latest">排序：最新</option>
+            </select>
+            <select id="typeFilter">
+              <option value="image">类型：图片</option>
+              <option value="video">类型：视频</option>
+            </select>
+          </div>
+          <div class="share-grid" id="exploreGrid"></div>
+        </section>
+
+        <section class="view" id="view-chat" aria-labelledby="chatTitle">
+          <div class="chat-layout logged-chat-layout">
+            <aside class="conversation-list">
+              <div class="section-head compact">
+                <div>
+                  <h1 id="chatTitle">你的聊天</h1>
+                </div>
+                <button class="ghost-button">新聊天</button>
+              </div>
+              <div id="conversationList"></div>
+            </aside>
+            <section class="chat-panel">
+              <div class="chat-header">
+                <img id="chatAvatar" alt="聊天头像" />
+                <div>
+                  <strong id="chatName">Lina Hsu</strong>
+                  <span>@Ol's_Erotes 创作</span>
+                </div>
+              </div>
+              <div class="chat-messages" id="chatMessages"></div>
+              <div class="chat-quick-actions">
+                <button data-chat-create="image">请求图片</button>
+                <button data-chat-create="video">请求视频</button>
+                <button data-chat-album>相册</button>
+              </div>
+              <div class="chat-input">
+                <input type="text" placeholder="写点什么..." />
+                <button>➤</button>
+              </div>
+            </section>
+            <aside class="album-panel">
+              <img id="albumHero" alt="角色相册" />
+              <div class="album-thumbs">
+                <img id="albumThumbOne" alt="缩略图 1" />
+                <img id="albumThumbTwo" alt="缩略图 2" />
+                <img id="albumThumbThree" alt="缩略图 3" />
+              </div>
+              <strong id="albumName">Lina Hsu, 21</strong>
+              <span>@Ol's_Erotes 创作 ›</span>
+              <p>21 岁的台湾角色。她来到你的出租屋，发现你就是委托人后陷入慌乱。</p>
+              <button class="primary-button">查看私密内容</button>
+              <div class="album-actions">
+                <button>重新开始</button>
+                <button>点赞</button>
+                <button>分享</button>
+                <button>删除</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile" aria-labelledby="profileTitle">
+          <div class="profile-layout logged-profile">
+            <section class="profile-hero">
+              <img id="profileAvatar" alt="资料头像" />
+              <div>
+                <h1 id="profileTitle">User-mW4X6YPx</h1>
+                <span>kouki@telegram</span>
+              </div>
+              <button class="ghost-button">编辑资料</button>
+            </section>
+            <div class="metric-grid">
+              <div><strong>0</strong><span>粉丝 ›</span></div>
+              <div><strong>0</strong><span>关注 ›</span></div>
+            </div>
+            <section class="membership-band">
+              <div>
+                <h2>Standard</h2>
+                <span>剩余钻石</span>
+              </div>
+              <button class="primary-button" data-open-upgrade>升级</button>
+              <strong>💎 570 ›</strong>
+            </section>
+            <section class="danger-panel">
+              <h2>⚠ 危险区域</h2>
+              <p>不可逆账户操作</p>
+              <button>删除账户</button>
+            </section>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <dialog id="characterModal" class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>选择角色</h2>
+          <span>为这个模板选择一个角色。</span>
+        </div>
+        <button class="icon-button" data-close-modal>×</button>
+      </div>
+      <div class="modal-grid" id="characterModalGrid"></div>
+    </dialog>
+
+    <dialog id="upgradeModal" class="modal upgrade-modal">
+      <div class="modal-head">
+        <div>
+          <h2>会员计划</h2>
+          <span>当前计划：标准版 · 剩余钻石 570</span>
+        </div>
+        <button class="icon-button" data-close-upgrade>×</button>
+      </div>
+      <div class="deal-strip">
+        <strong>当前 Plan：Standard</strong>
+        <span>可继续使用当前额度，也可以选择更高套餐。</span>
+      </div>
+      <div class="plan-grid">
+        <article class="plan-card is-current">
+          <span class="plan-badge">当前计划</span>
+          <strong class="plan-tier">Standard</strong>
+          <div class="plan-price"><strong>$9.9</strong><span>$19.9</span></div>
+          <p>适合轻量创作和日常聊天。</p>
+          <ul>
+            <li>570 钻石余额</li>
+            <li>图片与视频创作</li>
+            <li>作品分享与复用</li>
+          </ul>
+          <button class="secondary-button" disabled>当前使用中</button>
+        </article>
+        <article class="plan-card is-featured">
+          <span class="plan-badge">推荐</span>
+          <strong class="plan-tier">Premium</strong>
+          <div class="plan-price"><strong>$19.9</strong><span>$39.9</span></div>
+          <p>适合更高频的图片、视频创作。</p>
+          <ul>
+            <li>更多月度钻石</li>
+            <li>更快创作队列</li>
+            <li>高清视频优先</li>
+          </ul>
+          <button class="primary-button" data-plan="Premium">升级</button>
+        </article>
+        <article class="plan-card">
+          <strong class="plan-tier">Pro</strong>
+          <div class="plan-price"><strong>$29.9</strong><span>$59.9</span></div>
+          <p>适合持续运营作品广场内容。</p>
+          <ul>
+            <li>大额钻石包</li>
+            <li>批量创作支持</li>
+            <li>更多历史保存</li>
+          </ul>
+          <button class="primary-button" data-plan="Pro">升级</button>
+        </article>
+        <article class="plan-card">
+          <strong class="plan-tier">Max</strong>
+          <div class="plan-price"><strong>$49.9</strong><span>$99.9</span></div>
+          <p>适合重度创作和高频视频创作。</p>
+          <ul>
+            <li>最高钻石额度</li>
+            <li>视频创作优先</li>
+            <li>高级模板权益</li>
+          </ul>
+          <button class="primary-button" data-plan="Max">升级</button>
+        </article>
+      </div>
+      <p class="upgrade-note">当前套餐会在顶部余额和个人中心同步显示。</p>
+    </dialog>
+
+    <dialog id="shareModal" class="modal share-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="shareModalTitle">分享作品</h2>
+          <span id="shareModalSubtitle">选择要分享的聊天软件。</span>
+        </div>
+        <button class="icon-button" data-close-share>×</button>
+      </div>
+      <div class="share-platform-grid" id="sharePlatformGrid"></div>
+    </dialog>
+
+    <aside class="history-drawer" id="historyDrawer" aria-label="历史抽屉">
+      <div class="modal-head">
+        <div>
+          <h2>历史</h2>
+          <span>最近创作的内容</span>
+        </div>
+        <button class="icon-button" id="closeHistory">×</button>
+      </div>
+      <div id="historyList"></div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

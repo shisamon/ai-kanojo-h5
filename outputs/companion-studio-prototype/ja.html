@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenLover - 創作エリア</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">♡</div>
+          <div>
+            <strong>OPENLOVER</strong>
+            <span>AI彼女</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="メインナビ">
+          <button class="nav-item is-active" data-view="explore"><span>投稿広場</span></button>
+          <button class="nav-item" data-view="generate"><span>創作エリア</span></button>
+          <button class="nav-item" data-view="chat"><span>チャット</span></button>
+          <button class="nav-item" data-view="profile"><span>個人センター</span></button>
+        </nav>
+
+        <div class="side-actions">
+          <button class="upgrade-button" data-open-upgrade>アップグレード</button>
+        </div>
+
+        <p class="legal">
+          ログインすると、利用規約、プライバシーポリシー、苦情ポリシー、コンテンツ削除ポリシー、18 U.S.C. 2257 準拠声明、会社概要、返金・返品ポリシーに同意したものとみなされます。既定では、18歳以上であることを確認します。
+        </p>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="search-wrap" aria-hidden="true">
+            <input id="globalSearch" type="search" placeholder="" />
+          </div>
+          <div class="locale-switch" aria-label="言語切替">
+            <a href="index.html">中文</a>
+            <a class="is-active" href="ja.html">日本語</a>
+          </div>
+        <button class="balance-button" data-open-upgrade><span id="coinBalance">570</span> | スタンダード</button>
+          <button class="avatar-button" data-view="profile"><img id="userAvatar" alt="ユーザー画像" /></button>
+        </header>
+
+        <section class="view" id="view-generate" aria-labelledby="generateTitle">
+          <div id="templateScreen">
+            <div class="section-head generate-head">
+              <div>
+                <p class="eyebrow">創作エリア</p>
+                <h1 id="generateTitle">創作エリア</h1>
+              </div>
+              <button class="ghost-button" id="historyButton">履歴</button>
+            </div>
+
+            <div class="mode-tabs" role="tablist" aria-label="創作モード">
+              <button class="mode-tab is-active" data-mode="image">画像</button>
+              <button class="mode-tab" data-mode="video">動画 <span>-20% 割引</span></button>
+            </div>
+
+            <div class="template-grid" id="templateGrid"></div>
+            <button class="load-more" id="loadMoreButton">もっと見る</button>
+
+            <div class="section-head gallery-head">
+              <div>
+                <h2>インスピレーションギャラリー</h2>
+              </div>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+          </div>
+
+          <div id="composeScreen" class="compose-screen" hidden>
+            <div class="section-head">
+              <div>
+                <p class="eyebrow" id="composeModeLabel">画像創作</p>
+                <h1>キャラクターを選択</h1>
+              </div>
+              <button class="ghost-button" id="backToTemplates">戻る</button>
+            </div>
+
+            <div class="compose-layout">
+              <section class="compose-main">
+                <div class="preview-stage">
+                  <img id="composePreview" alt="創作プレビュー" />
+                  <div class="preview-state" id="previewState">準備完了</div>
+                </div>
+                <label class="field-block">
+                  <span>プロンプト</span>
+                  <textarea id="promptInput" maxlength="1000"></textarea>
+                </label>
+                <div class="privacy-row">
+                  <span>公開範囲</span>
+                  <div class="segmented-control">
+                    <button class="is-active" data-privacy="private">非公開</button>
+                    <button data-privacy="public">公開</button>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="reference-panel">
+                <h2>参照</h2>
+                <div class="reference-card">
+                  <img id="posePreview" alt="ポーズ参照" />
+                  <div>
+                    <span>テンプレート</span>
+                    <strong id="poseName"></strong>
+                  </div>
+                </div>
+                <div class="reference-card">
+                  <img id="characterPreview" alt="キャラクター参照" />
+                  <div>
+                    <span>キャラクター</span>
+                    <strong id="characterName"></strong>
+                  </div>
+                  <button class="mini-button" id="removeCharacter">削除</button>
+                </div>
+                <button class="secondary-button" id="selectCharacterAgain">キャラクターを選択</button>
+                <button class="primary-button" id="generateButton"><span id="generateCost">40</span> 創作</button>
+                <button class="secondary-button" id="shareResultButton">作品を共有</button>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="view is-visible" id="view-explore" aria-labelledby="exploreTitle">
+          <div class="section-head">
+            <div>
+              <h1 id="exploreTitle">投稿広場</h1>
+            </div>
+          </div>
+          <div class="filter-row">
+            <select id="sortFilter">
+              <option value="likes">並び替え：いいね数</option>
+              <option value="latest">並び替え：最新</option>
+            </select>
+            <select id="typeFilter">
+              <option value="image">タイプ：画像</option>
+              <option value="video">タイプ：動画</option>
+            </select>
+          </div>
+          <div class="share-grid" id="exploreGrid"></div>
+        </section>
+
+        <section class="view" id="view-chat" aria-labelledby="chatTitle">
+          <div class="chat-layout logged-chat-layout">
+            <aside class="conversation-list">
+              <div class="section-head compact">
+                <div>
+                  <h1 id="chatTitle">あなたのチャット</h1>
+                </div>
+              <button class="ghost-button">新規チャット</button>
+              </div>
+              <div id="conversationList"></div>
+            </aside>
+            <section class="chat-panel">
+              <div class="chat-header">
+                <img id="chatAvatar" alt="チャット画像" />
+                <div>
+                  <strong id="chatName">Lina Hsu</strong>
+                  <span>@Ol's_Erotes 作成</span>
+                </div>
+              </div>
+              <div class="chat-messages" id="chatMessages"></div>
+              <div class="chat-quick-actions">
+                <button data-chat-create="image">画像をリクエスト</button>
+                <button data-chat-create="video">動画をリクエスト</button>
+                <button data-chat-album>アルバム</button>
+              </div>
+              <div class="chat-input">
+                <input type="text" placeholder="何かを書いて..." />
+                <button>➤</button>
+              </div>
+            </section>
+            <aside class="album-panel">
+              <img id="albumHero" alt="キャラクターアルバム" />
+              <div class="album-thumbs">
+                <img id="albumThumbOne" alt="サムネイル 1" />
+                <img id="albumThumbTwo" alt="サムネイル 2" />
+                <img id="albumThumbThree" alt="サムネイル 3" />
+              </div>
+              <strong id="albumName">Lina Hsu, 21</strong>
+              <span>@Ol's_Erotes 作成 ›</span>
+              <p>21歳の台湾出身キャラクター。レンタル部屋に現れ、あなたが依頼者だと知って動揺する物語設定。</p>
+              <button class="primary-button">非公開コンテンツを見る</button>
+              <div class="album-actions">
+                <button>再スタート</button>
+                <button>いいね</button>
+                <button>共有</button>
+                <button>削除</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-profile" aria-labelledby="profileTitle">
+          <div class="profile-layout logged-profile">
+            <section class="profile-hero">
+              <img id="profileAvatar" alt="プロフィール画像" />
+              <div>
+                <h1 id="profileTitle">User-mW4X6YPx</h1>
+                <span>kouki@telegram</span>
+              </div>
+              <button class="ghost-button">プロフィール編集</button>
+            </section>
+            <div class="metric-grid">
+              <div><strong>0</strong><span>フォロワー ›</span></div>
+              <div><strong>0</strong><span>フォロー ›</span></div>
+            </div>
+            <section class="membership-band">
+              <div>
+                <h2>Standard</h2>
+                <span>残りダイヤ</span>
+              </div>
+              <button class="primary-button" data-open-upgrade>アップグレード</button>
+              <strong>💎 570 ›</strong>
+            </section>
+            <section class="danger-panel">
+              <h2>⚠ 危険エリア</h2>
+              <p>元に戻せないアカウント操作</p>
+              <button>アカウント削除</button>
+            </section>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <dialog id="characterModal" class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>キャラクターを選択</h2>
+          <span>このテンプレートの参照キャラクターを選びます。</span>
+        </div>
+        <button class="icon-button" data-close-modal>×</button>
+      </div>
+      <div class="modal-grid" id="characterModalGrid"></div>
+    </dialog>
+
+    <dialog id="upgradeModal" class="modal upgrade-modal">
+      <div class="modal-head">
+        <div>
+          <h2>会員プラン</h2>
+          <span>現在のプラン：スタンダード · 残りダイヤ 570</span>
+        </div>
+        <button class="icon-button" data-close-upgrade>×</button>
+      </div>
+      <div class="deal-strip">
+        <strong>現在の Plan：Standard</strong>
+        <span>現在の残高を利用するか、上位プランへ変更できます。</span>
+      </div>
+      <div class="plan-grid">
+        <article class="plan-card is-current">
+          <span class="plan-badge">現在のプラン</span>
+          <strong class="plan-tier">Standard</strong>
+          <div class="plan-price"><strong>$9.9</strong><span>$19.9</span></div>
+          <p>軽めの創作と日常チャット向け。</p>
+          <ul>
+            <li>570 ダイヤ残高</li>
+            <li>画像・動画創作</li>
+            <li>作品共有と再利用</li>
+          </ul>
+          <button class="secondary-button" disabled>利用中</button>
+        </article>
+        <article class="plan-card is-featured">
+          <span class="plan-badge">おすすめ</span>
+          <strong class="plan-tier">Premium</strong>
+          <div class="plan-price"><strong>$19.9</strong><span>$39.9</span></div>
+          <p>画像・動画をより高頻度で創作する方向け。</p>
+          <ul>
+            <li>月間ダイヤ増量</li>
+            <li>高速創作キュー</li>
+            <li>HD動画優先</li>
+          </ul>
+          <button class="primary-button" data-plan="Premium">アップグレード</button>
+        </article>
+        <article class="plan-card">
+          <strong class="plan-tier">Pro</strong>
+          <div class="plan-price"><strong>$29.9</strong><span>$59.9</span></div>
+          <p>投稿広場の作品運用を続けたい方向け。</p>
+          <ul>
+            <li>大容量ダイヤ</li>
+            <li>一括創作サポート</li>
+            <li>履歴保存数アップ</li>
+          </ul>
+          <button class="primary-button" data-plan="Pro">アップグレード</button>
+        </article>
+        <article class="plan-card">
+          <strong class="plan-tier">Max</strong>
+          <div class="plan-price"><strong>$49.9</strong><span>$99.9</span></div>
+          <p>動画創作を高頻度で使う方向け。</p>
+          <ul>
+            <li>最大ダイヤ枠</li>
+            <li>動画創作優先</li>
+            <li>上位テンプレート特典</li>
+          </ul>
+          <button class="primary-button" data-plan="Max">アップグレード</button>
+        </article>
+      </div>
+      <p class="upgrade-note">現在のプランは上部残高と個人センターにも同期表示されます。</p>
+    </dialog>
+
+    <dialog id="shareModal" class="modal share-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="shareModalTitle">作品を共有</h2>
+          <span id="shareModalSubtitle">共有先のチャットアプリを選択してください。</span>
+        </div>
+        <button class="icon-button" data-close-share>×</button>
+      </div>
+      <div class="share-platform-grid" id="sharePlatformGrid"></div>
+    </dialog>
+
+    <aside class="history-drawer" id="historyDrawer" aria-label="履歴ドロワー">
+      <div class="modal-head">
+        <div>
+          <h2>履歴</h2>
+          <span>最近創作した内容</span>
+        </div>
+        <button class="icon-button" id="closeHistory">×</button>
+      </div>
+      <div id="historyList"></div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
