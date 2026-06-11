@@ -2795,3 +2795,15 @@ body {
 .membership-band h2 {
   margin: 0;
 }
+
+/* Balance band: flex layout, always one centered row */
+.membership-band {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.membership-band > div {
+  display: flex;
+  align-items: center;
+}
