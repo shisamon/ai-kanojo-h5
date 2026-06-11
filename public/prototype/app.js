@@ -61,6 +61,7 @@ const dictionary = {
     noCreatorPage: "该作者还没有主页。",
     usernamePlaceholder: "用户名（9 位字母或数字）",
     loginPlaceholder: "用户名",
+    nicknamePlaceholder: "给自己起个昵称",
     usernameRule: "用户名需为 9 位英文字母或数字。",
     usernameTaken: "该用户名已被占用。",
     changePassword: "修改密码",
@@ -200,6 +201,7 @@ const dictionary = {
     noCreatorPage: "この作者のページはまだありません。",
     usernamePlaceholder: "ユーザー名（英数字9文字）",
     loginPlaceholder: "ユーザー名",
+    nicknamePlaceholder: "ニックネームを入力",
     usernameRule: "ユーザー名は英数字9文字にしてください。",
     usernameTaken: "このユーザー名は既に使われています。",
     changePassword: "パスワード変更",
@@ -1391,6 +1393,8 @@ function setAuthScreenMode(nextMode) {
   });
   const confirmRow = qs("#authConfirmRow");
   if (confirmRow) confirmRow.hidden = authScreenMode !== "register";
+  const nicknameRow = qs("#authNicknameRow");
+  if (nicknameRow) nicknameRow.hidden = authScreenMode !== "register";
   const submit = qs("#authScreenSubmit");
   if (submit) submit.textContent = authScreenMode === "login" ? t.authLoginAction : t.authRegisterAction;
   const password = qs("#authScreenPassword");
@@ -1466,7 +1470,7 @@ async function handleAuthScreenSubmit() {
         if (errorEl) errorEl.textContent = t.usernameTaken;
         return;
       }
-      const nickname = randomNickname();
+      const nickname = (qs("#authScreenNickname")?.value || "").trim() || randomNickname();
       const { data, error } = await supabaseClient.auth.signUp({
         email: `${username}@${LOGIN_DOMAIN}`,
         password,

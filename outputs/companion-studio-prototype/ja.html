@@ -21,8 +21,12 @@
           <button data-auth-tab="register">新規登録</button>
         </div>
         <label class="field-block">
-          <span>メール</span>
-          <input id="authScreenEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+          <span>ユーザー名</span>
+          <input id="authScreenEmail" type="text" autocomplete="username" placeholder="ユーザー名" />
+        </label>
+        <label class="field-block" id="authNicknameRow" hidden>
+          <span>ニックネーム</span>
+          <input id="authScreenNickname" type="text" placeholder="ニックネームを入力" />
         </label>
         <label class="field-block">
           <span>パスワード</span>
@@ -35,9 +39,6 @@
         <p class="legal auth-error" id="authScreenError"></p>
         <button class="primary-button auth-submit" id="authScreenSubmit">ログイン</button>
         <button class="ghost-link" id="authGuestLink">あとでログインする ›</button>
-        <p class="legal">
-          ログインまたは登録により、利用規約、プライバシーポリシー、コンテンツ削除ポリシー、18 U.S.C. 2257 への同意、および18歳以上であることを確認したものとみなされます。
-        </p>
       </div>
     </div>
 
