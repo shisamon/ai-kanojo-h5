@@ -653,12 +653,35 @@ function renderCreatorPreview() {
   if (previewState) previewState.textContent = t.ready;
 }
 
+let feedVideoObserver = null;
+
+function setupFeedVideoAutoplay() {
+  if (feedVideoObserver) feedVideoObserver.disconnect();
+  const videos = exploreGrid.querySelectorAll("video");
+  if (!videos.length) return;
+  feedVideoObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+    },
+    { threshold: [0, 0.6] }
+  );
+  videos.forEach((video) => feedVideoObserver.observe(video));
+}
+
 function renderExplore() {
   const visiblePosts = sharedPosts
     .filter((post) => post.mode === "video");
   exploreGrid.innerHTML = visiblePosts
     .map((post) => shareCard(post))
     .join("");
+  setupFeedVideoAutoplay();
   exploreGrid.querySelectorAll("[data-share-post]").forEach((button) => {
     button.addEventListener("click", () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.sharePost);
@@ -799,11 +822,16 @@ async function loadTemplatesFromApi() {
   }
 }
 
+const isVideoUrl = (url) => typeof url === "string" && /\.(mp4|webm|mov|m3u8)(\?|#|$)/i.test(url);
+
 function shareCard(post) {
+  const media = isVideoUrl(post.mediaUrl)
+    ? `<video src="${post.mediaUrl}" poster="${post.image}" muted loop playsinline preload="metadata"></video>`
+    : `<img src="${post.image}" alt="${post.title}" />
+      <div class="video-play">▶</div>`;
   return `
     <article class="share-card" data-work-id="${post.id}">
-      <img src="${post.image}" alt="${post.title}" />
-      <div class="video-play">▶</div>
+      ${media}
       <div class="share-card-body">
         <span>${post.creator} · ${post.character}</span>
         <strong>${post.title}</strong>
