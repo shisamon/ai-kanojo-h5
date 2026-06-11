@@ -1297,6 +1297,18 @@ async function loadLikedWorks() {
 }
 
 async function generateMock() {
+  try {
+    await runGenerate();
+  } catch (error) {
+    const previewState = qs("#previewState");
+    const generateButton = qs("#generateButton");
+    if (previewState) previewState.textContent = t.ready;
+    if (generateButton) generateButton.disabled = false;
+    showToast((error && error.message) || String(error) || t.generationFailed);
+  }
+}
+
+async function runGenerate() {
   if (!requireAuth()) return;
   const cost = currentTemplate.cost;
   if (balance < cost) {

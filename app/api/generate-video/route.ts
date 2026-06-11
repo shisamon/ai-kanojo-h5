@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 type CharacterInput = {
   id?: string;
