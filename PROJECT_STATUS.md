@@ -6,7 +6,7 @@ H5 原型：https://ai-kanojo-h5.vercel.app ｜ 仓库：github.com/shisamon/ai-
 
 - Next.js 16 壳 + 静态原型（`outputs/companion-studio-prototype/index.html` zh / `ja.html` ja）+ 原生 JS（`public/prototype/app.js`，全部前端逻辑）
 - API 路由：`/api/works`、`/api/characters`、`/api/templates`、`/api/chat`、`/api/health`
-- Supabase：schema 见 `supabase/schema.sql`，模板表 `templates.sql`，auth 触发器/RPC `auth.sql`，种子 `seed.sql`（均已应用到线上库）
+- Supabase：schema 见 `supabase/schema.sql`，模板表 `templates.sql`，auth 触发器/RPC `auth.sql`，管理员删除保护 `protect-admin-account.sql`，种子 `seed.sql`
 - 推送 main 分支即触发 Vercel 部署
 
 ## 已完成
@@ -19,6 +19,7 @@ H5 原型：https://ai-kanojo-h5.vercel.app ｜ 仓库：github.com/shisamon/ai-
 - 聊天：`/api/chat`，未配 key 时规则自动回复（zh/ja），配置 `AI_CHAT_API_KEY/BASE_URL/MODEL` 后走真模型；`AI_CHAT_SYSTEM_PROMPT` 可自定义人设（{name} {age} {tag} {language} 占位符）
 - 分享：navigator.share 系统分享面板，链接 `/?work=<id>` 深链定位高亮；弹窗兜底含复制链接
 - 移动端弹窗均为 bottom sheet；资料页/余额卡片样式已修
+- `admin` / 管理员账号前端禁止提交删除请求；数据库保护见 `supabase/protect-admin-account.sql`
 
 ## 已知待办
 

@@ -27,6 +27,7 @@ const dictionary = {
     uploadedName: "上传图片",
     uploadedReady: "已选择上传图片。",
     deleteSubmitted: "账户删除请求已提交。",
+    adminDeleteBlocked: "管理员账号不允许删除。",
     share: "分享",
     shareDone: "分享链接已创建，作品已加入首页。",
     shareOpened: "选择要分享的聊天软件。",
@@ -167,6 +168,7 @@ const dictionary = {
     uploadedName: "アップロード画像",
     uploadedReady: "アップロード画像を選択しました。",
     deleteSubmitted: "アカウント削除リクエストを送信しました。",
+    adminDeleteBlocked: "管理者アカウントは削除できません。",
     share: "共有",
     shareDone: "共有リンクを作成し、作品をホームに追加しました。",
     shareOpened: "共有先のチャットアプリを選択してください。",
@@ -1531,7 +1533,7 @@ async function loadProfile() {
   if (!supabaseClient || !session) return;
   const { data } = await supabaseClient
     .from("profiles")
-    .select("id,display_name,diamond_balance,locale,public_id,username")
+    .select("id,email,display_name,diamond_balance,locale,public_id,username,is_admin")
     .eq("id", session.user.id)
     .maybeSingle();
   if (!data) return;
@@ -1539,6 +1541,12 @@ async function loadProfile() {
   balance = data.diamond_balance;
   updateAuthUi();
   updateBalance();
+}
+
+function isProtectedAdminAccount() {
+  const username = String(profile?.username || "").toLowerCase();
+  const email = String(profile?.email || session?.user?.email || "").toLowerCase();
+  return Boolean(profile?.is_admin) || username === "admin" || email === "admin@openlover.app";
 }
 
 async function loadUserHistory() {
@@ -1899,6 +1907,10 @@ if (savePasswordButton) {
 qsa("[data-open-delete]").forEach((button) => {
   button.addEventListener("click", () => {
     if (!requireAuth()) return;
+    if (isProtectedAdminAccount()) {
+      showToast(t.adminDeleteBlocked);
+      return;
+    }
     if (settingsModalEl && settingsModalEl.open) closeDialog(settingsModalEl);
     openDialog(deleteConfirmModal);
   });
@@ -1939,6 +1951,11 @@ qsa("[data-close-delete]").forEach((button) => {
 });
 qsa("[data-confirm-delete]").forEach((button) => {
   button.addEventListener("click", () => {
+    if (isProtectedAdminAccount()) {
+      closeDialog(deleteConfirmModal);
+      showToast(t.adminDeleteBlocked);
+      return;
+    }
     closeDialog(deleteConfirmModal);
     showToast(t.deleteSubmitted);
   });

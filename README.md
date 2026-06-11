@@ -24,8 +24,9 @@ cp .env.example .env.local
 The first Supabase schema is in `supabase/schema.sql`.
 Optional demo seed data for the home video feed is in `supabase/seed.sql`.
 Generation templates (styles) table and seed are in `supabase/templates.sql`.
+Admin account deletion protection is in `supabase/protect-admin-account.sql`.
 
-Run order: `schema.sql` -> `templates.sql` -> `seed.sql` (optional).
+Run order: `schema.sql` -> `admin.sql` -> `auth.sql` -> `templates.sql` -> `protect-admin-account.sql` -> `seed.sql` (optional).
 
 It covers:
 
@@ -38,7 +39,7 @@ It covers:
 - creation jobs
 - diamond transactions
 
-Run `schema.sql` first, then `seed.sql` if you want sample public video works on the home feed.
+Run `seed.sql` only if you want sample public video works on the home feed.
 
 ## Deploy
 
