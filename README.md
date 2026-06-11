@@ -41,6 +41,15 @@ It covers:
 
 Run `seed.sql` only if you want sample public video works on the home feed.
 
+## Video Generation
+
+The creation tab calls `/api/generate-video`. Without RunPod variables it stays in demo mode, still creating a private work and spending diamonds. To connect a real worker, set:
+
+- `RUNPOD_API_KEY`
+- `RUNPOD_VIDEO_ENDPOINT`
+
+Use a RunPod endpoint that returns a video URL in the response, preferably a synchronous endpoint for the first production version.
+
 ## Deploy
 
 Push this folder to GitHub, import the repository in Vercel, and set the environment variables from `.env.example`.

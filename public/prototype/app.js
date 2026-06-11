@@ -81,6 +81,7 @@ const dictionary = {
     generationQueued: "任务已创建",
     generationRunning: "视频生成中",
     generationSaved: "视频已保存到我的创作。",
+    generationFailed: "创作失败，请稍后再试。",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
     chatMessages: [
@@ -230,6 +231,7 @@ const dictionary = {
     generationQueued: "タスクを作成しました",
     generationRunning: "動画を生成中",
     generationSaved: "動画をマイ作品に保存しました。",
+    generationFailed: "作成に失敗しました。時間をおいて再試行してください。",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
     chatMessages: [
@@ -1305,74 +1307,66 @@ async function generateMock() {
   const generateButton = qs("#generateButton");
   if (previewState) previewState.textContent = t.generationQueued;
   if (generateButton) generateButton.disabled = true;
+  const generatedImage = makeResultImage(currentTemplate, currentCharacter, history.length + 1);
 
   if (supabaseClient && session) {
-    let jobId = null;
     try {
-      const { data: newBalance, error } = await supabaseClient.rpc("spend_diamonds", {
-        amount: cost,
-        reason: `${currentTemplate.name} · ${t.modeName[mode]}`
-      });
-      if (error) throw error;
-      balance = typeof newBalance === "number" ? newBalance : balance - cost;
-      if (profile) profile.diamond_balance = balance;
-
-      const title = `${currentCharacter.name} · ${currentTemplate.name}`;
-      const prompt = t.prompt(currentTemplate, currentCharacter);
-      const { data: job } = await supabaseClient
-        .from("creation_jobs")
-        .insert({
-          user_id: session.user.id,
-          character_id: isUuid(currentCharacter.id) ? currentCharacter.id : null,
-          template_name: currentTemplate.name,
-          mode,
-          prompt,
-          status: "running",
-          cost
-        })
-        .select("id")
-        .single();
-      jobId = job?.id || null;
       if (previewState) previewState.textContent = t.generationRunning;
-
-      const generatedImage = makeResultImage(currentTemplate, currentCharacter, history.length + 1);
-      const { data: work } = await supabaseClient
-        .from("works")
-        .insert({
-          user_id: session.user.id,
-          character_id: isUuid(currentCharacter.id) ? currentCharacter.id : null,
-          title,
-          mode,
+      const response = await fetch("/api/generate-video", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          locale,
+          mode: "video",
           cost,
-          media_url: generatedImage,
-          thumbnail_url: generatedImage,
-          visibility: "private"
+          prompt: t.prompt(currentTemplate, currentCharacter),
+          previewImage: generatedImage,
+          character: {
+            id: currentCharacter.id,
+            name: currentCharacter.name,
+            age: currentCharacter.age,
+            tag: currentCharacter.tag,
+            image: currentCharacter.image
+          },
+          template: {
+            id: currentTemplate.id,
+            name: currentTemplate.name,
+            cost: currentTemplate.cost,
+            mode: "video",
+            image: currentTemplate.image
+          }
         })
-        .select("id")
-        .single();
-
-      if (jobId) {
-        await supabaseClient
-          .from("creation_jobs")
-          .update({
-            status: "completed",
-            result_work_id: work?.id || null,
-            completed_at: new Date().toISOString()
-          })
-          .eq("id", jobId)
-          .eq("user_id", session.user.id);
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const error = new Error(payload.error || t.generationFailed);
+        error.code = payload.code || "";
+        throw error;
       }
 
+      if (typeof payload.balance === "number") {
+        balance = payload.balance;
+      } else {
+        balance = Math.max(0, balance - cost);
+      }
+      if (profile) profile.diamond_balance = balance;
+
+      const work = payload.work || {};
+      const title = work.title || `${currentCharacter.name} · ${currentTemplate.name}`;
+      const image = work.image || work.thumbnailUrl || generatedImage;
       const result = {
         id: `history-${Date.now()}`,
-        workId: work ? work.id : null,
+        workId: work.id || null,
         title,
-        mode,
-        cost,
+        mode: "video",
+        cost: work.cost ?? cost,
         character: currentCharacter.name,
         visibility: "private",
-        mediaUrl: generatedImage,
-        image: generatedImage
+        mediaUrl: work.mediaUrl || image,
+        image
       };
       history.unshift(result);
       const composePreview = qs("#composePreview");
@@ -1383,15 +1377,12 @@ async function generateMock() {
       loadUserHistory();
       showToast(t.generationSaved);
     } catch (error) {
-      if (jobId) {
-        await supabaseClient
-          .from("creation_jobs")
-          .update({ status: "failed", completed_at: new Date().toISOString() })
-          .eq("id", jobId)
-          .eq("user_id", session.user.id);
-      }
       if (previewState) previewState.textContent = t.ready;
-      if (String(error.message || error).includes("insufficient")) openDialog(upgradeModal);
+      if (error.code === "INSUFFICIENT_BALANCE" || String(error.message || error).includes("余额不足")) {
+        openDialog(upgradeModal);
+      } else {
+        showToast(error.message || t.generationFailed);
+      }
     } finally {
       if (generateButton) generateButton.disabled = false;
     }
@@ -1406,7 +1397,9 @@ async function generateMock() {
       mode,
       cost,
       character: currentCharacter.name,
-      image: makeResultImage(currentTemplate, currentCharacter, history.length + 1)
+      visibility: "private",
+      mediaUrl: generatedImage,
+      image: generatedImage
     };
     history.unshift(result);
     const composePreview = qs("#composePreview");
