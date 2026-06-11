@@ -3088,3 +3088,9 @@ body {
 .share-actions .action-icon svg {
   display: block;
 }
+
+/* Fix: hidden attribute must win over display:grid */
+.profile-works #profileHistory[hidden],
+.profile-works #profileLikes[hidden] {
+  display: none;
+}
