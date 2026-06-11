@@ -50,6 +50,13 @@ The creation tab calls `/api/generate-video`. Without RunPod variables it stays 
 
 Use a RunPod endpoint that returns a video URL in the response, preferably a synchronous endpoint for the first production version.
 
+The first deployable worker scaffold lives in `runpod-worker/`. Deploy it to RunPod Serverless from GitHub with:
+
+- Build context: `runpod-worker`
+- Dockerfile path: `runpod-worker/Dockerfile`
+
+This scaffold verifies the full website-to-RunPod connection before replacing the demo generation code with a real video pipeline.
+
 ## Deploy
 
 Push this folder to GitHub, import the repository in Vercel, and set the environment variables from `.env.example`.
