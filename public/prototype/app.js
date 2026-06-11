@@ -50,6 +50,7 @@ const dictionary = {
     authConfirmEmail: "注册成功，请到邮箱完成确认后再登录。",
     authSignedOut: "已退出登录。",
     authRequired: "请先登录。",
+    passwordMismatch: "两次输入的密码不一致。",
     notLoggedIn: "未登录",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
@@ -170,6 +171,7 @@ const dictionary = {
     authConfirmEmail: "登録完了。確認メールをチェックしてください。",
     authSignedOut: "ログアウトしました。",
     authRequired: "先にログインしてください。",
+    passwordMismatch: "パスワードが一致しません。",
     notLoggedIn: "未ログイン",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
@@ -351,6 +353,8 @@ const sharePlatformGrid = qs("#sharePlatformGrid");
 const toast = qs("#toast");
 const authModal = qs("#authModal");
 const authButton = qs("#authButton");
+const authScreen = qs("#authScreen");
+let authScreenMode = "login";
 
 function seeded(seed) {
   let value = seed * 9301 + 49297;
@@ -1089,10 +1093,89 @@ function setAuthMode(nextMode) {
   if (authError) authError.textContent = "";
 }
 
+function guestSkipped() {
+  try {
+    return sessionStorage.getItem("ol-guest") === "1";
+  } catch (error) {
+    return false;
+  }
+}
+
+function setGuestSkipped(value) {
+  try {
+    if (value) sessionStorage.setItem("ol-guest", "1");
+    else sessionStorage.removeItem("ol-guest");
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+function setAuthScreenMode(nextMode) {
+  authScreenMode = nextMode;
+  if (!authScreen) return;
+  authScreen.querySelectorAll("[data-auth-tab]").forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.authTab === authScreenMode);
+  });
+  const confirmRow = qs("#authConfirmRow");
+  if (confirmRow) confirmRow.hidden = authScreenMode !== "register";
+  const submit = qs("#authScreenSubmit");
+  if (submit) submit.textContent = authScreenMode === "login" ? t.authLoginAction : t.authRegisterAction;
+  const password = qs("#authScreenPassword");
+  if (password) password.autocomplete = authScreenMode === "login" ? "current-password" : "new-password";
+  const errorEl = qs("#authScreenError");
+  if (errorEl) errorEl.textContent = "";
+}
+
+function showAuthScreen(mode = "login") {
+  if (!authScreen || !supabaseClient) return;
+  setAuthScreenMode(mode);
+  authScreen.hidden = false;
+}
+
+function hideAuthScreen() {
+  if (authScreen) authScreen.hidden = true;
+}
+
+async function handleAuthScreenSubmit() {
+  if (!supabaseClient) return;
+  const email = (qs("#authScreenEmail")?.value || "").trim();
+  const password = qs("#authScreenPassword")?.value || "";
+  const confirm = qs("#authScreenConfirm")?.value || "";
+  const errorEl = qs("#authScreenError");
+  if (!email || !password) return;
+  if (authScreenMode === "register" && password !== confirm) {
+    if (errorEl) errorEl.textContent = t.passwordMismatch;
+    return;
+  }
+  const submit = qs("#authScreenSubmit");
+  if (submit) submit.disabled = true;
+  try {
+    if (authScreenMode === "login") {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      hideAuthScreen();
+      showToast(t.authWelcome);
+    } else {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        hideAuthScreen();
+        showToast(t.authSignedUp);
+      } else {
+        setAuthScreenMode("login");
+        if (errorEl) errorEl.textContent = t.authConfirmEmail;
+      }
+    }
+  } catch (error) {
+    if (errorEl) errorEl.textContent = error.message || String(error);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
+}
+
 function requireAuth() {
   if (!supabaseClient || session) return true;
-  setAuthMode("login");
-  openDialog(authModal);
+  showAuthScreen("login");
   showToast(t.authRequired);
   return false;
 }
@@ -1579,8 +1662,7 @@ async function handleAuthButtonClick() {
     await supabaseClient.auth.signOut();
     showToast(t.authSignedOut);
   } else {
-    setAuthMode("login");
-    openDialog(authModal);
+    showAuthScreen("login");
   }
 }
 
@@ -1613,20 +1695,49 @@ if (chatInput) {
   });
 }
 
+if (authScreen) {
+  authScreen.querySelectorAll("[data-auth-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => setAuthScreenMode(tab.dataset.authTab));
+  });
+  const authScreenSubmit = qs("#authScreenSubmit");
+  if (authScreenSubmit) authScreenSubmit.addEventListener("click", handleAuthScreenSubmit);
+  ["#authScreenPassword", "#authScreenConfirm"].forEach((selector) => {
+    const field = qs(selector);
+    if (field) {
+      field.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") handleAuthScreenSubmit();
+      });
+    }
+  });
+  const authGuestLink = qs("#authGuestLink");
+  if (authGuestLink) {
+    authGuestLink.addEventListener("click", () => {
+      setGuestSkipped(true);
+      hideAuthScreen();
+    });
+  }
+}
+
 if (supabaseClient) {
   supabaseClient.auth.onAuthStateChange((_event, newSession) => {
     const hadSession = Boolean(session);
     session = newSession;
     if (session) {
+      hideAuthScreen();
       updateAuthUi();
       loadProfile();
       loadUserHistory();
       loadUserLikes();
     } else if (hadSession) {
       resetUserState();
+      setGuestSkipped(false);
+      showAuthScreen("login");
     } else {
       updateAuthUi();
     }
+  });
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (!data.session && !guestSkipped()) showAuthScreen("login");
   });
 }
 

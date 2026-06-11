@@ -7,6 +7,40 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="auth-screen" id="authScreen" hidden>
+      <div class="auth-card">
+        <div class="brand auth-brand">
+          <div class="brand-mark">♡</div>
+          <div>
+            <strong>OPENLOVER</strong>
+            <span>AI 女友</span>
+          </div>
+        </div>
+        <div class="auth-tabs">
+          <button class="is-active" data-auth-tab="login">登录</button>
+          <button data-auth-tab="register">注册</button>
+        </div>
+        <label class="field-block">
+          <span>邮箱</span>
+          <input id="authScreenEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+        </label>
+        <label class="field-block">
+          <span>密码</span>
+          <input id="authScreenPassword" type="password" autocomplete="current-password" placeholder="至少 6 位" />
+        </label>
+        <label class="field-block" id="authConfirmRow" hidden>
+          <span>确认密码</span>
+          <input id="authScreenConfirm" type="password" autocomplete="new-password" placeholder="再次输入密码" />
+        </label>
+        <p class="legal auth-error" id="authScreenError"></p>
+        <button class="primary-button auth-submit" id="authScreenSubmit">登录</button>
+        <button class="ghost-link" id="authGuestLink">先以游客身份逛逛 ›</button>
+        <p class="legal">
+          登录或注册即表示你同意我们的服务条款、隐私政策、内容移除政策与 18 U.S.C. 2257 合规声明，并确认你已年满 18 岁。
+        </p>
+      </div>
+    </div>
+
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
