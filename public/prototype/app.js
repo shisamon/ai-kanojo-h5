@@ -1438,6 +1438,7 @@ function resetUserState() {
   renderExplore();
   updateAuthUi();
   updateBalance();
+  switchView("explore");
 }
 
 function switchView(view) {
@@ -1467,11 +1468,13 @@ function showToast(message) {
 
 qsa("[data-view]").forEach((button) => {
   button.addEventListener("click", () => {
-    if (button.dataset.view === "chat") {
+    const view = button.dataset.view;
+    if (view !== "explore" && !requireAuth()) return;
+    if (view === "chat") {
       chatScreen = "list";
       updateChatScreen();
     }
-    switchView(button.dataset.view);
+    switchView(view);
   });
 });
 
