@@ -1340,7 +1340,12 @@ function updateAuthUi() {
   const profileId = qs("#profileId");
   if (session) {
     if (profileTitle && profile && profile.display_name) profileTitle.textContent = profile.display_name;
-    if (profileId) profileId.textContent = (session.user && session.user.email) || "";
+    if (profileId) {
+      profileId.textContent =
+        (profile && profile.public_id ? `ID: ${profile.public_id}` : null) ||
+        (session.user && session.user.email) ||
+        "";
+    }
   } else {
     if (profileTitle) profileTitle.textContent = t.guestName;
     if (profileId) profileId.textContent = t.notLoggedIn;
@@ -1464,7 +1469,7 @@ async function loadProfile() {
   if (!supabaseClient || !session) return;
   const { data } = await supabaseClient
     .from("profiles")
-    .select("id,display_name,diamond_balance,locale")
+    .select("id,display_name,diamond_balance,locale,public_id")
     .eq("id", session.user.id)
     .maybeSingle();
   if (!data) return;
@@ -1793,7 +1798,10 @@ qsa("[data-open-profile-edit]").forEach((button) => {
     const nicknameInput = qs("#nicknameInput");
     if (nicknameInput) nicknameInput.value = qs("#profileTitle").textContent.trim();
     const profileIdInput = qs("#profileIdInput");
-    if (profileIdInput) profileIdInput.value = session && session.user ? session.user.email || "" : "";
+    if (profileIdInput) {
+      profileIdInput.value =
+        (profile && profile.public_id) || (session && session.user ? session.user.email || "" : "");
+    }
     openDialog(profileEditModal);
   });
 });
