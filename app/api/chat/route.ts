@@ -66,15 +66,24 @@ export async function POST(request: Request) {
   const model = process.env.AI_CHAT_MODEL || "gpt-4o-mini";
   const language = locale === "ja" ? "日本語" : "中文";
 
-  const persona = [
-    `你正在扮演名为 ${character.name || "AI 角色"} 的虚拟聊天角色`,
-    character.age ? `${character.age} 岁` : "",
-    character.tag ? `角色标签：${character.tag}` : ""
-  ]
-    .filter(Boolean)
-    .join("，");
-
-  const system = `${persona}。请始终以该角色的第一人称用${language}与用户对话，回复保持简短自然，不要跳出角色，不要提及你是 AI 模型。`;
+  const customTemplate = process.env.AI_CHAT_SYSTEM_PROMPT;
+  let system: string;
+  if (customTemplate) {
+    system = customTemplate
+      .replaceAll("{name}", String(character.name || ""))
+      .replaceAll("{age}", String(character.age || ""))
+      .replaceAll("{tag}", String(character.tag || ""))
+      .replaceAll("{language}", language);
+  } else {
+    const persona = [
+      `你正在扮演名为 ${characterName} 的虚拟聊天角色`,
+      character.age ? `${character.age} 岁` : "",
+      character.tag ? `角色标签：${character.tag}` : ""
+    ]
+      .filter(Boolean)
+      .join("，");
+    system = `${persona}。请始终以该角色的第一人称用${language}与用户对话，回复保持简短自然，不要跳出角色，不要提及你是 AI 模型。`;
+  }
 
   const history = (Array.isArray(body.messages) ? body.messages : [])
     .slice(-16)
