@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const query = supabase
       .from("works")
       .select(
-        "id,title,mode,media_url,thumbnail_url,cost,likes_count,created_at,characters(name,creator_name)"
+        "id,title,mode,media_url,thumbnail_url,cost,likes_count,created_at,user_id,characters(name,creator_name)"
       )
       .eq("visibility", "public")
       .eq("mode", mode)
@@ -42,6 +42,7 @@ export async function GET(request: Request) {
           id: work.id,
           title: work.title,
           mode: work.mode,
+          userId: work.user_id,
           image: work.thumbnail_url || work.media_url,
           mediaUrl: work.media_url,
           cost: work.cost,

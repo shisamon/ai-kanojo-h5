@@ -56,6 +56,9 @@ const dictionary = {
     copyLink: "复制链接",
     linkCopied: "链接已复制。",
     noLikes: "还没有点赞的作品。",
+    creatorWorks: "作品",
+    creatorLikes: "点赞",
+    noCreatorPage: "该作者还没有主页。",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
@@ -181,6 +184,9 @@ const dictionary = {
     copyLink: "リンクをコピー",
     linkCopied: "リンクをコピーしました。",
     noLikes: "いいねした作品はまだありません。",
+    creatorWorks: "作品",
+    creatorLikes: "いいね",
+    noCreatorPage: "この作者のページはまだありません。",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
@@ -684,6 +690,11 @@ function renderExplore() {
     .map((post) => shareCard(post))
     .join("");
   setupFeedVideoAutoplay();
+  exploreGrid.querySelectorAll(".creator-link").forEach((button) => {
+    button.addEventListener("click", () => {
+      openCreatorPage(button.dataset.creator, button.dataset.creatorName);
+    });
+  });
   exploreGrid.querySelectorAll("[data-share-post]").forEach((button) => {
     button.addEventListener("click", () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.sharePost);
@@ -724,6 +735,7 @@ async function loadWorksFromApi() {
         cost: post.cost || 0,
         image: post.image || makeScene(index + 160, post.title || "", "video"),
         mediaUrl: post.mediaUrl,
+        userId: post.userId || null,
         likes: post.likes || 0,
         liked: likedWorkIds.has(post.id),
         character: post.character,
@@ -835,7 +847,7 @@ function shareCard(post) {
     <article class="share-card" data-work-id="${post.id}">
       ${media}
       <div class="share-card-body">
-        <span>${post.creator} · ${post.character}</span>
+        <button class="creator-link" data-creator="${post.userId || ""}" data-creator-name="${post.creator}">${post.creator} · ${post.character}</button>
         <strong>${post.title}</strong>
         <div class="share-actions">
           <button class="like-button ${post.liked ? "is-liked" : ""}" data-like-post="${post.id}" aria-pressed="${post.liked}">
@@ -1073,18 +1085,131 @@ function renderWorkGrid(container, items, emptyText) {
         )
         .join("")}</div>`
     : `<p class="legal">${emptyText}</p>`;
-  container.querySelectorAll("[data-profile-work]").forEach((button) => {
+  container.querySelectorAll("[data-profile-work]").forEach((button, index) => {
     button.addEventListener("click", () => {
-      switchView("explore");
-      const card =
-        exploreGrid && exploreGrid.querySelector(`[data-work-id="${CSS.escape(button.dataset.profileWork)}"]`);
-      if (card) {
-        card.scrollIntoView({ behavior: "smooth", block: "center" });
-        card.classList.add("is-highlighted");
-        setTimeout(() => card.classList.remove("is-highlighted"), 2600);
-      }
+      const item = items[index];
+      if (item) openWorkViewer(item);
     });
   });
+}
+
+function ensureWorkViewer() {
+  let viewer = qs("#workViewer");
+  if (viewer) return viewer;
+  viewer = document.createElement("div");
+  viewer.id = "workViewer";
+  viewer.className = "work-viewer";
+  viewer.hidden = true;
+  viewer.innerHTML = `<button class="icon-button work-viewer-back">‹</button><div class="work-viewer-stage"></div>`;
+  document.body.appendChild(viewer);
+  viewer.querySelector(".work-viewer-back").addEventListener("click", closeWorkViewer);
+  viewer.addEventListener("click", (event) => {
+    if (event.target === viewer) closeWorkViewer();
+  });
+  return viewer;
+}
+
+function openWorkViewer(item) {
+  const viewer = ensureWorkViewer();
+  const stage = viewer.querySelector(".work-viewer-stage");
+  stage.innerHTML = isVideoUrl(item.mediaUrl)
+    ? `<video src="${item.mediaUrl}" poster="${item.image || ""}" controls autoplay loop playsinline></video>`
+    : `<img src="${item.image}" alt="${item.title || ""}" />`;
+  viewer.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeWorkViewer() {
+  const viewer = qs("#workViewer");
+  if (!viewer) return;
+  const video = viewer.querySelector("video");
+  if (video) video.pause();
+  viewer.querySelector(".work-viewer-stage").innerHTML = "";
+  viewer.hidden = true;
+  document.body.style.overflow = "";
+}
+
+function ensureCreatorPage() {
+  let page = qs("#creatorPage");
+  if (page) return page;
+  page = document.createElement("div");
+  page.id = "creatorPage";
+  page.className = "creator-page";
+  page.hidden = true;
+  page.innerHTML = `
+    <header class="creator-page-head">
+      <button class="icon-button creator-page-back">‹</button>
+      <strong id="creatorPageName"></strong>
+    </header>
+    <div class="profile-works-tabs creator-tabs">
+      <button class="is-active" data-creator-tab="works">${t.creatorWorks}</button>
+      <button data-creator-tab="likes">${t.creatorLikes}</button>
+    </div>
+    <div id="creatorWorksGrid"></div>
+    <div id="creatorLikesGrid" hidden></div>
+  `;
+  document.body.appendChild(page);
+  page.querySelector(".creator-page-back").addEventListener("click", () => {
+    page.hidden = true;
+    document.body.style.overflow = "";
+  });
+  page.querySelectorAll("[data-creator-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      page.querySelectorAll("[data-creator-tab]").forEach((item) => item.classList.toggle("is-active", item === tab));
+      const showLikes = tab.dataset.creatorTab === "likes";
+      const worksGrid = qs("#creatorWorksGrid");
+      const likesGrid = qs("#creatorLikesGrid");
+      if (worksGrid) worksGrid.hidden = showLikes;
+      if (likesGrid) likesGrid.hidden = !showLikes;
+    });
+  });
+  return page;
+}
+
+async function openCreatorPage(userId, name) {
+  if (!supabaseClient || !isUuid(userId)) {
+    showToast(t.noCreatorPage);
+    return;
+  }
+  const page = ensureCreatorPage();
+  const nameEl = qs("#creatorPageName");
+  if (nameEl) nameEl.textContent = name || "@User";
+  page.hidden = false;
+  document.body.style.overflow = "hidden";
+
+  const mapWork = (work, index) => ({
+    id: work.id,
+    workId: work.id,
+    title: work.title,
+    mediaUrl: work.media_url,
+    image:
+      work.thumbnail_url ||
+      (isVideoUrl(work.media_url) ? "" : work.media_url) ||
+      makeScene(index + 240, work.title, work.mode || "video")
+  });
+
+  const [worksRes, likesRes] = await Promise.all([
+    supabaseClient
+      .from("works")
+      .select("id,title,mode,thumbnail_url,media_url")
+      .eq("user_id", userId)
+      .eq("visibility", "public")
+      .order("created_at", { ascending: false })
+      .limit(60),
+    supabaseClient
+      .from("work_likes")
+      .select("created_at, works(id,title,mode,thumbnail_url,media_url,visibility)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(60)
+  ]);
+
+  renderWorkGrid(qs("#creatorWorksGrid"), (worksRes.data ?? []).map(mapWork), t.noHistory);
+  const likedItems = (likesRes.data ?? [])
+    .map((row) => (Array.isArray(row.works) ? row.works[0] : row.works))
+    .filter((work) => work && work.visibility === "public")
+    .map(mapWork);
+  renderWorkGrid(qs("#creatorLikesGrid"), likedItems, t.noLikes);
 }
 
 async function loadLikedWorks() {
@@ -1103,6 +1228,7 @@ async function loadLikedWorks() {
       id: work.id,
       workId: work.id,
       title: work.title,
+      mediaUrl: work.media_url,
       image: work.thumbnail_url || (isVideoUrl(work.media_url) ? "" : work.media_url) || makeScene(index + 220, work.title, work.mode)
     }));
   renderWorkGrid(container, items, t.noLikes);
@@ -1358,7 +1484,11 @@ async function loadUserHistory() {
     mode: work.mode,
     cost: work.cost,
     visibility: work.visibility,
-    image: work.thumbnail_url || work.media_url || makeScene(index + 200, work.title, work.mode)
+    mediaUrl: work.media_url,
+    image:
+      work.thumbnail_url ||
+      (isVideoUrl(work.media_url) ? "" : work.media_url) ||
+      makeScene(index + 200, work.title, work.mode)
   }));
   renderHistory();
 }
