@@ -291,8 +291,31 @@
         </div>
       </div>
       <div class="settings-stack">
+        <button class="delete-account-button" id="changePasswordButton">パスワード変更</button>
         <button class="delete-account-button" id="profileAuthButton">ログイン</button>
         <button class="delete-account-button" data-open-delete>アカウント削除</button>
+      </div>
+    </dialog>
+
+    <dialog id="passwordModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>パスワード変更</h2>
+        </div>
+        <button class="icon-button" data-close-password>×</button>
+      </div>
+      <label class="field-block">
+        <span>新しいパスワード</span>
+        <input id="newPasswordInput" type="password" autocomplete="new-password" placeholder="6文字以上" />
+      </label>
+      <label class="field-block">
+        <span>新しいパスワード（確認）</span>
+        <input id="confirmPasswordInput" type="password" autocomplete="new-password" placeholder="もう一度入力" />
+      </label>
+      <p class="legal" id="passwordError"></p>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-password>キャンセル</button>
+        <button class="primary-button" id="savePasswordButton">保存</button>
       </div>
     </dialog>
 

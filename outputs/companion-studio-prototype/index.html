@@ -291,8 +291,31 @@
         </div>
       </div>
       <div class="settings-stack">
+        <button class="delete-account-button" id="changePasswordButton">修改密码</button>
         <button class="delete-account-button" id="profileAuthButton">登录</button>
         <button class="delete-account-button" data-open-delete>删除账户</button>
+      </div>
+    </dialog>
+
+    <dialog id="passwordModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>修改密码</h2>
+        </div>
+        <button class="icon-button" data-close-password>×</button>
+      </div>
+      <label class="field-block">
+        <span>新密码</span>
+        <input id="newPasswordInput" type="password" autocomplete="new-password" placeholder="至少 6 位" />
+      </label>
+      <label class="field-block">
+        <span>确认新密码</span>
+        <input id="confirmPasswordInput" type="password" autocomplete="new-password" placeholder="再次输入" />
+      </label>
+      <p class="legal" id="passwordError"></p>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-password>取消</button>
+        <button class="primary-button" id="savePasswordButton">保存</button>
       </div>
     </dialog>
 

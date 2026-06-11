@@ -59,6 +59,17 @@ const dictionary = {
     creatorWorks: "作品",
     creatorLikes: "点赞",
     noCreatorPage: "该作者还没有主页。",
+    usernamePlaceholder: "用户名（9 位字母或数字）",
+    loginPlaceholder: "用户名",
+    usernameRule: "用户名需为 9 位英文字母或数字。",
+    usernameTaken: "该用户名已被占用。",
+    changePassword: "修改密码",
+    newPassword: "新密码",
+    confirmNewPassword: "确认新密码",
+    passwordTooShort: "密码至少 6 位。",
+    passwordChanged: "密码已修改。",
+    save: "保存",
+    cancel: "取消",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
@@ -187,6 +198,17 @@ const dictionary = {
     creatorWorks: "作品",
     creatorLikes: "いいね",
     noCreatorPage: "この作者のページはまだありません。",
+    usernamePlaceholder: "ユーザー名（英数字9文字）",
+    loginPlaceholder: "ユーザー名",
+    usernameRule: "ユーザー名は英数字9文字にしてください。",
+    usernameTaken: "このユーザー名は既に使われています。",
+    changePassword: "パスワード変更",
+    newPassword: "新しいパスワード",
+    confirmNewPassword: "新しいパスワード（確認）",
+    passwordTooShort: "パスワードは6文字以上。",
+    passwordChanged: "パスワードを変更しました。",
+    save: "保存",
+    cancel: "キャンセル",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
@@ -1341,10 +1363,7 @@ function updateAuthUi() {
   if (session) {
     if (profileTitle && profile && profile.display_name) profileTitle.textContent = profile.display_name;
     if (profileId) {
-      profileId.textContent =
-        (profile && profile.public_id ? `ID: ${profile.public_id}` : null) ||
-        (session.user && session.user.email) ||
-        "";
+      profileId.textContent = profile && profile.username ? `ID: ${profile.username}` : "";
     }
   } else {
     if (profileTitle) profileTitle.textContent = t.guestName;
@@ -1376,6 +1395,8 @@ function setAuthScreenMode(nextMode) {
   if (submit) submit.textContent = authScreenMode === "login" ? t.authLoginAction : t.authRegisterAction;
   const password = qs("#authScreenPassword");
   if (password) password.autocomplete = authScreenMode === "login" ? "current-password" : "new-password";
+  const emailInput = qs("#authScreenEmail");
+  if (emailInput) emailInput.placeholder = authScreenMode === "register" ? t.usernamePlaceholder : t.loginPlaceholder;
   const errorEl = qs("#authScreenError");
   if (errorEl) errorEl.textContent = "";
 }
@@ -1390,30 +1411,67 @@ function hideAuthScreen() {
   if (authScreen) authScreen.hidden = true;
 }
 
-const normalizeLoginEmail = (value) => (value.includes("@") ? value : `${value}@openlover.demo`);
+const LOGIN_DOMAIN = "openlover.app";
+const normalizeLoginEmail = (value) => (value.includes("@") ? value : `${value}@${LOGIN_DOMAIN}`);
+const usernameRegex = /^[a-zA-Z0-9]{9}$/;
+
+function randomNickname() {
+  const adjectives =
+    locale === "ja"
+      ? ["静かな", "煌めく", "優しい", "気まぐれな", "夜更けの", "甘い", "遠い", "小さな"]
+      : ["安静的", "闪烁的", "温柔的", "随性的", "深夜的", "微甜的", "远方的", "迷你的"];
+  const nouns =
+    locale === "ja"
+      ? ["猫", "月", "星", "波", "風", "影", "夢", "灯"]
+      : ["小猫", "月亮", "星河", "海浪", "晚风", "影子", "梦境", "灯火"];
+  const a = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const n = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${a}${n}${Math.floor(100 + Math.random() * 900)}`;
+}
 
 async function handleAuthScreenSubmit() {
   if (!supabaseClient) return;
-  const rawEmail = (qs("#authScreenEmail")?.value || "").trim();
-  const email = rawEmail && authScreenMode === "login" ? normalizeLoginEmail(rawEmail) : rawEmail;
+  const rawValue = (qs("#authScreenEmail")?.value || "").trim();
   const password = qs("#authScreenPassword")?.value || "";
   const confirm = qs("#authScreenConfirm")?.value || "";
   const errorEl = qs("#authScreenError");
-  if (!email || !password) return;
-  if (authScreenMode === "register" && password !== confirm) {
-    if (errorEl) errorEl.textContent = t.passwordMismatch;
-    return;
-  }
+  if (!rawValue || !password) return;
   const submit = qs("#authScreenSubmit");
   if (submit) submit.disabled = true;
   try {
     if (authScreenMode === "login") {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email: normalizeLoginEmail(rawValue),
+        password
+      });
       if (error) throw error;
       hideAuthScreen();
       showToast(t.authWelcome);
     } else {
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (!usernameRegex.test(rawValue)) {
+        if (errorEl) errorEl.textContent = t.usernameRule;
+        return;
+      }
+      if (password !== confirm) {
+        if (errorEl) errorEl.textContent = t.passwordMismatch;
+        return;
+      }
+      const username = rawValue.toLowerCase();
+      const { data: existing } = await supabaseClient
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .maybeSingle();
+      if (existing) {
+        if (errorEl) errorEl.textContent = t.usernameTaken;
+        return;
+      }
+      const nickname = randomNickname();
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: `${username}@${LOGIN_DOMAIN}`,
+        password,
+        options: { data: { username, display_name: nickname } }
+      });
       if (error) throw error;
       if (data.session) {
         hideAuthScreen();
@@ -1469,7 +1527,7 @@ async function loadProfile() {
   if (!supabaseClient || !session) return;
   const { data } = await supabaseClient
     .from("profiles")
-    .select("id,display_name,diamond_balance,locale,public_id")
+    .select("id,display_name,diamond_balance,locale,public_id,username")
     .eq("id", session.user.id)
     .maybeSingle();
   if (!data) return;
@@ -1785,6 +1843,55 @@ qsa("[data-close-settings]").forEach((button) => {
     if (settingsModalEl) closeDialog(settingsModalEl);
   });
 });
+
+const passwordModalEl = qs("#passwordModal");
+const changePasswordButton = qs("#changePasswordButton");
+if (changePasswordButton) {
+  changePasswordButton.addEventListener("click", () => {
+    if (!requireAuth()) return;
+    if (settingsModalEl && settingsModalEl.open) closeDialog(settingsModalEl);
+    const newInput = qs("#newPasswordInput");
+    const confirmInput = qs("#confirmPasswordInput");
+    const errorEl = qs("#passwordError");
+    if (newInput) newInput.value = "";
+    if (confirmInput) confirmInput.value = "";
+    if (errorEl) errorEl.textContent = "";
+    if (passwordModalEl) openDialog(passwordModalEl);
+  });
+}
+qsa("[data-close-password]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (passwordModalEl) closeDialog(passwordModalEl);
+  });
+});
+const savePasswordButton = qs("#savePasswordButton");
+if (savePasswordButton) {
+  savePasswordButton.addEventListener("click", async () => {
+    if (!supabaseClient || !session) return;
+    const newPassword = qs("#newPasswordInput")?.value || "";
+    const confirmPassword = qs("#confirmPasswordInput")?.value || "";
+    const errorEl = qs("#passwordError");
+    if (newPassword.length < 6) {
+      if (errorEl) errorEl.textContent = t.passwordTooShort;
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      if (errorEl) errorEl.textContent = t.passwordMismatch;
+      return;
+    }
+    savePasswordButton.disabled = true;
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      if (passwordModalEl) closeDialog(passwordModalEl);
+      showToast(t.passwordChanged);
+    } catch (error) {
+      if (errorEl) errorEl.textContent = error.message || String(error);
+    } finally {
+      savePasswordButton.disabled = false;
+    }
+  });
+}
 qsa("[data-open-delete]").forEach((button) => {
   button.addEventListener("click", () => {
     if (!requireAuth()) return;
@@ -1798,10 +1905,7 @@ qsa("[data-open-profile-edit]").forEach((button) => {
     const nicknameInput = qs("#nicknameInput");
     if (nicknameInput) nicknameInput.value = qs("#profileTitle").textContent.trim();
     const profileIdInput = qs("#profileIdInput");
-    if (profileIdInput) {
-      profileIdInput.value =
-        (profile && profile.public_id) || (session && session.user ? session.user.email || "" : "");
-    }
+    if (profileIdInput) profileIdInput.value = (profile && profile.username) || "";
     openDialog(profileEditModal);
   });
 });
