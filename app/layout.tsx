@@ -18,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
+        <style>{".auth-screen .field-block[hidden]{display:none!important}"}</style>
         <script
           dangerouslySetInnerHTML={{
             __html: `window.__SUPABASE_URL__=${JSON.stringify(supabaseUrl)};window.__SUPABASE_ANON_KEY__=${JSON.stringify(supabaseAnonKey)};`
