@@ -328,6 +328,9 @@ let profile = null;
 let authMode = "login";
 let likedWorkIds = new Set();
 const chatSessionIds = new Map();
+const chatTranscripts = new Map();
+const hydratedChats = new Set();
+let chatBusy = false;
 
 const qs = (selector) => document.querySelector(selector);
 const qsa = (selector) => Array.from(document.querySelectorAll(selector));
@@ -838,13 +841,7 @@ function renderChat() {
 
   qs("#chatAvatar").src = activeChat.image;
   qs("#chatName").textContent = activeChat.name;
-  qs("#chatMessages").innerHTML = `
-    <div class="story-time">03:38</div>
-    <div class="message">${t.chatMessages[0]}</div>
-    <div class="message">${t.chatMessages[1]}</div>
-    <div class="message user">${t.chatMessages[2]}</div>
-    <div class="message">${t.chatMessages[3]}</div>
-  `;
+  renderChatMessages();
   qs("#albumHero").src = activeChat.image;
   qs("#albumThumbOne").src = activeChat.image;
   qs("#albumThumbTwo").src = characters[(characters.indexOf(activeChat) + 1) % characters.length].image;
@@ -1068,6 +1065,8 @@ function updateBalance() {
 
 function updateAuthUi() {
   if (authButton) authButton.textContent = session ? t.logout : t.login;
+  const profileAuthButton = qs("#profileAuthButton");
+  if (profileAuthButton) profileAuthButton.textContent = session ? t.logout : t.login;
   const profileTitle = qs("#profileTitle");
   const profileId = qs("#profileId");
   if (session) {
@@ -1217,18 +1216,41 @@ async function ensureChatSession(character) {
   return created.id;
 }
 
+function getTranscript(character) {
+  if (!chatTranscripts.has(character.id)) chatTranscripts.set(character.id, []);
+  return chatTranscripts.get(character.id);
+}
+
 function appendChatMessage(sender, content) {
   const container = qs("#chatMessages");
-  if (!container) return;
+  if (!container) return null;
   const div = document.createElement("div");
   div.className = sender === "user" ? "message user" : "message";
   div.textContent = content;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function renderChatMessages() {
+  const container = qs("#chatMessages");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="story-time">03:38</div>
+    <div class="message">${t.chatMessages[0]}</div>
+    <div class="message">${t.chatMessages[1]}</div>
+    <div class="message user">${t.chatMessages[2]}</div>
+    <div class="message">${t.chatMessages[3]}</div>
+  `;
+  getTranscript(activeChat).forEach((message) =>
+    appendChatMessage(message.role === "user" ? "user" : "character", message.content)
+  );
 }
 
 async function hydrateChatMessages() {
   if (!supabaseClient || !session || !isUuid(activeChat.id)) return;
+  if (hydratedChats.has(activeChat.id)) return;
+  hydratedChats.add(activeChat.id);
   if (!chatSessionIds.has(activeChat.id)) {
     const { data } = await supabaseClient
       .from("chat_sessions")
@@ -1247,24 +1269,83 @@ async function hydrateChatMessages() {
     .eq("session_id", sessionId)
     .order("created_at", { ascending: true })
     .limit(100);
-  if (!Array.isArray(messages) || characterId !== activeChat.id) return;
-  messages.forEach((message) => appendChatMessage(message.sender, message.content));
+  if (!Array.isArray(messages)) return;
+  chatTranscripts.set(
+    characterId,
+    messages.map((message) => ({
+      role: message.sender === "user" ? "user" : "assistant",
+      content: message.content
+    }))
+  );
+  if (characterId === activeChat.id) renderChatMessages();
+}
+
+function introContext() {
+  return [
+    { role: "assistant", content: t.chatMessages[0] },
+    { role: "assistant", content: t.chatMessages[1] },
+    { role: "user", content: t.chatMessages[2] },
+    { role: "assistant", content: t.chatMessages[3] }
+  ];
 }
 
 async function sendChatMessage() {
+  if (chatBusy) return;
   const input = qs(".chat-input input");
   if (!input) return;
   const content = input.value.trim();
   if (!content) return;
   input.value = "";
+  chatBusy = true;
+  const character = activeChat;
+  const transcript = getTranscript(character);
   appendChatMessage("user", content);
-  if (supabaseClient && session && isUuid(activeChat.id)) {
-    const sessionId = await ensureChatSession(activeChat);
+  transcript.push({ role: "user", content });
+
+  let sessionId = null;
+  if (supabaseClient && session && isUuid(character.id)) {
+    sessionId = await ensureChatSession(character);
     if (sessionId) {
-      await supabaseClient.from("chat_messages").insert({ session_id: sessionId, sender: "user", content });
+      supabaseClient
+        .from("chat_messages")
+        .insert({ session_id: sessionId, sender: "user", content })
+        .then(() => {});
     }
   }
-  appendChatMessage("character", t.chatPlaceholderReply);
+
+  const typing = appendChatMessage("character", "…");
+  let reply = null;
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locale,
+        character: { name: character.name, age: character.age, tag: character.tag },
+        messages: [...introContext(), ...transcript.slice(-16)]
+      })
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      if (payload && typeof payload.reply === "string" && payload.reply.trim()) reply = payload.reply.trim();
+    }
+  } catch (error) {
+    // Fall through to placeholder reply.
+  }
+  if (typing) typing.remove();
+
+  const finalReply = reply || t.chatPlaceholderReply;
+  if (character.id === activeChat.id) appendChatMessage("character", finalReply);
+  if (reply) {
+    transcript.push({ role: "assistant", content: reply });
+    if (sessionId && supabaseClient && session) {
+      supabaseClient
+        .from("chat_messages")
+        .insert({ session_id: sessionId, sender: "character", content: reply })
+        .then(() => {});
+    }
+  }
+  chatBusy = false;
 }
 
 function resetUserState() {
@@ -1273,6 +1354,9 @@ function resetUserState() {
   history = [];
   likedWorkIds = new Set();
   chatSessionIds.clear();
+  chatTranscripts.clear();
+  hydratedChats.clear();
+  renderChatMessages();
   sharedPosts.forEach((post) => {
     post.liked = false;
   });
@@ -1489,18 +1573,20 @@ if (globalSearch) {
   });
 }
 
-if (authButton) {
-  authButton.addEventListener("click", async () => {
-    if (!supabaseClient) return;
-    if (session) {
-      await supabaseClient.auth.signOut();
-      showToast(t.authSignedOut);
-    } else {
-      setAuthMode("login");
-      openDialog(authModal);
-    }
-  });
+async function handleAuthButtonClick() {
+  if (!supabaseClient) return;
+  if (session) {
+    await supabaseClient.auth.signOut();
+    showToast(t.authSignedOut);
+  } else {
+    setAuthMode("login");
+    openDialog(authModal);
+  }
 }
+
+if (authButton) authButton.addEventListener("click", handleAuthButtonClick);
+const profileAuthButtonEl = qs("#profileAuthButton");
+if (profileAuthButtonEl) profileAuthButtonEl.addEventListener("click", handleAuthButtonClick);
 
 const authToggleMode = qs("#authToggleMode");
 if (authToggleMode) {
