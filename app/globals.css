@@ -2786,3 +2786,12 @@ body {
     max-height: 60vh;
   }
 }
+
+/* Balance band: single row, vertically centered */
+.membership-band {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.membership-band h2 {
+  margin: 0;
+}
