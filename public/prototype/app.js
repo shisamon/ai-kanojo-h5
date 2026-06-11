@@ -52,6 +52,7 @@ const dictionary = {
     authRequired: "请先登录。",
     passwordMismatch: "两次输入的密码不一致。",
     notLoggedIn: "未登录",
+    guestName: "游客",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
@@ -173,6 +174,7 @@ const dictionary = {
     authRequired: "先にログインしてください。",
     passwordMismatch: "パスワードが一致しません。",
     notLoggedIn: "未ログイン",
+    guestName: "ゲスト",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
@@ -899,7 +901,7 @@ async function shareToExplore(item, characterName = currentCharacter.name) {
   sharedPosts.unshift({
     id: `post-${Date.now()}`,
     title: item.title,
-    creator: "@User-mW4X6YPx",
+    creator: profile && profile.display_name ? `@${profile.display_name}` : "@User",
     mode: "video",
     cost: item.cost,
     image: item.image,
@@ -1063,9 +1065,12 @@ async function generateMock() {
 
 function updateBalance() {
   const coinBalance = qs("#coinBalance");
-  if (coinBalance) {
-    coinBalance.textContent = balance >= 1000 ? `${(balance / 1000).toFixed(1)}${t.thousand}` : String(balance);
+  if (!coinBalance) return;
+  if (supabaseClient && !session) {
+    coinBalance.textContent = "—";
+    return;
   }
+  coinBalance.textContent = balance >= 1000 ? `${(balance / 1000).toFixed(1)}${t.thousand}` : String(balance);
 }
 
 function updateAuthUi() {
@@ -1077,8 +1082,9 @@ function updateAuthUi() {
   if (session) {
     if (profileTitle && profile && profile.display_name) profileTitle.textContent = profile.display_name;
     if (profileId) profileId.textContent = (session.user && session.user.email) || "";
-  } else if (profileId) {
-    profileId.textContent = t.notLoggedIn;
+  } else {
+    if (profileTitle) profileTitle.textContent = t.guestName;
+    if (profileId) profileId.textContent = t.notLoggedIn;
   }
 }
 
@@ -1432,8 +1438,6 @@ function resetUserState() {
   renderExplore();
   updateAuthUi();
   updateBalance();
-  const profileTitle = qs("#profileTitle");
-  if (profileTitle) profileTitle.textContent = "User-mW4X6YPx";
 }
 
 function switchView(view) {
