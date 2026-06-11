@@ -73,6 +73,14 @@ const dictionary = {
     save: "保存",
     cancel: "取消",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
+    chatOnline: "在线",
+    chatNow: "刚刚",
+    chatEmptyPreview: "开始聊天，角色会按人设回复你。",
+    chatTyping: "正在输入",
+    chatQuickPrompts: ["今天在做什么？", "给我讲讲你自己", "想生成一段视频", "打开相册"],
+    generationQueued: "任务已创建",
+    generationRunning: "视频生成中",
+    generationSaved: "视频已保存到我的创作。",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
     chatMessages: [
@@ -214,6 +222,14 @@ const dictionary = {
     save: "保存",
     cancel: "キャンセル",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
+    chatOnline: "オンライン",
+    chatNow: "たった今",
+    chatEmptyPreview: "チャットを始めると、キャラが設定に沿って返信します。",
+    chatTyping: "入力中",
+    chatQuickPrompts: ["今日は何してる？", "あなたのことを教えて", "動画を作りたい", "アルバムを開く"],
+    generationQueued: "タスクを作成しました",
+    generationRunning: "動画を生成中",
+    generationSaved: "動画をマイ作品に保存しました。",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
     chatMessages: [
@@ -913,19 +929,29 @@ function characterCard(character) {
   `;
 }
 
-function renderChat() {
-  const conversations = t.conversations;
-  qs("#conversationList").innerHTML = conversations
+function chatPreview(character, index) {
+  const transcript = chatTranscripts.get(character.id) || [];
+  const last = transcript[transcript.length - 1];
+  if (last) return last.content;
+  return t.conversations[index]?.[2] || t.chatEmptyPreview;
+}
+
+function renderConversationList() {
+  const list = qs("#conversationList");
+  if (!list) return;
+  list.innerHTML = characters
+    .slice(0, 12)
     .map(
-      (row, index) => {
-        const character = charAt(index === 0 ? 8 : index);
-        return `
+      (character, index) => `
       <button class="conversation-item ${character.id === activeChat.id ? "is-active" : ""}" data-id="${character.id}">
         <img src="${character.image}" alt="${character.name}" />
-        <div><strong>${row[0]}</strong><small>${row[1]}</small><span>${row[2]}</span></div>
+        <div>
+          <strong>${character.name}</strong>
+          <small>${index === 0 ? t.chatNow : t.chatOnline}</small>
+          <span>${chatPreview(character, index)}</span>
+        </div>
       </button>
-    `;
-      }
+    `
     )
     .join("");
   qsa(".conversation-item").forEach((item) => {
@@ -935,10 +961,16 @@ function renderChat() {
       renderChat();
     });
   });
+}
 
+function renderChat() {
+  renderConversationList();
   qs("#chatAvatar").src = activeChat.image;
   qs("#chatName").textContent = activeChat.name;
+  const chatSubline = qs(".chat-header span");
+  if (chatSubline) chatSubline.textContent = `${activeChat.tag || ""} · ${t.chatOnline}`;
   renderChatMessages();
+  renderChatQuickActions();
   qs("#albumHero").src = activeChat.image;
   qs("#albumThumbOne").src = activeChat.image;
   qs("#albumThumbTwo").src = characters[(characters.indexOf(activeChat) + 1) % characters.length].image;
@@ -1269,10 +1301,13 @@ async function generateMock() {
     openDialog(upgradeModal);
     return;
   }
-  qs("#previewState").textContent = t.generating;
-  qs("#generateButton").disabled = true;
+  const previewState = qs("#previewState");
+  const generateButton = qs("#generateButton");
+  if (previewState) previewState.textContent = t.generationQueued;
+  if (generateButton) generateButton.disabled = true;
 
   if (supabaseClient && session) {
+    let jobId = null;
     try {
       const { data: newBalance, error } = await supabaseClient.rpc("spend_diamonds", {
         amount: cost,
@@ -1283,8 +1318,24 @@ async function generateMock() {
       if (profile) profile.diamond_balance = balance;
 
       const title = `${currentCharacter.name} · ${currentTemplate.name}`;
-      const remoteImage =
-        currentCharacter.image && currentCharacter.image.startsWith("http") ? currentCharacter.image : "";
+      const prompt = t.prompt(currentTemplate, currentCharacter);
+      const { data: job } = await supabaseClient
+        .from("creation_jobs")
+        .insert({
+          user_id: session.user.id,
+          character_id: isUuid(currentCharacter.id) ? currentCharacter.id : null,
+          template_name: currentTemplate.name,
+          mode,
+          prompt,
+          status: "running",
+          cost
+        })
+        .select("id")
+        .single();
+      jobId = job?.id || null;
+      if (previewState) previewState.textContent = t.generationRunning;
+
+      const generatedImage = makeResultImage(currentTemplate, currentCharacter, history.length + 1);
       const { data: work } = await supabaseClient
         .from("works")
         .insert({
@@ -1293,12 +1344,24 @@ async function generateMock() {
           title,
           mode,
           cost,
-          media_url: remoteImage,
-          thumbnail_url: remoteImage || null,
-          visibility: "public"
+          media_url: generatedImage,
+          thumbnail_url: generatedImage,
+          visibility: "private"
         })
         .select("id")
         .single();
+
+      if (jobId) {
+        await supabaseClient
+          .from("creation_jobs")
+          .update({
+            status: "completed",
+            result_work_id: work?.id || null,
+            completed_at: new Date().toISOString()
+          })
+          .eq("id", jobId)
+          .eq("user_id", session.user.id);
+      }
 
       const result = {
         id: `history-${Date.now()}`,
@@ -1307,22 +1370,30 @@ async function generateMock() {
         mode,
         cost,
         character: currentCharacter.name,
-        visibility: "public",
-        image: remoteImage || makeResultImage(currentTemplate, currentCharacter, history.length + 1)
+        visibility: "private",
+        mediaUrl: generatedImage,
+        image: generatedImage
       };
       history.unshift(result);
       const composePreview = qs("#composePreview");
       if (composePreview) composePreview.src = result.image;
-      qs("#previewState").textContent = t.complete;
+      if (previewState) previewState.textContent = t.complete;
       updateBalance();
       renderHistory();
-      loadWorksFromApi();
-      showToast(t.toastDone);
+      loadUserHistory();
+      showToast(t.generationSaved);
     } catch (error) {
-      qs("#previewState").textContent = t.ready;
+      if (jobId) {
+        await supabaseClient
+          .from("creation_jobs")
+          .update({ status: "failed", completed_at: new Date().toISOString() })
+          .eq("id", jobId)
+          .eq("user_id", session.user.id);
+      }
+      if (previewState) previewState.textContent = t.ready;
       if (String(error.message || error).includes("insufficient")) openDialog(upgradeModal);
     } finally {
-      qs("#generateButton").disabled = false;
+      if (generateButton) generateButton.disabled = false;
     }
     return;
   }
@@ -1340,11 +1411,11 @@ async function generateMock() {
     history.unshift(result);
     const composePreview = qs("#composePreview");
     if (composePreview) composePreview.src = result.image;
-    qs("#previewState").textContent = t.complete;
-    qs("#generateButton").disabled = false;
+    if (previewState) previewState.textContent = t.complete;
+    if (generateButton) generateButton.disabled = false;
     updateBalance();
     renderHistory();
-    showToast(t.toastDone);
+    showToast(t.generationSaved);
   }, 760);
 }
 
@@ -1636,11 +1707,11 @@ function getTranscript(character) {
   return chatTranscripts.get(character.id);
 }
 
-function appendChatMessage(sender, content) {
+function appendChatMessage(sender, content, extraClass = "") {
   const container = qs("#chatMessages");
   if (!container) return null;
   const div = document.createElement("div");
-  div.className = sender === "user" ? "message user" : "message";
+  div.className = `${sender === "user" ? "message user" : "message"} ${extraClass}`.trim();
   div.textContent = content;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
@@ -1660,6 +1731,22 @@ function renderChatMessages() {
   getTranscript(activeChat).forEach((message) =>
     appendChatMessage(message.role === "user" ? "user" : "character", message.content)
   );
+}
+
+function renderChatQuickActions() {
+  const container = qs("#chatQuickActions");
+  if (!container) return;
+  container.innerHTML = t.chatQuickPrompts
+    .map((prompt) => `<button type="button" data-chat-prompt="${prompt}">${prompt}</button>`)
+    .join("");
+  container.querySelectorAll("[data-chat-prompt]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const input = qs(".chat-input input");
+      if (!input) return;
+      input.value = button.dataset.chatPrompt || "";
+      sendChatMessage();
+    });
+  });
 }
 
 async function hydrateChatMessages() {
@@ -1692,6 +1779,7 @@ async function hydrateChatMessages() {
       content: message.content
     }))
   );
+  renderConversationList();
   if (characterId === activeChat.id) renderChatMessages();
 }
 
@@ -1729,7 +1817,8 @@ async function sendChatMessage() {
     }
   }
 
-  const typing = appendChatMessage("character", "…");
+  renderConversationList();
+  const typing = appendChatMessage("character", `${t.chatTyping}…`, "is-typing");
   let reply = null;
   try {
     const response = await fetch("/api/chat", {
@@ -1754,6 +1843,7 @@ async function sendChatMessage() {
   if (character.id === activeChat.id) appendChatMessage("character", finalReply);
   if (reply) {
     transcript.push({ role: "assistant", content: reply });
+    renderConversationList();
     if (sessionId && supabaseClient && session) {
       supabaseClient
         .from("chat_messages")

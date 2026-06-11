@@ -1063,6 +1063,11 @@ h2 {
   background: rgba(49, 214, 200, 0.18);
 }
 
+.message.is-typing {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .chat-input {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
