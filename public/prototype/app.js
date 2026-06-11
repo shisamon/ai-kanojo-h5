@@ -1385,9 +1385,12 @@ function hideAuthScreen() {
   if (authScreen) authScreen.hidden = true;
 }
 
+const normalizeLoginEmail = (value) => (value.includes("@") ? value : `${value}@openlover.demo`);
+
 async function handleAuthScreenSubmit() {
   if (!supabaseClient) return;
-  const email = (qs("#authScreenEmail")?.value || "").trim();
+  const rawEmail = (qs("#authScreenEmail")?.value || "").trim();
+  const email = rawEmail && authScreenMode === "login" ? normalizeLoginEmail(rawEmail) : rawEmail;
   const password = qs("#authScreenPassword")?.value || "";
   const confirm = qs("#authScreenConfirm")?.value || "";
   const errorEl = qs("#authScreenError");
@@ -1431,7 +1434,8 @@ function requireAuth() {
 
 async function handleAuthSubmit() {
   if (!supabaseClient) return;
-  const email = (qs("#authEmail")?.value || "").trim();
+  const rawModalEmail = (qs("#authEmail")?.value || "").trim();
+  const email = rawModalEmail && authMode === "login" ? normalizeLoginEmail(rawModalEmail) : rawModalEmail;
   const password = qs("#authPassword")?.value || "";
   const authError = qs("#authError");
   if (!email || !password) return;

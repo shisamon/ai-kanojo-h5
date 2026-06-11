@@ -213,8 +213,8 @@ export default function AdminPage() {
           <h1 style={{ margin: 0, fontSize: 22 }}>OpenLover 管理后台</h1>
           <input
             style={inputStyle}
-            type="email"
-            placeholder="管理员邮箱"
+            type="text"
+            placeholder="管理员账号"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -230,7 +230,11 @@ export default function AdminPage() {
             style={primaryButton}
             onClick={async () => {
               setLoginError("");
-              const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+              const normalized = email.includes("@") ? email.trim() : `${email.trim()}@openlover.demo`;
+              const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: normalized,
+                password
+              });
               if (signInError) setLoginError(signInError.message);
             }}
           >
