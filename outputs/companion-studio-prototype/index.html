@@ -195,8 +195,12 @@
               <button class="primary-button" data-open-upgrade>充值</button>
             </section>
             <section class="profile-works">
-              <h2>我的创作</h2>
+              <div class="profile-works-tabs">
+                <button class="is-active" data-profile-tab="works">我的创作</button>
+                <button data-profile-tab="likes">我的点赞</button>
+              </div>
               <div id="profileHistory"></div>
+              <div id="profileLikes" hidden></div>
             </section>
           </div>
         </section>

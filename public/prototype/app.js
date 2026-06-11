@@ -55,6 +55,7 @@ const dictionary = {
     guestName: "游客",
     copyLink: "复制链接",
     linkCopied: "链接已复制。",
+    noLikes: "还没有点赞的作品。",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
@@ -179,6 +180,7 @@ const dictionary = {
     guestName: "ゲスト",
     copyLink: "リンクをコピー",
     linkCopied: "リンクをコピーしました。",
+    noLikes: "いいねした作品はまだありません。",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
@@ -1054,33 +1056,56 @@ function renderHistory() {
       if (item) shareToExplore(item, item.character || currentCharacter.name);
     });
   });
-  const profileHistory = qs("#profileHistory");
-  if (profileHistory) {
-    profileHistory.innerHTML = history.length
-      ? `<div class="profile-works-grid">${history
-          .map(
-            (item) => `
-        <button class="profile-work-card" data-profile-work="${item.workId || item.id}">
-          <img src="${item.image}" alt="${item.title}" />
-          <span>▶</span>
-        </button>
-      `
-          )
-          .join("")}</div>`
-      : `<p class="legal">${t.noHistory}</p>`;
-    profileHistory.querySelectorAll("[data-profile-work]").forEach((button) => {
-      button.addEventListener("click", () => {
-        switchView("explore");
-        const card =
-          exploreGrid && exploreGrid.querySelector(`[data-work-id="${CSS.escape(button.dataset.profileWork)}"]`);
-        if (card) {
-          card.scrollIntoView({ behavior: "smooth", block: "center" });
-          card.classList.add("is-highlighted");
-          setTimeout(() => card.classList.remove("is-highlighted"), 2600);
-        }
-      });
+  renderWorkGrid(qs("#profileHistory"), history, t.noHistory);
+}
+
+function renderWorkGrid(container, items, emptyText) {
+  if (!container) return;
+  container.innerHTML = items.length
+    ? `<div class="profile-works-grid">${items
+        .map(
+          (item) => `
+      <button class="profile-work-card" data-profile-work="${item.workId || item.id}">
+        <img src="${item.image}" alt="${item.title}" />
+        <span>▶</span>
+      </button>
+    `
+        )
+        .join("")}</div>`
+    : `<p class="legal">${emptyText}</p>`;
+  container.querySelectorAll("[data-profile-work]").forEach((button) => {
+    button.addEventListener("click", () => {
+      switchView("explore");
+      const card =
+        exploreGrid && exploreGrid.querySelector(`[data-work-id="${CSS.escape(button.dataset.profileWork)}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.classList.add("is-highlighted");
+        setTimeout(() => card.classList.remove("is-highlighted"), 2600);
+      }
     });
-  }
+  });
+}
+
+async function loadLikedWorks() {
+  const container = qs("#profileLikes");
+  if (!container || !supabaseClient || !session) return;
+  const { data } = await supabaseClient
+    .from("work_likes")
+    .select("created_at, works(id,title,mode,thumbnail_url,media_url)")
+    .eq("user_id", session.user.id)
+    .order("created_at", { ascending: false })
+    .limit(60);
+  const items = (Array.isArray(data) ? data : [])
+    .map((row) => (Array.isArray(row.works) ? row.works[0] : row.works))
+    .filter(Boolean)
+    .map((work, index) => ({
+      id: work.id,
+      workId: work.id,
+      title: work.title,
+      image: work.thumbnail_url || (isVideoUrl(work.media_url) ? "" : work.media_url) || makeScene(index + 220, work.title, work.mode)
+    }));
+  renderWorkGrid(container, items, t.noLikes);
 }
 
 async function generateMock() {
@@ -1537,6 +1562,8 @@ function resetUserState() {
   chatTranscripts.clear();
   hydratedChats.clear();
   renderChatMessages();
+  const profileLikesEl = qs("#profileLikes");
+  if (profileLikesEl) profileLikesEl.innerHTML = `<p class="legal">${t.noLikes}</p>`;
   sharedPosts.forEach((post) => {
     post.liked = false;
   });
@@ -1594,6 +1621,18 @@ qsa("[data-open-upgrade]").forEach((button) => {
 qsa("[data-close-upgrade]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(upgradeModal));
 });
+qsa("[data-profile-tab]").forEach((button) => {
+  button.addEventListener("click", () => {
+    qsa("[data-profile-tab]").forEach((item) => item.classList.toggle("is-active", item === button));
+    const showLikes = button.dataset.profileTab === "likes";
+    const profileHistoryEl = qs("#profileHistory");
+    const profileLikesEl = qs("#profileLikes");
+    if (profileHistoryEl) profileHistoryEl.hidden = showLikes;
+    if (profileLikesEl) profileLikesEl.hidden = !showLikes;
+    if (showLikes) loadLikedWorks();
+  });
+});
+
 const settingsModalEl = qs("#settingsModal");
 qsa("[data-open-settings]").forEach((button) => {
   button.addEventListener("click", () => {

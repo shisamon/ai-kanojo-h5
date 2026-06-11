@@ -195,8 +195,12 @@
               <button class="primary-button" data-open-upgrade>チャージ</button>
             </section>
             <section class="profile-works">
-              <h2>マイ作品</h2>
+              <div class="profile-works-tabs">
+                <button class="is-active" data-profile-tab="works">マイ作品</button>
+                <button data-profile-tab="likes">いいね済み</button>
+              </div>
               <div id="profileHistory"></div>
+              <div id="profileLikes" hidden></div>
             </section>
           </div>
         </section>
