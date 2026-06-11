@@ -663,8 +663,8 @@ function renderExplore() {
     button.addEventListener("click", async () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.likePost);
       if (!post) return;
-      if (supabaseClient && isUuid(post.id)) {
-        if (!requireAuth()) return;
+      if (supabaseClient && !requireAuth()) return;
+      if (supabaseClient && session && isUuid(post.id)) {
         await toggleLikeRemote(post);
       }
       post.liked = !post.liked;
@@ -979,6 +979,7 @@ function renderHistory() {
 }
 
 async function generateMock() {
+  if (!requireAuth()) return;
   const cost = currentTemplate.cost;
   if (balance < cost) {
     openDialog(upgradeModal);
@@ -1091,23 +1092,6 @@ function setAuthMode(nextMode) {
   if (toggle) toggle.textContent = authMode === "login" ? t.authToRegister : t.authToLogin;
   const authError = qs("#authError");
   if (authError) authError.textContent = "";
-}
-
-function guestSkipped() {
-  try {
-    return sessionStorage.getItem("ol-guest") === "1";
-  } catch (error) {
-    return false;
-  }
-}
-
-function setGuestSkipped(value) {
-  try {
-    if (value) sessionStorage.setItem("ol-guest", "1");
-    else sessionStorage.removeItem("ol-guest");
-  } catch (error) {
-    // Ignore storage failures.
-  }
 }
 
 function setAuthScreenMode(nextMode) {
@@ -1373,6 +1357,7 @@ function introContext() {
 }
 
 async function sendChatMessage() {
+  if (!requireAuth()) return;
   if (chatBusy) return;
   const input = qs(".chat-input input");
   if (!input) return;
@@ -1487,17 +1472,24 @@ qsa("[data-view]").forEach((button) => {
 });
 
 qsa("[data-open-upgrade]").forEach((button) => {
-  button.addEventListener("click", () => openDialog(upgradeModal));
+  button.addEventListener("click", () => {
+    if (!requireAuth()) return;
+    openDialog(upgradeModal);
+  });
 });
 
 qsa("[data-close-upgrade]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(upgradeModal));
 });
 qsa("[data-open-delete]").forEach((button) => {
-  button.addEventListener("click", () => openDialog(deleteConfirmModal));
+  button.addEventListener("click", () => {
+    if (!requireAuth()) return;
+    openDialog(deleteConfirmModal);
+  });
 });
 qsa("[data-open-profile-edit]").forEach((button) => {
   button.addEventListener("click", () => {
+    if (!requireAuth()) return;
     const nicknameInput = qs("#nicknameInput");
     if (nicknameInput) nicknameInput.value = qs("#profileTitle").textContent.trim();
     const profileIdInput = qs("#profileIdInput");
@@ -1711,10 +1703,7 @@ if (authScreen) {
   });
   const authGuestLink = qs("#authGuestLink");
   if (authGuestLink) {
-    authGuestLink.addEventListener("click", () => {
-      setGuestSkipped(true);
-      hideAuthScreen();
-    });
+    authGuestLink.addEventListener("click", () => hideAuthScreen());
   }
 }
 
@@ -1730,14 +1719,9 @@ if (supabaseClient) {
       loadUserLikes();
     } else if (hadSession) {
       resetUserState();
-      setGuestSkipped(false);
-      showAuthScreen("login");
     } else {
       updateAuthUi();
     }
-  });
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (!data.session && !guestSkipped()) showAuthScreen("login");
   });
 }
 
