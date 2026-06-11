@@ -53,6 +53,8 @@ const dictionary = {
     passwordMismatch: "两次输入的密码不一致。",
     notLoggedIn: "未登录",
     guestName: "游客",
+    copyLink: "复制链接",
+    linkCopied: "链接已复制。",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
@@ -175,6 +177,8 @@ const dictionary = {
     passwordMismatch: "パスワードが一致しません。",
     notLoggedIn: "未ログイン",
     guestName: "ゲスト",
+    copyLink: "リンクをコピー",
+    linkCopied: "リンクをコピーしました。",
     chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
@@ -715,6 +719,23 @@ async function loadWorksFromApi() {
     sharedPosts = fallbackPosts.map((post) => ({ ...post }));
   }
   renderExplore();
+  handleWorkDeepLink();
+}
+
+let deepLinkHandled = false;
+function handleWorkDeepLink() {
+  if (deepLinkHandled) return;
+  const workId = new URLSearchParams(window.location.search).get("work");
+  if (!workId) {
+    deepLinkHandled = true;
+    return;
+  }
+  const card = exploreGrid && exploreGrid.querySelector(`[data-work-id="${CSS.escape(workId)}"]`);
+  if (!card) return;
+  deepLinkHandled = true;
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  card.classList.add("is-highlighted");
+  setTimeout(() => card.classList.remove("is-highlighted"), 2600);
 }
 
 async function loadCharactersFromApi() {
@@ -780,7 +801,7 @@ async function loadTemplatesFromApi() {
 
 function shareCard(post) {
   return `
-    <article class="share-card">
+    <article class="share-card" data-work-id="${post.id}">
       <img src="${post.image}" alt="${post.title}" />
       <div class="video-play">▶</div>
       <div class="share-card-body">
@@ -922,8 +943,13 @@ function updateChatScreen() {
   layout.classList.toggle("chat-detail-mode", chatScreen === "detail");
 }
 
+function shareUrl(post) {
+  const basePath = locale === "ja" ? "/ja" : "/";
+  return `${window.location.origin}${basePath}?work=${encodeURIComponent(post.id)}`;
+}
+
 function shareLink(platform, post) {
-  const pageUrl = encodeURIComponent(window.location.href);
+  const pageUrl = encodeURIComponent(shareUrl(post));
   const text = encodeURIComponent(`${post.title} - OpenLover`);
   const urls = {
     Telegram: `https://t.me/share/url?url=${pageUrl}&text=${text}`,
@@ -936,12 +962,36 @@ function shareLink(platform, post) {
   return urls[platform] || "";
 }
 
+async function copyShareLink(post) {
+  try {
+    await navigator.clipboard.writeText(shareUrl(post));
+    showToast(t.linkCopied);
+  } catch (error) {
+    window.prompt("URL", shareUrl(post));
+  }
+}
+
 function openShareModal(post) {
   if (!post) return;
+  if (navigator.share) {
+    navigator
+      .share({ title: `${post.title} - OpenLover`, url: shareUrl(post) })
+      .catch(() => {});
+    return;
+  }
   qs("#shareModalSubtitle").textContent = t.shareOpened;
-  sharePlatformGrid.innerHTML = t.sharePlatforms
-    .map((platform) => `<button class="share-platform" data-platform="${platform}">${platform}</button>`)
-    .join("");
+  sharePlatformGrid.innerHTML =
+    `<button class="share-platform" data-copy-link>${t.copyLink}</button>` +
+    t.sharePlatforms
+      .map((platform) => `<button class="share-platform" data-platform="${platform}">${platform}</button>`)
+      .join("");
+  const copyButton = sharePlatformGrid.querySelector("[data-copy-link]");
+  if (copyButton) {
+    copyButton.addEventListener("click", () => {
+      copyShareLink(post);
+      closeDialog(shareModal);
+    });
+  }
   sharePlatformGrid.querySelectorAll("[data-platform]").forEach((button) => {
     button.addEventListener("click", () => {
       const platform = button.dataset.platform;

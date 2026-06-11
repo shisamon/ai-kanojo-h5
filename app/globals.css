@@ -2807,3 +2807,9 @@ body {
   display: flex;
   align-items: center;
 }
+
+/* Shared-work deep link highlight */
+.share-card.is-highlighted {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
