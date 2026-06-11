@@ -1079,7 +1079,8 @@ async function generateMock() {
         image: makeResultImage(currentTemplate, currentCharacter, history.length + 1)
       };
       history.unshift(result);
-      qs("#composePreview").src = result.image;
+      const composePreview = qs("#composePreview");
+      if (composePreview) composePreview.src = result.image;
       qs("#previewState").textContent = t.complete;
       updateBalance();
       renderHistory();
@@ -1104,7 +1105,8 @@ async function generateMock() {
       image: makeResultImage(currentTemplate, currentCharacter, history.length + 1)
     };
     history.unshift(result);
-    qs("#composePreview").src = result.image;
+    const composePreview = qs("#composePreview");
+    if (composePreview) composePreview.src = result.image;
     qs("#previewState").textContent = t.complete;
     qs("#generateButton").disabled = false;
     updateBalance();

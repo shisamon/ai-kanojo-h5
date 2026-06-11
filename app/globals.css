@@ -2813,3 +2813,32 @@ body {
   outline: 2px solid var(--pink);
   outline-offset: 2px;
 }
+
+/* Simplified generate bar (creator step 3) */
+.generate-bar {
+  display: grid;
+  gap: 14px;
+}
+
+.generate-bar .primary-button {
+  width: 100%;
+  min-height: 48px;
+}
+
+.generate-state {
+  position: static;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Profile: my works */
+.profile-works h2 {
+  font-size: 18px;
+  margin: 6px 0 10px;
+}
+
+.profile-works #profileHistory {
+  display: grid;
+  gap: 10px;
+}

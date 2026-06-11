@@ -107,17 +107,14 @@
               <div class="style-grid" id="styleGrid"></div>
             </section>
 
-            <section class="create-preview-panel">
-              <div class="preview-stage">
-                <img id="composePreview" alt="视频生成预览" />
-                <div class="preview-state" id="previewState">准备就绪</div>
-              </div>
+            <section class="create-step generate-bar">
               <div class="create-summary">
                 <div><span>人物</span><strong id="characterName"></strong></div>
                 <div><span>风格</span><strong id="poseName"></strong></div>
                 <div><span>消耗</span><strong><span id="generateCost">96</span></strong></div>
               </div>
               <button class="primary-button" id="generateButton">生成视频</button>
+              <div class="preview-state generate-state" id="previewState">准备就绪</div>
             </section>
           </div>
         </section>
@@ -195,6 +192,10 @@
                 <h2>余额 <span id="coinBalance">570</span></h2>
               </div>
               <button class="primary-button" data-open-upgrade>充值</button>
+            </section>
+            <section class="profile-works">
+              <h2>我的创作</h2>
+              <div id="profileHistory"></div>
             </section>
             <section class="settings-list">
               <div class="settings-row language-row">
