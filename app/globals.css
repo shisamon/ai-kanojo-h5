@@ -3050,3 +3050,20 @@ body {
 .creator-page-head .icon-button {
   font-size: 22px;
 }
+
+/* Profile hero: avatar | text | edit | settings on one row */
+.logged-profile .profile-hero {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+}
+
+.logged-profile .profile-hero .ghost-button {
+  grid-column: auto;
+  margin-left: 0;
+}
+
+.profile-settings-button {
+  position: static;
+  top: auto;
+  right: auto;
+}
