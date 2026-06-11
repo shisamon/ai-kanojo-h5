@@ -3067,3 +3067,24 @@ body {
   top: auto;
   right: auto;
 }
+
+/* Feed action buttons: uniform size, icon + label */
+.share-actions button {
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  min-height: 54px;
+  padding: 7px 6px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.share-actions .action-icon {
+  display: block;
+  line-height: 1;
+  color: #fff;
+}
+
+.share-actions .action-icon svg {
+  display: block;
+}

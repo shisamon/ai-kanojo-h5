@@ -853,7 +853,9 @@ function shareCard(post) {
           <button class="like-button ${post.liked ? "is-liked" : ""}" data-like-post="${post.id}" aria-pressed="${post.liked}">
             <span>♥</span><b>${post.likes.toLocaleString()}</b>
           </button>
-          <button data-share-post="${post.id}">${t.share}</button>
+          <button data-share-post="${post.id}">
+            <span class="action-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M14 5l7 7-7 7v-4.1c-5 0-8.6 1.6-11 5.1.9-5.4 4.3-9.3 11-10V5z"/></svg></span><b>${t.share}</b>
+          </button>
         </div>
       </div>
     </article>
