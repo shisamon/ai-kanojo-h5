@@ -1,5 +1,13 @@
 const locale = document.documentElement.lang.startsWith("ja") || location.pathname.startsWith("/ja") ? "ja" : "zh";
 
+const supabaseClient =
+  window.supabase && window.__SUPABASE_URL__ && window.__SUPABASE_ANON_KEY__
+    ? window.supabase.createClient(window.__SUPABASE_URL__, window.__SUPABASE_ANON_KEY__)
+    : null;
+
+const isUuid = (value) =>
+  typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
 const dictionary = {
   zh: {
     activePlan: "标准版",
@@ -29,6 +37,21 @@ const dictionary = {
     unliked: "已取消点赞。",
     thousand: "K",
     toastDone: "创作已完成，并保存到历史。",
+    login: "登录",
+    logout: "退出登录",
+    authLoginTitle: "登录",
+    authRegisterTitle: "注册",
+    authLoginAction: "登录",
+    authRegisterAction: "注册",
+    authToLogin: "已有账号？登录",
+    authToRegister: "没有账号？注册",
+    authWelcome: "登录成功。",
+    authSignedUp: "注册成功，已自动登录。",
+    authConfirmEmail: "注册成功，请到邮箱完成确认后再登录。",
+    authSignedOut: "已退出登录。",
+    authRequired: "请先登录。",
+    notLoggedIn: "未登录",
+    chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     prompt: (template, character) =>
       `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`,
     chatMessages: [
@@ -134,6 +157,21 @@ const dictionary = {
     unliked: "いいねを取り消しました。",
     thousand: "K",
     toastDone: "創作が完了し、履歴に保存しました。",
+    login: "ログイン",
+    logout: "ログアウト",
+    authLoginTitle: "ログイン",
+    authRegisterTitle: "新規登録",
+    authLoginAction: "ログイン",
+    authRegisterAction: "登録",
+    authToLogin: "アカウントをお持ちの方はログイン",
+    authToRegister: "アカウント未登録？新規登録",
+    authWelcome: "ログインしました。",
+    authSignedUp: "登録が完了し、ログインしました。",
+    authConfirmEmail: "登録完了。確認メールをチェックしてください。",
+    authSignedOut: "ログアウトしました。",
+    authRequired: "先にログインしてください。",
+    notLoggedIn: "未ログイン",
+    chatPlaceholderReply: "（キャラクターの返信は対話モデル接続後に対応します）",
     prompt: (template, character) =>
       `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`,
     chatMessages: [
@@ -285,6 +323,11 @@ let balance = 570;
 let history = [];
 let activeChat = charAt(8);
 let chatScreen = "list";
+let session = null;
+let profile = null;
+let authMode = "login";
+let likedWorkIds = new Set();
+const chatSessionIds = new Map();
 
 const qs = (selector) => document.querySelector(selector);
 const qsa = (selector) => Array.from(document.querySelectorAll(selector));
@@ -303,6 +346,8 @@ const profileEditModal = qs("#profileEditModal");
 const shareModal = qs("#shareModal");
 const sharePlatformGrid = qs("#sharePlatformGrid");
 const toast = qs("#toast");
+const authModal = qs("#authModal");
+const authButton = qs("#authButton");
 
 function seeded(seed) {
   let value = seed * 9301 + 49297;
@@ -608,9 +653,13 @@ function renderExplore() {
     });
   });
   exploreGrid.querySelectorAll("[data-like-post]").forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       const post = sharedPosts.find((item) => item.id === button.dataset.likePost);
       if (!post) return;
+      if (supabaseClient && isUuid(post.id)) {
+        if (!requireAuth()) return;
+        await toggleLikeRemote(post);
+      }
       post.liked = !post.liked;
       post.likes += post.liked ? 1 : -1;
       renderExplore();
@@ -638,7 +687,7 @@ async function loadWorksFromApi() {
         image: post.image,
         mediaUrl: post.mediaUrl,
         likes: post.likes || 0,
-        liked: false,
+        liked: likedWorkIds.has(post.id),
         character: post.character,
         createdAt: post.createdAt || Date.now()
       }));
@@ -802,6 +851,7 @@ function renderChat() {
   qs("#albumThumbThree").src = characters[(characters.indexOf(activeChat) + 2) % characters.length].image;
   qs("#albumName").textContent = `${activeChat.name}, ${activeChat.age}`;
   updateChatScreen();
+  hydrateChatMessages();
 }
 
 function beginTemplate(id) {
@@ -832,7 +882,19 @@ function openCreateFlow(template, character) {
   renderCreatorFlow();
 }
 
-function shareToExplore(item, characterName = currentCharacter.name) {
+async function shareToExplore(item, characterName = currentCharacter.name) {
+  if (supabaseClient && session && item.workId) {
+    await supabaseClient
+      .from("works")
+      .update({ visibility: "public" })
+      .eq("id", item.workId)
+      .eq("user_id", session.user.id);
+    item.visibility = "public";
+    await loadWorksFromApi();
+    switchView("explore");
+    showToast(t.shareDone);
+    return;
+  }
   sharedPosts.unshift({
     id: `post-${Date.now()}`,
     title: item.title,
@@ -915,7 +977,7 @@ function renderHistory() {
   if (profileHistory) profileHistory.innerHTML = rows;
 }
 
-function generateMock() {
+async function generateMock() {
   const cost = currentTemplate.cost;
   if (balance < cost) {
     openDialog(upgradeModal);
@@ -923,6 +985,60 @@ function generateMock() {
   }
   qs("#previewState").textContent = t.generating;
   qs("#generateButton").disabled = true;
+
+  if (supabaseClient && session) {
+    try {
+      const { data: newBalance, error } = await supabaseClient.rpc("spend_diamonds", {
+        amount: cost,
+        reason: `${currentTemplate.name} · ${t.modeName[mode]}`
+      });
+      if (error) throw error;
+      balance = typeof newBalance === "number" ? newBalance : balance - cost;
+      if (profile) profile.diamond_balance = balance;
+
+      const title = `${currentCharacter.name} · ${currentTemplate.name}`;
+      const remoteImage =
+        currentCharacter.image && currentCharacter.image.startsWith("http") ? currentCharacter.image : "";
+      const { data: work } = await supabaseClient
+        .from("works")
+        .insert({
+          user_id: session.user.id,
+          character_id: isUuid(currentCharacter.id) ? currentCharacter.id : null,
+          title,
+          mode,
+          cost,
+          media_url: remoteImage,
+          thumbnail_url: remoteImage || null,
+          visibility: "private"
+        })
+        .select("id")
+        .single();
+
+      const result = {
+        id: `history-${Date.now()}`,
+        workId: work ? work.id : null,
+        title,
+        mode,
+        cost,
+        character: currentCharacter.name,
+        visibility: "private",
+        image: makeResultImage(currentTemplate, currentCharacter, history.length + 1)
+      };
+      history.unshift(result);
+      qs("#composePreview").src = result.image;
+      qs("#previewState").textContent = t.complete;
+      updateBalance();
+      renderHistory();
+      showToast(t.toastDone);
+    } catch (error) {
+      qs("#previewState").textContent = t.ready;
+      if (String(error.message || error).includes("insufficient")) openDialog(upgradeModal);
+    } finally {
+      qs("#generateButton").disabled = false;
+    }
+    return;
+  }
+
   window.setTimeout(() => {
     balance -= cost;
     const result = {
@@ -948,6 +1064,224 @@ function updateBalance() {
   if (coinBalance) {
     coinBalance.textContent = balance >= 1000 ? `${(balance / 1000).toFixed(1)}${t.thousand}` : String(balance);
   }
+}
+
+function updateAuthUi() {
+  if (authButton) authButton.textContent = session ? t.logout : t.login;
+  const profileTitle = qs("#profileTitle");
+  const profileId = qs("#profileId");
+  if (session) {
+    if (profileTitle && profile && profile.display_name) profileTitle.textContent = profile.display_name;
+    if (profileId) profileId.textContent = (session.user && session.user.email) || "";
+  } else if (profileId) {
+    profileId.textContent = t.notLoggedIn;
+  }
+}
+
+function setAuthMode(nextMode) {
+  authMode = nextMode;
+  const title = qs("#authModalTitle");
+  const submit = qs("#authSubmit");
+  const toggle = qs("#authToggleMode");
+  if (title) title.textContent = authMode === "login" ? t.authLoginTitle : t.authRegisterTitle;
+  if (submit) submit.textContent = authMode === "login" ? t.authLoginAction : t.authRegisterAction;
+  if (toggle) toggle.textContent = authMode === "login" ? t.authToRegister : t.authToLogin;
+  const authError = qs("#authError");
+  if (authError) authError.textContent = "";
+}
+
+function requireAuth() {
+  if (!supabaseClient || session) return true;
+  setAuthMode("login");
+  openDialog(authModal);
+  showToast(t.authRequired);
+  return false;
+}
+
+async function handleAuthSubmit() {
+  if (!supabaseClient) return;
+  const email = (qs("#authEmail")?.value || "").trim();
+  const password = qs("#authPassword")?.value || "";
+  const authError = qs("#authError");
+  if (!email || !password) return;
+  const submit = qs("#authSubmit");
+  if (submit) submit.disabled = true;
+  try {
+    if (authMode === "login") {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      closeDialog(authModal);
+      showToast(t.authWelcome);
+    } else {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      closeDialog(authModal);
+      showToast(data.session ? t.authSignedUp : t.authConfirmEmail);
+    }
+  } catch (error) {
+    if (authError) authError.textContent = error.message || String(error);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
+}
+
+async function loadProfile() {
+  if (!supabaseClient || !session) return;
+  const { data } = await supabaseClient
+    .from("profiles")
+    .select("id,display_name,diamond_balance,locale")
+    .eq("id", session.user.id)
+    .maybeSingle();
+  if (!data) return;
+  profile = data;
+  balance = data.diamond_balance;
+  updateAuthUi();
+  updateBalance();
+}
+
+async function loadUserHistory() {
+  if (!supabaseClient || !session) return;
+  const { data } = await supabaseClient
+    .from("works")
+    .select("id,title,mode,cost,thumbnail_url,media_url,visibility,created_at")
+    .eq("user_id", session.user.id)
+    .order("created_at", { ascending: false })
+    .limit(40);
+  if (!Array.isArray(data)) return;
+  history = data.map((work, index) => ({
+    id: `db-${work.id}`,
+    workId: work.id,
+    title: work.title,
+    mode: work.mode,
+    cost: work.cost,
+    visibility: work.visibility,
+    image: work.thumbnail_url || work.media_url || makeScene(index + 200, work.title, work.mode)
+  }));
+  renderHistory();
+}
+
+async function loadUserLikes() {
+  if (!supabaseClient || !session) return;
+  const { data } = await supabaseClient
+    .from("work_likes")
+    .select("work_id")
+    .eq("user_id", session.user.id);
+  likedWorkIds = new Set(Array.isArray(data) ? data.map((row) => row.work_id) : []);
+  let changed = false;
+  sharedPosts.forEach((post) => {
+    const liked = likedWorkIds.has(post.id);
+    if (post.liked !== liked) {
+      post.liked = liked;
+      changed = true;
+    }
+  });
+  if (changed) renderExplore();
+}
+
+async function toggleLikeRemote(post) {
+  if (post.liked) {
+    likedWorkIds.delete(post.id);
+    await supabaseClient
+      .from("work_likes")
+      .delete()
+      .eq("work_id", post.id)
+      .eq("user_id", session.user.id);
+  } else {
+    likedWorkIds.add(post.id);
+    await supabaseClient
+      .from("work_likes")
+      .insert({ work_id: post.id, user_id: session.user.id });
+  }
+}
+
+async function ensureChatSession(character) {
+  if (!supabaseClient || !session || !isUuid(character.id)) return null;
+  if (chatSessionIds.has(character.id)) return chatSessionIds.get(character.id);
+  const { data: existing } = await supabaseClient
+    .from("chat_sessions")
+    .select("id")
+    .eq("user_id", session.user.id)
+    .eq("character_id", character.id)
+    .maybeSingle();
+  if (existing) {
+    chatSessionIds.set(character.id, existing.id);
+    return existing.id;
+  }
+  const { data: created } = await supabaseClient
+    .from("chat_sessions")
+    .insert({ user_id: session.user.id, character_id: character.id, title: character.name })
+    .select("id")
+    .single();
+  if (!created) return null;
+  chatSessionIds.set(character.id, created.id);
+  return created.id;
+}
+
+function appendChatMessage(sender, content) {
+  const container = qs("#chatMessages");
+  if (!container) return;
+  const div = document.createElement("div");
+  div.className = sender === "user" ? "message user" : "message";
+  div.textContent = content;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function hydrateChatMessages() {
+  if (!supabaseClient || !session || !isUuid(activeChat.id)) return;
+  if (!chatSessionIds.has(activeChat.id)) {
+    const { data } = await supabaseClient
+      .from("chat_sessions")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .eq("character_id", activeChat.id)
+      .maybeSingle();
+    if (!data) return;
+    chatSessionIds.set(activeChat.id, data.id);
+  }
+  const sessionId = chatSessionIds.get(activeChat.id);
+  const characterId = activeChat.id;
+  const { data: messages } = await supabaseClient
+    .from("chat_messages")
+    .select("sender,content,created_at")
+    .eq("session_id", sessionId)
+    .order("created_at", { ascending: true })
+    .limit(100);
+  if (!Array.isArray(messages) || characterId !== activeChat.id) return;
+  messages.forEach((message) => appendChatMessage(message.sender, message.content));
+}
+
+async function sendChatMessage() {
+  const input = qs(".chat-input input");
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  input.value = "";
+  appendChatMessage("user", content);
+  if (supabaseClient && session && isUuid(activeChat.id)) {
+    const sessionId = await ensureChatSession(activeChat);
+    if (sessionId) {
+      await supabaseClient.from("chat_messages").insert({ session_id: sessionId, sender: "user", content });
+    }
+  }
+  appendChatMessage("character", t.chatPlaceholderReply);
+}
+
+function resetUserState() {
+  profile = null;
+  balance = 570;
+  history = [];
+  likedWorkIds = new Set();
+  chatSessionIds.clear();
+  sharedPosts.forEach((post) => {
+    post.liked = false;
+  });
+  renderHistory();
+  renderExplore();
+  updateAuthUi();
+  updateBalance();
+  const profileTitle = qs("#profileTitle");
+  if (profileTitle) profileTitle.textContent = "User-mW4X6YPx";
 }
 
 function switchView(view) {
@@ -999,6 +1333,8 @@ qsa("[data-open-profile-edit]").forEach((button) => {
   button.addEventListener("click", () => {
     const nicknameInput = qs("#nicknameInput");
     if (nicknameInput) nicknameInput.value = qs("#profileTitle").textContent.trim();
+    const profileIdInput = qs("#profileIdInput");
+    if (profileIdInput) profileIdInput.value = session && session.user ? session.user.email || "" : "";
     openDialog(profileEditModal);
   });
 });
@@ -1006,10 +1342,19 @@ qsa("[data-close-profile-edit]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(profileEditModal));
 });
 qsa("[data-save-profile]").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     const nicknameInput = qs("#nicknameInput");
     const nickname = nicknameInput ? nicknameInput.value.trim() : "";
-    if (nickname) qs("#profileTitle").textContent = nickname;
+    if (nickname) {
+      qs("#profileTitle").textContent = nickname;
+      if (supabaseClient && session) {
+        await supabaseClient
+          .from("profiles")
+          .update({ display_name: nickname, updated_at: new Date().toISOString() })
+          .eq("id", session.user.id);
+        if (profile) profile.display_name = nickname;
+      }
+    }
     closeDialog(profileEditModal);
     showToast(t.profileSaved);
   });
@@ -1141,6 +1486,61 @@ if (globalSearch) {
     qsa(".template-card, .gallery-card, .character-card, .share-card, .conversation-item").forEach((item) => {
       item.style.display = item.textContent.toLowerCase().includes(query) ? "" : "none";
     });
+  });
+}
+
+if (authButton) {
+  authButton.addEventListener("click", async () => {
+    if (!supabaseClient) return;
+    if (session) {
+      await supabaseClient.auth.signOut();
+      showToast(t.authSignedOut);
+    } else {
+      setAuthMode("login");
+      openDialog(authModal);
+    }
+  });
+}
+
+const authToggleMode = qs("#authToggleMode");
+if (authToggleMode) {
+  authToggleMode.addEventListener("click", () => setAuthMode(authMode === "login" ? "register" : "login"));
+}
+const authSubmit = qs("#authSubmit");
+if (authSubmit) authSubmit.addEventListener("click", handleAuthSubmit);
+qsa("[data-close-auth]").forEach((button) => {
+  button.addEventListener("click", () => closeDialog(authModal));
+});
+const authPassword = qs("#authPassword");
+if (authPassword) {
+  authPassword.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") handleAuthSubmit();
+  });
+}
+
+const chatSendButton = qs(".chat-input button");
+if (chatSendButton) chatSendButton.addEventListener("click", sendChatMessage);
+const chatInput = qs(".chat-input input");
+if (chatInput) {
+  chatInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") sendChatMessage();
+  });
+}
+
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((_event, newSession) => {
+    const hadSession = Boolean(session);
+    session = newSession;
+    if (session) {
+      updateAuthUi();
+      loadProfile();
+      loadUserHistory();
+      loadUserLikes();
+    } else if (hadSession) {
+      resetUserState();
+    } else {
+      updateAuthUi();
+    }
   });
 }
 
