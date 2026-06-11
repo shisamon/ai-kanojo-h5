@@ -12,9 +12,10 @@ export async function GET(request: Request) {
 
   const { data, count, error } = await service
     .from("works")
-    .select("id,title,mode,cost,visibility,likes_count,created_at,user_id,profiles(email,display_name)", {
-      count: "exact"
-    })
+    .select(
+      "id,title,mode,cost,visibility,likes_count,created_at,user_id,profiles!works_user_id_fkey(email,display_name)",
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .range(page * pageSize, page * pageSize + pageSize - 1);
 
