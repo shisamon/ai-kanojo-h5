@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OpenLover - 首页",
+  title: "AIAI - 首页",
   description: "首页、创作、消息与我的 H5 原型。"
 };
 

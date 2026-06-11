@@ -217,7 +217,7 @@ export default function AdminPage() {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
         <div style={{ ...card, width: "min(380px, 100%)", display: "grid", gap: 12 }}>
-          <h1 style={{ margin: 0, fontSize: 22 }}>OpenLover 管理后台</h1>
+          <h1 style={{ margin: 0, fontSize: 22 }}>AIAI 管理后台</h1>
           <input
             style={inputStyle}
             type="text"
@@ -268,7 +268,7 @@ export default function AdminPage() {
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 16px 80px" }}>
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-        <h1 style={{ margin: 0, fontSize: 22 }}>OpenLover 管理后台</h1>
+        <h1 style={{ margin: 0, fontSize: 22 }}>AIAI 管理后台</h1>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <span style={{ color: "var(--muted)", fontSize: 13 }}>{session.user.email}</span>
           <button style={buttonStyle} onClick={() => supabase.auth.signOut()}>

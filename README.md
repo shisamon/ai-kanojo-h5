@@ -1,4 +1,4 @@
-# OpenLover Studio Prototype
+# AIAI Studio Prototype
 
 This is the deployable Next.js version of the Chinese/Japanese prototype.
 

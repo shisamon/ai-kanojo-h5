@@ -796,7 +796,7 @@ function updateChatScreen() {
 
 function shareLink(platform, post) {
   const pageUrl = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent(`${post.title} - OpenLover`);
+  const text = encodeURIComponent(`${post.title} - AIAI`);
   const urls = {
     Telegram: `https://t.me/share/url?url=${pageUrl}&text=${text}`,
     LINE: `https://social-plugins.line.me/lineit/share?url=${pageUrl}`,

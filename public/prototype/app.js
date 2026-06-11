@@ -1020,7 +1020,7 @@ function shareUrl(post) {
 
 function shareLink(platform, post) {
   const pageUrl = encodeURIComponent(shareUrl(post));
-  const text = encodeURIComponent(`${post.title} - OpenLover`);
+  const text = encodeURIComponent(`${post.title} - AIAI`);
   const urls = {
     Telegram: `https://t.me/share/url?url=${pageUrl}&text=${text}`,
     LINE: `https://social-plugins.line.me/lineit/share?url=${pageUrl}`,
@@ -1045,7 +1045,7 @@ function openShareModal(post) {
   if (!post) return;
   if (navigator.share) {
     navigator
-      .share({ title: `${post.title} - OpenLover`, url: shareUrl(post) })
+      .share({ title: `${post.title} - AIAI`, url: shareUrl(post) })
       .catch(() => {});
     return;
   }
