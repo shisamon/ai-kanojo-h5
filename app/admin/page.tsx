@@ -77,6 +77,13 @@ const primaryButton: React.CSSProperties = {
   fontWeight: 700
 };
 
+const LOGIN_DOMAIN = "openlover.app";
+
+function normalizeLoginEmail(value: string) {
+  const trimmed = value.trim().toLowerCase();
+  return trimmed.includes("@") ? trimmed : `${trimmed}@${LOGIN_DOMAIN}`;
+}
+
 const thStyle: React.CSSProperties = {
   textAlign: "left",
   padding: "8px 10px",
@@ -230,7 +237,7 @@ export default function AdminPage() {
             style={primaryButton}
             onClick={async () => {
               setLoginError("");
-              const normalized = email.includes("@") ? email.trim() : `${email.trim()}@openlover.demo`;
+              const normalized = normalizeLoginEmail(email);
               const { error: signInError } = await supabase.auth.signInWithPassword({
                 email: normalized,
                 password
