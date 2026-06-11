@@ -182,6 +182,7 @@
                 <span id="profileId">未登录</span>
               </div>
               <button class="ghost-button" data-open-profile-edit>编辑资料</button>
+              <button class="icon-button profile-settings-button" data-open-settings aria-label="设置">⋯</button>
             </section>
             <div class="metric-grid">
               <div><strong>0</strong><span>粉丝 ›</span></div>
@@ -197,17 +198,6 @@
               <h2>我的创作</h2>
               <div id="profileHistory"></div>
             </section>
-            <section class="settings-list">
-              <div class="settings-row language-row">
-                <span>语言</span>
-                <div class="locale-switch profile-locale" aria-label="语言切换">
-                  <a class="is-active" href="index.html">中文</a>
-                  <a href="ja.html">日本語</a>
-                </div>
-              </div>
-            </section>
-            <button class="delete-account-button" id="profileAuthButton">登录</button>
-            <button class="delete-account-button" data-open-delete>删除账户</button>
           </div>
         </section>
 
@@ -283,6 +273,27 @@
       <div class="confirm-actions">
         <button class="secondary-button" data-close-delete>取消</button>
         <button class="primary-button" data-confirm-delete>确认删除</button>
+      </div>
+    </dialog>
+
+    <dialog id="settingsModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>设置</h2>
+          <span>语言与账户</span>
+        </div>
+        <button class="icon-button" data-close-settings>×</button>
+      </div>
+      <div class="settings-row language-row">
+        <span>语言</span>
+        <div class="locale-switch profile-locale" aria-label="语言切换">
+          <a class="is-active" href="index.html">中文</a>
+          <a href="ja.html">日本語</a>
+        </div>
+      </div>
+      <div class="settings-stack">
+        <button class="delete-account-button" id="profileAuthButton">登录</button>
+        <button class="delete-account-button" data-open-delete>删除账户</button>
       </div>
     </dialog>
 

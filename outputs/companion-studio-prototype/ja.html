@@ -182,6 +182,7 @@
                 <span id="profileId">未ログイン</span>
               </div>
               <button class="ghost-button" data-open-profile-edit>プロフィール編集</button>
+              <button class="icon-button profile-settings-button" data-open-settings aria-label="設定">⋯</button>
             </section>
             <div class="metric-grid">
               <div><strong>0</strong><span>フォロワー ›</span></div>
@@ -197,17 +198,6 @@
               <h2>マイ作品</h2>
               <div id="profileHistory"></div>
             </section>
-            <section class="settings-list">
-              <div class="settings-row language-row">
-                <span>言語</span>
-                <div class="locale-switch profile-locale" aria-label="言語切替">
-                  <a href="index.html">中文</a>
-                  <a class="is-active" href="ja.html">日本語</a>
-                </div>
-              </div>
-            </section>
-            <button class="delete-account-button" id="profileAuthButton">ログイン</button>
-            <button class="delete-account-button" data-open-delete>アカウント削除</button>
           </div>
         </section>
 
@@ -283,6 +273,27 @@
       <div class="confirm-actions">
         <button class="secondary-button" data-close-delete>キャンセル</button>
         <button class="primary-button" data-confirm-delete>削除を確認</button>
+      </div>
+    </dialog>
+
+    <dialog id="settingsModal" class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>設定</h2>
+          <span>言語とアカウント</span>
+        </div>
+        <button class="icon-button" data-close-settings>×</button>
+      </div>
+      <div class="settings-row language-row">
+        <span>言語</span>
+        <div class="locale-switch profile-locale" aria-label="言語切替">
+          <a href="index.html">中文</a>
+          <a class="is-active" href="ja.html">日本語</a>
+        </div>
+      </div>
+      <div class="settings-stack">
+        <button class="delete-account-button" id="profileAuthButton">ログイン</button>
+        <button class="delete-account-button" data-open-delete>アカウント削除</button>
       </div>
     </dialog>
 

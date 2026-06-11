@@ -691,13 +691,13 @@ async function loadWorksFromApi() {
     const payload = await response.json();
     if (requestId !== worksRequestId) return;
     if (Array.isArray(payload.works) && payload.works.length > 0) {
-      const loadedPosts = payload.works.map((post) => ({
+      const loadedPosts = payload.works.map((post, index) => ({
         id: post.id,
         title: post.title,
         creator: post.creator,
         mode: "video",
         cost: post.cost || 0,
-        image: post.image,
+        image: post.image || makeScene(index + 160, post.title || "", "video"),
         mediaUrl: post.mediaUrl,
         likes: post.likes || 0,
         liked: likedWorkIds.has(post.id),
@@ -1027,7 +1027,32 @@ function renderHistory() {
     });
   });
   const profileHistory = qs("#profileHistory");
-  if (profileHistory) profileHistory.innerHTML = rows;
+  if (profileHistory) {
+    profileHistory.innerHTML = history.length
+      ? `<div class="profile-works-grid">${history
+          .map(
+            (item) => `
+        <button class="profile-work-card" data-profile-work="${item.workId || item.id}">
+          <img src="${item.image}" alt="${item.title}" />
+          <span>▶</span>
+        </button>
+      `
+          )
+          .join("")}</div>`
+      : `<p class="legal">${t.noHistory}</p>`;
+    profileHistory.querySelectorAll("[data-profile-work]").forEach((button) => {
+      button.addEventListener("click", () => {
+        switchView("explore");
+        const card =
+          exploreGrid && exploreGrid.querySelector(`[data-work-id="${CSS.escape(button.dataset.profileWork)}"]`);
+        if (card) {
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          card.classList.add("is-highlighted");
+          setTimeout(() => card.classList.remove("is-highlighted"), 2600);
+        }
+      });
+    });
+  }
 }
 
 async function generateMock() {
@@ -1063,7 +1088,7 @@ async function generateMock() {
           cost,
           media_url: remoteImage,
           thumbnail_url: remoteImage || null,
-          visibility: "private"
+          visibility: "public"
         })
         .select("id")
         .single();
@@ -1075,8 +1100,8 @@ async function generateMock() {
         mode,
         cost,
         character: currentCharacter.name,
-        visibility: "private",
-        image: makeResultImage(currentTemplate, currentCharacter, history.length + 1)
+        visibility: "public",
+        image: remoteImage || makeResultImage(currentTemplate, currentCharacter, history.length + 1)
       };
       history.unshift(result);
       const composePreview = qs("#composePreview");
@@ -1084,6 +1109,7 @@ async function generateMock() {
       qs("#previewState").textContent = t.complete;
       updateBalance();
       renderHistory();
+      loadWorksFromApi();
       showToast(t.toastDone);
     } catch (error) {
       qs("#previewState").textContent = t.ready;
@@ -1540,9 +1566,21 @@ qsa("[data-open-upgrade]").forEach((button) => {
 qsa("[data-close-upgrade]").forEach((button) => {
   button.addEventListener("click", () => closeDialog(upgradeModal));
 });
+const settingsModalEl = qs("#settingsModal");
+qsa("[data-open-settings]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (settingsModalEl) openDialog(settingsModalEl);
+  });
+});
+qsa("[data-close-settings]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (settingsModalEl) closeDialog(settingsModalEl);
+  });
+});
 qsa("[data-open-delete]").forEach((button) => {
   button.addEventListener("click", () => {
     if (!requireAuth()) return;
+    if (settingsModalEl && settingsModalEl.open) closeDialog(settingsModalEl);
     openDialog(deleteConfirmModal);
   });
 });
@@ -1709,6 +1747,8 @@ if (globalSearch) {
 
 async function handleAuthButtonClick() {
   if (!supabaseClient) return;
+  const settingsModal = qs("#settingsModal");
+  if (settingsModal && settingsModal.open) closeDialog(settingsModal);
   if (session) {
     await supabaseClient.auth.signOut();
     showToast(t.authSignedOut);

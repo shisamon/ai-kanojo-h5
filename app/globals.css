@@ -2842,3 +2842,93 @@ body {
   display: grid;
   gap: 10px;
 }
+
+/* Profile settings entry + stack */
+.profile-hero {
+  position: relative;
+}
+
+.profile-settings-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.settings-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+#settingsModal .settings-row {
+  margin-bottom: 4px;
+}
+
+/* Profile works: TikTok-style grid */
+.profile-works-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.profile-work-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0c0c0f;
+  cursor: pointer;
+}
+
+.profile-work-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-work-card span {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile: full-bleed TikTok-style feed with floating nav */
+@media (max-width: 860px) {
+  #view-explore {
+    height: 100dvh;
+    margin: -12px -12px -88px;
+  }
+
+  .share-grid {
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .share-card {
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .share-card-body {
+    bottom: 92px;
+  }
+
+  .sidebar {
+    border-radius: 18px;
+    background: rgba(10, 10, 12, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+}
