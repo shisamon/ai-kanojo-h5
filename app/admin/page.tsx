@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient, type Session } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
 
-const supabase =
-  typeof window !== "undefined" &&
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-    : null;
+declare global {
+  interface Window {
+    __SUPABASE_URL__?: string;
+    __SUPABASE_ANON_KEY__?: string;
+  }
+}
 
 type Stats = {
   users: number;
@@ -92,6 +92,8 @@ const tdStyle: React.CSSProperties = {
 };
 
 export default function AdminPage() {
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null);
+  const [initFailed, setInitFailed] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,11 +111,18 @@ export default function AdminPage() {
   const [notAdmin, setNotAdmin] = useState(false);
 
   useEffect(() => {
+    const url = window.__SUPABASE_URL__ || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = window.__SUPABASE_ANON_KEY__ || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (url && key) setSupabase(createClient(url, key));
+    else setInitFailed(true);
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return;
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   const api = useCallback(
     async (path: string, init?: RequestInit) => {
@@ -189,8 +198,12 @@ export default function AdminPage() {
     [stats]
   );
 
-  if (!supabase) {
+  if (initFailed) {
     return <div style={{ padding: 40 }}>缺少 Supabase 环境变量。</div>;
+  }
+
+  if (!supabase) {
+    return <div style={{ padding: 40 }}>加载中…</div>;
   }
 
   if (!session) {
