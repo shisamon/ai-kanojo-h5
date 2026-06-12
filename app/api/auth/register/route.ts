@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/admin";
 
 const LOGIN_DOMAIN = "example.com";
-const USERNAME_RE = /^[a-zA-Z0-9]{4,20}$/;
+const USERNAME_RE = /^[a-zA-Z0-9]{6,20}$/;
 
 export async function POST(request: Request) {
   let body: { username?: string; password?: string; nickname?: string };
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const nickname = String(body.nickname || "").trim() || username;
 
   if (!USERNAME_RE.test(username)) {
-    return NextResponse.json({ error: "用户名需为 4-20 位英文字母或数字。" }, { status: 400 });
+    return NextResponse.json({ error: "用户名需为 6-20 位英文字母或数字。" }, { status: 400 });
   }
   if (password.length < 6) {
     return NextResponse.json({ error: "密码至少 6 位。" }, { status: 400 });
