@@ -1443,6 +1443,18 @@ if (stageTouch) {
 const profileCreateGirlfriend = qs("#profileCreateGirlfriend");
 if (profileCreateGirlfriend) profileCreateGirlfriend.addEventListener("click", openCustomize);
 
+// Tap outside the dialog content (on the backdrop) to close, mobile-style.
+qsa("dialog.modal").forEach((dialog) => {
+  dialog.addEventListener("click", (event) => {
+    if (event.target !== dialog) return; // only the backdrop, not inner content
+    if (dialog.id === "customizeModal") {
+      closeCustomize();
+    } else {
+      closeDialog(dialog);
+    }
+  });
+});
+
 qsa("[data-close-chat]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#chatModal"))));
 qsa("[data-close-video]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#videoModal"))));
 qsa("[data-close-customize]").forEach((button) =>
