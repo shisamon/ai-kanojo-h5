@@ -445,7 +445,6 @@ function renderStage() {
   const stageEmpty = qs("#stageEmpty");
   const avatarMini = qs("#activeAvatarMini");
   const userAvatarMini = qs("#userAvatarMini");
-  const stageAffinity = qs("#stageAffinity");
   const relationshipLabel = qs("#relationshipLabel");
   const relationshipFill = qs("#relationshipFill");
   const subject = getStageSubject();
@@ -455,7 +454,6 @@ function renderStage() {
   if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
   if (stageName) stageName.textContent = subject ? subject.name : "AIAI";
   if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : t.stageCustomizeHint;
-  if (stageAffinity) stageAffinity.textContent = `Lv.${affinity.level}`;
   if (relationshipLabel) relationshipLabel.textContent = `Lv.${affinity.level}`;
   if (relationshipFill) relationshipFill.style.setProperty("--bond", `${affinity.percent}%`);
   if (stageEmpty) stageEmpty.hidden = Boolean(subject);
