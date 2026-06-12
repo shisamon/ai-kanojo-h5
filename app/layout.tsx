@@ -4,7 +4,14 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AIAI - AI 女友",
-  description: "定制 AI 女友、聊天陪伴与视频创作的移动 H5 原型。"
+  description: "定制 AI 女友、聊天陪伴与视频创作的移动 H5 原型。",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "AIAI" },
+  icons: { apple: "/icons/apple-touch-icon.png" }
+};
+
+export const viewport = {
+  themeColor: "#0c0c12"
 };
 
 export default function RootLayout({
@@ -25,6 +32,12 @@ export default function RootLayout({
           }}
         />
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}`
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>
