@@ -9,9 +9,10 @@ const isUuid = (value) =>
   typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 const isVideoUrl = (url) => typeof url === "string" && /\.(mp4|webm|mov|m3u8)(\?|#|$)/i.test(url);
 
-const LOGIN_DOMAIN = "openlover.app";
-const normalizeLoginEmail = (value) => (value.includes("@") ? value : `${value}@${LOGIN_DOMAIN}`);
-const usernameRegex = /^[a-zA-Z0-9]{9}$/;
+const LOGIN_DOMAIN = "example.com";
+const LEGACY_LOGIN_DOMAINS = ["aiai.com", "openlover.app"];
+const normalizeLoginEmail = (value, domain = LOGIN_DOMAIN) => (value.includes("@") ? value : `${value}@${domain}`);
+const usernameRegex = /^[a-zA-Z0-9]{4,20}$/;
 
 const dictionary = {
   zh: {
@@ -36,9 +37,9 @@ const dictionary = {
     authSignedOut: "已退出登录。",
     authRequired: "请先登录。",
     authGateRequired: "请先登录或注册，之后就可以创建你的电子女友。",
-    usernamePlaceholder: "用户名（9 位字母或数字）",
+    usernamePlaceholder: "用户名（4-20 位字母或数字）",
     loginPlaceholder: "用户名",
-    usernameRule: "用户名需为 9 位英文字母或数字。",
+    usernameRule: "用户名需为 4-20 位英文字母或数字。",
     usernameTaken: "该用户名已被占用。",
     passwordMismatch: "两次输入的密码不一致。",
     passwordTooShort: "密码至少 6 位。",
@@ -87,9 +88,9 @@ const dictionary = {
     authSignedOut: "ログアウトしました。",
     authRequired: "先にログインしてください。",
     authGateRequired: "ログインまたは登録後、AI彼女を作成できます。",
-    usernamePlaceholder: "ユーザー名（英数字9文字）",
+    usernamePlaceholder: "ユーザー名（英数字4-20文字）",
     loginPlaceholder: "ユーザー名",
-    usernameRule: "ユーザー名は英数字9文字にしてください。",
+    usernameRule: "ユーザー名は英数字4-20文字にしてください。",
     usernameTaken: "このユーザー名は既に使われています。",
     passwordMismatch: "パスワードが一致しません。",
     passwordTooShort: "パスワードは6文字以上。",
@@ -1289,16 +1290,33 @@ async function handleAuthScreenSubmit() {
   if (submit) submit.disabled = true;
   try {
     if (authScreenMode === "login") {
-      const { error } = await supabaseClient.auth.signInWithPassword({
+      let { error } = await supabaseClient.auth.signInWithPassword({
         email: normalizeLoginEmail(rawValue),
         password
       });
+      if (error && !rawValue.includes("@")) {
+        for (const domain of LEGACY_LOGIN_DOMAINS) {
+          const legacy = await supabaseClient.auth.signInWithPassword({
+            email: normalizeLoginEmail(rawValue, domain),
+            password
+          });
+          if (!legacy.error) {
+            error = null;
+            break;
+          }
+          error = legacy.error;
+        }
+      }
       if (error) throw error;
       hideAuthScreen();
       showToast(t.authWelcome);
     } else {
       if (!usernameRegex.test(rawValue)) {
         if (errorEl) errorEl.textContent = t.usernameRule;
+        return;
+      }
+      if (password.length < 6) {
+        if (errorEl) errorEl.textContent = t.passwordTooShort;
         return;
       }
       if (password !== confirm) {
