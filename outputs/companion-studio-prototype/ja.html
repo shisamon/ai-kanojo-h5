@@ -61,12 +61,23 @@
         <section class="view is-visible gf-stage game-stage" id="view-home">
           <div class="game-sky"></div>
           <div class="game-topbar">
-            <button class="player-pill" data-view="profile" aria-label="マイページを開く">
+            <button class="player-pill" id="stageGirlfriendButton" aria-label="彼女を切り替え">
               <img id="activeAvatarMini" alt="現在の彼女" />
               <span>
                 <b id="stageName">AIAI</b>
                 <small id="stageTag">カスタム待ち</small>
               </span>
+            </button>
+            <div class="relationship-link" aria-label="親密度">
+              <span class="relationship-line"><i id="relationshipFill"></i></span>
+              <b id="relationshipLabel">Lv.1</b>
+            </div>
+            <button class="me-pill" data-view="profile" aria-label="マイページを開く">
+              <span>
+                <b>私</b>
+                <small>マイ</small>
+              </span>
+              <img id="userAvatarMini" alt="私のアバター" />
             </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
@@ -154,6 +165,17 @@
         <button class="primary-button" id="generateButton">動画を生成</button>
         <div class="preview-state generate-state" id="previewState">準備完了</div>
       </div>
+    </dialog>
+
+    <dialog id="girlfriendSwitchModal" class="modal switcher-modal">
+      <div class="modal-head">
+        <div>
+          <h2>彼女を切り替え</h2>
+          <span>彼女ごとに親密度が変わります。</span>
+        </div>
+        <button class="icon-button" data-close-switcher>×</button>
+      </div>
+      <div class="gf-switch-grid" id="gfSwitchGrid"></div>
     </dialog>
 
     <dialog id="customizeModal" class="modal customize-modal">

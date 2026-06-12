@@ -61,12 +61,23 @@
         <section class="view is-visible gf-stage game-stage" id="view-home">
           <div class="game-sky"></div>
           <div class="game-topbar">
-            <button class="player-pill" data-view="profile" aria-label="打开我的页面">
+            <button class="player-pill" id="stageGirlfriendButton" aria-label="切换女友">
               <img id="activeAvatarMini" alt="当前女友" />
               <span>
                 <b id="stageName">AIAI</b>
                 <small id="stageTag">等待定制</small>
               </span>
+            </button>
+            <div class="relationship-link" aria-label="亲密关系">
+              <span class="relationship-line"><i id="relationshipFill"></i></span>
+              <b id="relationshipLabel">Lv.1</b>
+            </div>
+            <button class="me-pill" data-view="profile" aria-label="进入我的主页">
+              <span>
+                <b>我</b>
+                <small>主页</small>
+              </span>
+              <img id="userAvatarMini" alt="我的头像" />
             </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
@@ -154,6 +165,17 @@
         <button class="primary-button" id="generateButton">生成视频</button>
         <div class="preview-state generate-state" id="previewState">准备就绪</div>
       </div>
+    </dialog>
+
+    <dialog id="girlfriendSwitchModal" class="modal switcher-modal">
+      <div class="modal-head">
+        <div>
+          <h2>切换女友</h2>
+          <span>不同女友会有不同亲密度。</span>
+        </div>
+        <button class="icon-button" data-close-switcher>×</button>
+      </div>
+      <div class="gf-switch-grid" id="gfSwitchGrid"></div>
     </dialog>
 
     <dialog id="customizeModal" class="modal customize-modal">

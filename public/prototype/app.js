@@ -283,6 +283,43 @@ function makeScene(seed, title, mode) {
   return canvas.toDataURL("image/png");
 }
 
+function makeUserAvatar(name) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 160;
+  canvas.height = 160;
+  const ctx = canvas.getContext("2d");
+  const bg = ctx.createLinearGradient(0, 0, 160, 160);
+  bg.addColorStop(0, "#73a7ff");
+  bg.addColorStop(1, "#ff8abc");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, 160, 160);
+  ctx.fillStyle = "rgba(255,255,255,.86)";
+  ctx.beginPath();
+  ctx.arc(80, 58, 26, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(80, 122, 46, 36, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(12,14,20,.72)";
+  ctx.font = "800 34px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText((name || "我").slice(0, 1).toUpperCase(), 80, 70);
+  return canvas.toDataURL("image/png");
+}
+
+function hashValue(value) {
+  return String(value || "")
+    .split("")
+    .reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 9973, 17);
+}
+
+function getAffinity(gf) {
+  const base = gf ? hashValue(`${gf.id}-${gf.name}`) : 0;
+  const level = 1 + (base % 5);
+  const percent = 24 + level * 14 + (base % 12);
+  return { level, percent: Math.min(96, percent) };
+}
+
 // ---------- data loaders ----------
 async function loadPublicCharacters() {
   try {
@@ -318,6 +355,7 @@ async function loadPublicCharacters() {
   renderStage();
   renderCustomizeGrid();
   renderGfList();
+  renderGfSwitcher();
 }
 
 async function loadTemplates() {
@@ -406,13 +444,20 @@ function renderStage() {
   const stageTag = qs("#stageTag");
   const stageEmpty = qs("#stageEmpty");
   const avatarMini = qs("#activeAvatarMini");
+  const userAvatarMini = qs("#userAvatarMini");
   const stageAffinity = qs("#stageAffinity");
+  const relationshipLabel = qs("#relationshipLabel");
+  const relationshipFill = qs("#relationshipFill");
   const subject = getStageSubject();
+  const affinity = getAffinity(subject);
   if (stageImage) stageImage.src = subject ? subject.image : makePortrait(3, "AIAI", "");
   if (avatarMini) avatarMini.src = subject ? subject.image : makePortrait(3, "AIAI", "");
+  if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
   if (stageName) stageName.textContent = subject ? subject.name : "AIAI";
   if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : t.stageCustomizeHint;
-  if (stageAffinity) stageAffinity.textContent = activeGirlfriend ? "Lv.2" : "Lv.1";
+  if (stageAffinity) stageAffinity.textContent = `Lv.${affinity.level}`;
+  if (relationshipLabel) relationshipLabel.textContent = `Lv.${affinity.level}`;
+  if (relationshipFill) relationshipFill.style.setProperty("--bond", `${affinity.percent}%`);
   if (stageEmpty) stageEmpty.hidden = Boolean(subject);
   renderStageChatMessages();
 }
@@ -425,6 +470,7 @@ async function setActiveGirlfriend(gf) {
   activeGirlfriend = gf;
   renderStage();
   renderGfList();
+  renderGfSwitcher();
   updateAuthUi();
   if (supabaseClient && session && gf && isUuid(gf.id)) {
     await supabaseClient
@@ -481,6 +527,33 @@ function renderGfList() {
       renderStage();
       renderGfList();
       showToast(t.gfDeleted);
+    });
+  });
+}
+
+function renderGfSwitcher() {
+  const grid = qs("#gfSwitchGrid");
+  if (!grid) return;
+  const choices = girlfriends.length > 0 ? girlfriends : publicCharacters;
+  grid.innerHTML = choices
+    .map((gf) => {
+      const affinity = getAffinity(gf);
+      return `
+        <button class="gf-switch-card ${getStageSubject()?.id === gf.id ? "is-active" : ""}" data-switch-gf="${gf.id}">
+          <img src="${gf.image}" alt="${gf.name}" />
+          <strong>${gf.name}</strong>
+          <small>Lv.${affinity.level}</small>
+        </button>
+      `;
+    })
+    .join("");
+  grid.querySelectorAll("[data-switch-gf]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const gf = choices.find((item) => item.id === button.dataset.switchGf);
+      if (!gf) return;
+      setActiveGirlfriend(gf);
+      closeDialog(qs("#girlfriendSwitchModal"));
+      showToast(t.gfSwitched(gf.name));
     });
   });
 }
@@ -1005,6 +1078,8 @@ function updateAuthUi() {
         ? publicCharacters[0].image
         : makePortrait(5, "", "");
   }
+  const userAvatarMini = qs("#userAvatarMini");
+  if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
 }
 
 function updateBalance() {
@@ -1158,6 +1233,16 @@ qsa("[data-view]").forEach((button) => {
 
 const stageVideoButton = qs("#stageVideoButton");
 if (stageVideoButton) stageVideoButton.addEventListener("click", openVideo);
+const stageGirlfriendButton = qs("#stageGirlfriendButton");
+if (stageGirlfriendButton) {
+  stageGirlfriendButton.addEventListener("click", () => {
+    renderGfSwitcher();
+    openDialog(qs("#girlfriendSwitchModal"));
+  });
+}
+qsa("[data-close-switcher]").forEach((button) =>
+  button.addEventListener("click", () => closeDialog(qs("#girlfriendSwitchModal")))
+);
 const stageChatSend = qs("#stageChatSend");
 if (stageChatSend) stageChatSend.addEventListener("click", sendStageChatMessage);
 const stageChatInput = qs("#stageChatInput");
