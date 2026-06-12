@@ -64,6 +64,7 @@ export async function POST(request: Request) {
     email,
     username,
     display_name: nickname,
+    diamond_balance: 0,
     locale: "zh",
     updated_at: new Date().toISOString()
   });

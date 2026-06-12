@@ -8,7 +8,7 @@ create table if not exists public.profiles (
   avatar_url text,
   locale text not null default 'zh',
   current_plan text not null default 'standard',
-  diamond_balance integer not null default 570,
+  diamond_balance integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
