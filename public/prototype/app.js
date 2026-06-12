@@ -35,6 +35,7 @@ const dictionary = {
     authConfirmEmail: "注册成功，请到邮箱完成确认后再登录。",
     authSignedOut: "已退出登录。",
     authRequired: "请先登录。",
+    authGateRequired: "请先登录或注册，之后就可以创建你的电子女友。",
     usernamePlaceholder: "用户名（9 位字母或数字）",
     loginPlaceholder: "用户名",
     usernameRule: "用户名需为 9 位英文字母或数字。",
@@ -49,6 +50,8 @@ const dictionary = {
     gfNameRequired: "先给她起个名字。",
     gfImageRequired: "选择一个形象或上传图片。",
     gfSaved: "你的女友已创建。",
+    gfOnboardingTitle: "选择你的第一位女友",
+    gfOnboardingHint: "选择一个形象或上传图片，保存后进入陪伴首页。",
     gfSwitched: (name) => `已切换到 ${name}。`,
     gfDeleted: "已删除该女友。",
     gfDeleteConfirm: (name) => `确定删除 ${name} 吗？`,
@@ -81,6 +84,7 @@ const dictionary = {
     authConfirmEmail: "登録完了。確認メールをチェックしてください。",
     authSignedOut: "ログアウトしました。",
     authRequired: "先にログインしてください。",
+    authGateRequired: "ログインまたは登録後、AI彼女を作成できます。",
     usernamePlaceholder: "ユーザー名（英数字9文字）",
     loginPlaceholder: "ユーザー名",
     usernameRule: "ユーザー名は英数字9文字にしてください。",
@@ -95,6 +99,8 @@ const dictionary = {
     gfNameRequired: "先に名前をつけてください。",
     gfImageRequired: "形象を選ぶか画像をアップロードしてください。",
     gfSaved: "彼女を作成しました。",
+    gfOnboardingTitle: "最初のAI彼女を選択",
+    gfOnboardingHint: "形象を選ぶか画像をアップロードして、保存後にホームへ進みます。",
     gfSwitched: (name) => `${name} に切り替えました。`,
     gfDeleted: "削除しました。",
     gfDeleteConfirm: (name) => `${name} を削除しますか？`,
@@ -125,6 +131,9 @@ let customizeSelection = null;
 let authScreenMode = "login";
 let chatBusy = false;
 let moodIndex = 0;
+let publicCharactersReady = false;
+let onboardingActive = false;
+let pendingSignupOnboarding = false;
 const chatSessionIds = new Map();
 const chatTranscripts = new Map();
 const hydratedChats = new Set();
@@ -360,10 +369,12 @@ async function loadPublicCharacters() {
       image: makePortrait(index + 8, fallbackNames[index], fallbackTags[index])
     }));
   }
+  publicCharactersReady = true;
   renderStage();
   renderCustomizeGrid();
   renderGfList();
   renderGfSwitcher();
+  maybeStartOnboarding();
 }
 
 async function loadTemplates() {
@@ -408,15 +419,32 @@ async function loadGirlfriends() {
   renderStage();
   renderGfList();
   updateAuthUi();
+  maybeStartOnboarding();
 }
 
 async function loadProfile() {
   if (!supabaseClient || !session) return;
-  const { data } = await supabaseClient
+  let { data } = await supabaseClient
     .from("profiles")
     .select("id,display_name,diamond_balance,username,active_character_id")
     .eq("id", session.user.id)
     .maybeSingle();
+  if (!data) {
+    const fallbackUsername = String(session.user.email || "").split("@")[0] || `user${Date.now()}`;
+    const fallbackName = session.user.user_metadata?.display_name || fallbackUsername;
+    const { data: created } = await supabaseClient
+      .from("profiles")
+      .insert({
+        id: session.user.id,
+        email: session.user.email,
+        username: fallbackUsername,
+        display_name: fallbackName,
+        locale
+      })
+      .select("id,display_name,diamond_balance,username,active_character_id")
+      .maybeSingle();
+    data = created;
+  }
   if (!data) return;
   profile = data;
   balance = data.diamond_balance;
@@ -593,7 +621,27 @@ function renderCustomizeGrid() {
   });
 }
 
-function openCustomize() {
+function updateCustomizeOnboardingUi() {
+  const modal = qs("#customizeModal");
+  if (!modal) return;
+  modal.dataset.onboarding = onboardingActive ? "true" : "false";
+  document.body.classList.toggle("onboarding-active", onboardingActive);
+  const title = modal.querySelector(".modal-head h2");
+  if (title) title.textContent = onboardingActive ? t.gfOnboardingTitle : locale === "ja" ? "彼女をカスタマイズ" : "定制女友";
+  const hint = modal.querySelector(".modal-head span");
+  if (hint) {
+    hint.textContent = onboardingActive
+      ? t.gfOnboardingHint
+      : locale === "ja"
+        ? "形象を選ぶか画像をアップロードして、名前をつけましょう"
+        : "选择形象或上传图片，给她起个名字";
+  }
+  const save = qs("#saveGirlfriendButton");
+  if (save) save.textContent = onboardingActive ? (locale === "ja" ? "彼女と始める" : "开始陪伴") : locale === "ja" ? "保存" : "保存";
+}
+
+function openCustomize(options = {}) {
+  onboardingActive = Boolean(options.onboarding);
   customizeSelection = null;
   uploadedImage = "";
   const nameInput = qs("#gfNameInput");
@@ -602,8 +650,44 @@ function openCustomize() {
   if (errorEl) errorEl.textContent = "";
   const uploadCard = qs("#uploadCard");
   if (uploadCard) uploadCard.classList.remove("is-active");
+  updateCustomizeOnboardingUi();
   renderCustomizeGrid();
   openDialog(qs("#customizeModal"));
+}
+
+function closeCustomize() {
+  if (onboardingActive) {
+    showToast(t.gfOnboardingHint);
+    return;
+  }
+  closeDialog(qs("#customizeModal"));
+}
+
+function onboardingStorageKey() {
+  return session && session.user ? `aiai:onboarding:${session.user.id}` : "";
+}
+
+function markOnboardingDone() {
+  const key = onboardingStorageKey();
+  if (key) localStorage.setItem(key, "done");
+  pendingSignupOnboarding = false;
+  onboardingActive = false;
+  updateCustomizeOnboardingUi();
+}
+
+function shouldStartOnboarding() {
+  if (!supabaseClient || !session || !publicCharactersReady) return false;
+  if (girlfriends.length > 0) return false;
+  const key = onboardingStorageKey();
+  return pendingSignupOnboarding || !key || localStorage.getItem(key) !== "done";
+}
+
+function maybeStartOnboarding() {
+  if (!shouldStartOnboarding()) return;
+  closeDialog(qs("#girlfriendSwitchModal"));
+  closeDialog(qs("#chatModal"));
+  closeDialog(qs("#videoModal"));
+  openCustomize({ onboarding: true });
 }
 
 async function saveGirlfriend() {
@@ -631,6 +715,7 @@ async function saveGirlfriend() {
       };
       girlfriends.unshift(gf);
       await setActiveGirlfriend(gf);
+      markOnboardingDone();
       closeDialog(qs("#customizeModal"));
       switchView("home");
       showToast(t.gfSaved);
@@ -659,6 +744,7 @@ async function saveGirlfriend() {
     };
     girlfriends.unshift(gf);
     await setActiveGirlfriend(gf);
+    markOnboardingDone();
     closeDialog(qs("#customizeModal"));
     switchView("home");
     showToast(t.gfSaved);
@@ -1149,16 +1235,18 @@ function showAuthScreen(mode = "login") {
   if (!authScreen || !supabaseClient) return;
   setAuthScreenMode(mode);
   authScreen.hidden = false;
+  document.body.classList.add("auth-locked");
 }
 
 function hideAuthScreen() {
   if (authScreen) authScreen.hidden = true;
+  if (session) document.body.classList.remove("auth-locked");
 }
 
 function requireAuth() {
   if (!supabaseClient || session) return true;
   showAuthScreen("login");
-  showToast(t.authRequired);
+  showToast(t.authGateRequired);
   return false;
 }
 
@@ -1207,6 +1295,7 @@ async function handleAuthScreenSubmit() {
       });
       if (error) throw error;
       if (data.session) {
+        pendingSignupOnboarding = true;
         hideAuthScreen();
         showToast(t.authSignedUp);
       } else {
@@ -1276,7 +1365,7 @@ if (profileCreateGirlfriend) profileCreateGirlfriend.addEventListener("click", o
 qsa("[data-close-chat]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#chatModal"))));
 qsa("[data-close-video]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#videoModal"))));
 qsa("[data-close-customize]").forEach((button) =>
-  button.addEventListener("click", () => closeDialog(qs("#customizeModal")))
+  button.addEventListener("click", closeCustomize)
 );
 qsa("[data-close-upgrade]").forEach((button) =>
   button.addEventListener("click", () => closeDialog(qs("#upgradeModal")))
@@ -1441,8 +1530,6 @@ if (authScreen) {
       });
     }
   });
-  const authGuestLink = qs("#authGuestLink");
-  if (authGuestLink) authGuestLink.addEventListener("click", () => hideAuthScreen());
 }
 
 if (supabaseClient) {
@@ -1453,18 +1540,21 @@ if (supabaseClient) {
       hideAuthScreen();
       updateAuthUi();
       updateBalance();
-      loadProfile();
-      loadHistory();
+      loadProfile().then(() => loadHistory());
     } else if (hadSession) {
       resetUserState();
     } else {
       updateAuthUi();
       updateBalance();
+      showAuthScreen("login");
     }
   });
+} else {
+  document.body.classList.remove("auth-locked");
 }
 
 // boot
+if (supabaseClient) showAuthScreen("login");
 renderStage();
 updateAuthUi();
 updateBalance();

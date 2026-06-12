@@ -38,7 +38,7 @@
         </label>
         <p class="legal auth-error" id="authScreenError"></p>
         <button class="primary-button auth-submit" id="authScreenSubmit">登录</button>
-        <button class="ghost-link" id="authGuestLink">暂不登录，先看看 ›</button>
+        <p class="auth-note">注册后先选择并定制你的第一位电子女友。</p>
       </div>
     </div>
 
@@ -174,7 +174,7 @@
           <h2>定制女友</h2>
           <span>选择形象或上传图片，给她起个名字</span>
         </div>
-        <button class="icon-button" data-close-customize>×</button>
+        <button class="icon-button customize-close" data-close-customize>×</button>
       </div>
       <div class="person-grid" id="personGrid"></div>
       <label class="upload-card" id="uploadCard">
@@ -189,7 +189,7 @@
       </label>
       <p class="legal" id="customizeError"></p>
       <div class="confirm-actions">
-        <button class="secondary-button" data-close-customize>取消</button>
+        <button class="secondary-button customize-cancel" data-close-customize>取消</button>
         <button class="primary-button" id="saveGirlfriendButton">保存</button>
       </div>
     </dialog>

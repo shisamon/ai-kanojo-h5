@@ -9,12 +9,12 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, display_name, public_id)
+  insert into public.profiles (id, email, display_name, username)
   values (
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'display_name', 'User-' || substr(replace(new.id::text, '-', ''), 1, 8)),
-    substr(md5(new.id::text || 'openlover'), 1, 8)
+    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1))
   )
   on conflict (id) do nothing;
   return new;

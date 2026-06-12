@@ -38,7 +38,7 @@
         </label>
         <p class="legal auth-error" id="authScreenError"></p>
         <button class="primary-button auth-submit" id="authScreenSubmit">ログイン</button>
-        <button class="ghost-link" id="authGuestLink">あとでログインする ›</button>
+        <p class="auth-note">登録後、最初のAI彼女を選んでカスタマイズします。</p>
       </div>
     </div>
 
@@ -174,7 +174,7 @@
           <h2>彼女をカスタマイズ</h2>
           <span>形象を選ぶか画像をアップロードして、名前をつけましょう</span>
         </div>
-        <button class="icon-button" data-close-customize>×</button>
+        <button class="icon-button customize-close" data-close-customize>×</button>
       </div>
       <div class="person-grid" id="personGrid"></div>
       <label class="upload-card" id="uploadCard">
@@ -189,7 +189,7 @@
       </label>
       <p class="legal" id="customizeError"></p>
       <div class="confirm-actions">
-        <button class="secondary-button" data-close-customize>キャンセル</button>
+        <button class="secondary-button customize-cancel" data-close-customize>キャンセル</button>
         <button class="primary-button" id="saveGirlfriendButton">保存</button>
       </div>
     </dialog>

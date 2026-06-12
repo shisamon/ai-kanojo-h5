@@ -3,6 +3,7 @@ create extension if not exists "pgcrypto";
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
+  username text unique,
   display_name text,
   avatar_url text,
   locale text not null default 'zh',
@@ -23,6 +24,16 @@ create table if not exists public.characters (
   is_public boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists username text;
+
+create unique index if not exists profiles_username_key
+  on public.profiles (username)
+  where username is not null;
+
+alter table public.profiles
+  add column if not exists active_character_id uuid references public.characters(id) on delete set null;
 
 create table if not exists public.works (
   id uuid primary key default gen_random_uuid(),
