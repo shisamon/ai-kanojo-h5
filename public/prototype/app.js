@@ -125,6 +125,22 @@ const dictionary = {
 
 const t = dictionary[locale];
 
+// Keep layout pinned to the real visible area so the on-screen keyboard
+// shrinks the stage in place instead of pushing the whole page up.
+(function trackViewportHeight() {
+  const vv = window.visualViewport;
+  const apply = () => {
+    const h = vv ? vv.height : window.innerHeight;
+    document.documentElement.style.setProperty("--app-height", `${Math.round(h)}px`);
+  };
+  apply();
+  if (vv) {
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+  }
+  window.addEventListener("orientationchange", () => setTimeout(apply, 200));
+})();
+
 // ---------- state ----------
 let session = null;
 let profile = null;

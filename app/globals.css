@@ -2834,7 +2834,7 @@ body.onboarding-active .customize-modal .customize-cancel {
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  height: 100dvh;
+  height: var(--app-height, 100dvh);
   padding: calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
   overflow: hidden;
   background:
@@ -3748,4 +3748,12 @@ body.onboarding-active .customize-modal .customize-cancel {
 
 .gf-shell .game-stage {
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+/* Pin the home stage to the real visible viewport so the keyboard shrinks it
+   in place. Overrides the generic .gf-workspace .view min-height:100svh. */
+.gf-workspace .game-stage,
+.gf-workspace .view.game-stage {
+  min-height: var(--app-height, 100dvh);
+  height: var(--app-height, 100dvh);
 }
