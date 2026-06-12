@@ -3769,3 +3769,24 @@ body.onboarding-active .customize-modal .customize-cancel {
   transform: translateY(calc(-1 * var(--kb, 0px)));
   transition: transform 0.18s ease-out;
 }
+
+/* Keyboard open: re-frame the girlfriend as a face-only landscape crop so she
+   fills the short space above the keyboard instead of being cut at the waist. */
+.game-stage.kb-open .character-button {
+  align-self: center;
+  width: min(94vw, 460px);
+  height: auto;
+  max-height: calc(var(--app-height, 100dvh) - 168px);
+  aspect-ratio: 5 / 4;
+  margin: 0 auto;
+}
+
+.game-stage.kb-open .stage-image {
+  object-fit: cover;
+  object-position: center 16%;
+  border-radius: 22px;
+}
+
+.game-stage.kb-open .character-aura {
+  opacity: 0;
+}

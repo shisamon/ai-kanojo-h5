@@ -142,6 +142,9 @@ const t = dictionary[locale];
     const kb = Math.max(0, Math.round(fullHeight - visible));
     root.style.setProperty("--kb", `${kb}px`);
     root.style.setProperty("--app-height", `${Math.round(visible)}px`);
+    // Keyboard open -> crop the girlfriend to a face-only landscape framing.
+    const home = document.getElementById("view-home");
+    if (home) home.classList.toggle("kb-open", kb > 90);
   };
 
   setFull();
