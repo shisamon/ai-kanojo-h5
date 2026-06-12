@@ -24,7 +24,47 @@ export async function GET(request: Request) {
   const { data, count, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ users: data ?? [], total: count ?? 0, page, pageSize });
+  const users = data ?? [];
+  const ids = users.map((user) => user.id);
+  const emptyMetrics = ids.reduce<Record<string, { characters: number; works: number; chats: number; spent: number; granted: number }>>(
+    (acc, id) => {
+      acc[id] = { characters: 0, works: 0, chats: 0, spent: 0, granted: 0 };
+      return acc;
+    },
+    {}
+  );
+
+  if (ids.length > 0) {
+    const [charactersRes, worksRes, chatsRes, transactionsRes] = await Promise.all([
+      service.from("characters").select("owner_id").in("owner_id", ids),
+      service.from("works").select("user_id,cost").in("user_id", ids),
+      service.from("chat_sessions").select("user_id").in("user_id", ids),
+      service.from("diamond_transactions").select("user_id,amount").in("user_id", ids)
+    ]);
+
+    (charactersRes.data ?? []).forEach((row) => {
+      if (row.owner_id && emptyMetrics[row.owner_id]) emptyMetrics[row.owner_id].characters += 1;
+    });
+    (worksRes.data ?? []).forEach((row) => {
+      if (row.user_id && emptyMetrics[row.user_id]) emptyMetrics[row.user_id].works += 1;
+    });
+    (chatsRes.data ?? []).forEach((row) => {
+      if (row.user_id && emptyMetrics[row.user_id]) emptyMetrics[row.user_id].chats += 1;
+    });
+    (transactionsRes.data ?? []).forEach((row) => {
+      if (!row.user_id || !emptyMetrics[row.user_id]) return;
+      const amount = Number(row.amount || 0);
+      if (amount < 0) emptyMetrics[row.user_id].spent += Math.abs(amount);
+      if (amount > 0) emptyMetrics[row.user_id].granted += amount;
+    });
+  }
+
+  return NextResponse.json({
+    users: users.map((user) => ({ ...user, metrics: emptyMetrics[user.id] })),
+    total: count ?? 0,
+    page,
+    pageSize
+  });
 }
 
 export async function PATCH(request: Request) {

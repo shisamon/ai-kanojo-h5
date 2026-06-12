@@ -17,21 +17,55 @@ export async function GET(request: Request) {
   since.setDate(since.getDate() - 13);
   since.setHours(0, 0, 0, 0);
 
-  const [users, works, publicWorks, likes, chatSessions, chatMessages, transactions, recentProfiles] =
-    await Promise.all([
+  const [
+    users,
+    works,
+    publicWorks,
+    characters,
+    publicCharacters,
+    likes,
+    chatSessions,
+    chatMessages,
+    jobs,
+    completedJobs,
+    failedJobs,
+    runningJobs,
+    transactions,
+    recentProfiles,
+    recentTransactions,
+    recentWorks
+  ] = await Promise.all([
       count("profiles"),
       count("works"),
       count("works", (q) => q.eq("visibility", "public")),
+      count("characters"),
+      count("characters", (q) => q.eq("is_public", true)),
       count("work_likes"),
       count("chat_sessions"),
       count("chat_messages"),
+      count("creation_jobs"),
+      count("creation_jobs", (q) => q.eq("status", "completed")),
+      count("creation_jobs", (q) => q.eq("status", "failed")),
+      count("creation_jobs", (q) => q.in("status", ["queued", "running"])),
       service.from("diamond_transactions").select("amount"),
-      service.from("profiles").select("created_at").gte("created_at", since.toISOString())
+      service.from("profiles").select("created_at").gte("created_at", since.toISOString()),
+      service
+        .from("diamond_transactions")
+        .select("amount,reason,created_at,profiles!diamond_transactions_user_id_fkey(email,display_name)")
+        .order("created_at", { ascending: false })
+        .limit(8),
+      service
+        .from("works")
+        .select("id,title,mode,cost,created_at,profiles!works_user_id_fkey(email,display_name)")
+        .order("created_at", { ascending: false })
+        .limit(8)
     ]);
 
   const amounts = (transactions.data ?? []).map((row) => row.amount as number);
   const diamondsSpent = amounts.filter((a) => a < 0).reduce((sum, a) => sum - a, 0);
   const diamondsGranted = amounts.filter((a) => a > 0).reduce((sum, a) => sum + a, 0);
+  const paidTransactions = amounts.filter((a) => a > 0).length;
+  const arppu = paidTransactions ? Math.round(diamondsGranted / paidTransactions) : 0;
 
   const signupsByDay: { date: string; count: number }[] = [];
   for (let i = 0; i < 14; i += 1) {
@@ -55,6 +89,16 @@ export async function GET(request: Request) {
     chatMessages,
     diamondsSpent,
     diamondsGranted,
-    signupsByDay
+    arppu,
+    characters,
+    publicCharacters,
+    privateCharacters: characters - publicCharacters,
+    jobs,
+    completedJobs,
+    failedJobs,
+    runningJobs,
+    signupsByDay,
+    recentTransactions: recentTransactions.data ?? [],
+    recentWorks: recentWorks.data ?? []
   });
 }
