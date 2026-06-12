@@ -68,10 +68,6 @@
                 <small id="stageTag">等待定制</small>
               </span>
             </button>
-            <button class="diamond-pill" data-open-upgrade>
-              <span>◆</span>
-              <b id="topBalance">—</b>
-            </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
             <p>先定制一个属于你的电子女友</p>
@@ -97,6 +93,7 @@
         <section class="view" id="view-profile" aria-labelledby="profileTitle">
           <div class="profile-layout logged-profile me-page">
             <section class="profile-hero">
+              <button class="icon-button me-back-button" data-view="home" aria-label="返回">‹</button>
               <img id="profileAvatar" alt="资料头像" />
               <div>
                 <span class="eyebrow">我的</span>
@@ -116,14 +113,9 @@
 
             <section class="profile-works">
               <div class="section-title-row">
-                <h2 class="gf-section-title">切换女友</h2>
+              <h2 class="gf-section-title">切换女友</h2>
               </div>
               <div class="gf-list" id="gfList"></div>
-            </section>
-
-            <section class="profile-works">
-              <h2 class="gf-section-title">我的视频</h2>
-              <div id="profileHistory"></div>
             </section>
           </div>
         </section>

@@ -68,10 +68,6 @@
                 <small id="stageTag">カスタム待ち</small>
               </span>
             </button>
-            <button class="diamond-pill" data-open-upgrade>
-              <span>◆</span>
-              <b id="topBalance">—</b>
-            </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
             <p>まずは自分だけのAI彼女を作りましょう</p>
@@ -97,6 +93,7 @@
         <section class="view" id="view-profile" aria-labelledby="profileTitle">
           <div class="profile-layout logged-profile me-page">
             <section class="profile-hero">
+              <button class="icon-button me-back-button" data-view="home" aria-label="戻る">‹</button>
               <img id="profileAvatar" alt="アバター" />
               <div>
                 <span class="eyebrow">マイ</span>
@@ -116,14 +113,9 @@
 
             <section class="profile-works">
               <div class="section-title-row">
-                <h2 class="gf-section-title">彼女を切り替え</h2>
+              <h2 class="gf-section-title">彼女を切り替え</h2>
               </div>
               <div class="gf-list" id="gfList"></div>
-            </section>
-
-            <section class="profile-works">
-              <h2 class="gf-section-title">マイ動画</h2>
-              <div id="profileHistory"></div>
             </section>
           </div>
         </section>
