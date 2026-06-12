@@ -34,6 +34,7 @@ const dictionary = {
     authWelcome: "登录成功。",
     authSignedUp: "注册成功，已自动登录。",
     authConfirmEmail: "注册成功，请到邮箱完成确认后再登录。",
+    authRegisterFailed: "注册失败，请稍后再试。",
     authSignedOut: "已退出登录。",
     authRequired: "请先登录。",
     authGateRequired: "请先登录或注册，之后就可以创建你的电子女友。",
@@ -85,6 +86,7 @@ const dictionary = {
     authWelcome: "ログインしました。",
     authSignedUp: "登録が完了し、ログインしました。",
     authConfirmEmail: "登録完了。確認メールをチェックしてください。",
+    authRegisterFailed: "登録に失敗しました。時間をおいて再試行してください。",
     authSignedOut: "ログアウトしました。",
     authRequired: "先にログインしてください。",
     authGateRequired: "ログインまたは登録後、AI彼女を作成できます。",
@@ -1334,20 +1336,21 @@ async function handleAuthScreenSubmit() {
         return;
       }
       const nickname = (qs("#authScreenNickname")?.value || "").trim() || username;
-      const { data, error } = await supabaseClient.auth.signUp({
-        email: `${username}@${LOGIN_DOMAIN}`,
-        password,
-        options: { data: { username, display_name: nickname } }
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, nickname })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || t.authRegisterFailed);
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email: normalizeLoginEmail(username),
+        password
       });
       if (error) throw error;
-      if (data.session) {
-        pendingSignupOnboarding = true;
-        hideAuthScreen();
-        showToast(t.authSignedUp);
-      } else {
-        setAuthScreenMode("login");
-        if (errorEl) errorEl.textContent = t.authConfirmEmail;
-      }
+      pendingSignupOnboarding = true;
+      hideAuthScreen();
+      showToast(t.authSignedUp);
     }
   } catch (error) {
     if (errorEl) errorEl.textContent = error.message || String(error);
