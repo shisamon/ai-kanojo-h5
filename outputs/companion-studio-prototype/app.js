@@ -1235,11 +1235,7 @@ function updateAuthUi() {
     if (profileId) profileId.textContent = t.notLoggedIn;
   }
   if (profileAvatar) {
-    profileAvatar.src = activeGirlfriend
-      ? activeGirlfriend.image
-      : publicCharacters[0]
-        ? publicCharacters[0].image
-        : makePortrait(5, "", "");
+    profileAvatar.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
   }
   const userAvatarMini = qs("#userAvatarMini");
   if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
