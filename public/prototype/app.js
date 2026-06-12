@@ -1365,7 +1365,7 @@ async function handleAuthButtonClick() {
   if (settingsModal && settingsModal.open) closeDialog(settingsModal);
   if (session) {
     await supabaseClient.auth.signOut();
-    showToast(t.authSignedOut);
+    window.location.reload();
   } else {
     showAuthScreen("login");
   }

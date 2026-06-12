@@ -3668,3 +3668,15 @@ body.onboarding-active .customize-modal .customize-cancel {
     border-left: 1px solid rgba(255, 255, 255, 0.08);
   }
 }
+
+/* Settings modal: stacked mobile buttons */
+.settings-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-stack .delete-account-button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+}
