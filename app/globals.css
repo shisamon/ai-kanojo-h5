@@ -31,6 +31,12 @@ body {
   color: var(--text);
 }
 
+/* When the home stage is showing, lock the page so the keyboard can't scroll it. */
+body.gf-home-active {
+  overflow: hidden;
+  height: 100dvh;
+}
+
 button,
 input,
 select,
@@ -2834,7 +2840,7 @@ body.onboarding-active .customize-modal .customize-cancel {
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  height: var(--app-height, 100dvh);
+  height: var(--full-height, 100dvh);
   padding: calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
   overflow: hidden;
   background:
@@ -3754,6 +3760,12 @@ body.onboarding-active .customize-modal .customize-cancel {
    in place. Overrides the generic .gf-workspace .view min-height:100svh. */
 .gf-workspace .game-stage,
 .gf-workspace .view.game-stage {
-  min-height: var(--app-height, 100dvh);
-  height: var(--app-height, 100dvh);
+  min-height: var(--full-height, 100dvh);
+  height: var(--full-height, 100dvh);
+}
+
+/* Chat composer floats above the keyboard; girlfriend area stays locked. */
+.stage-chat-dock {
+  transform: translateY(calc(-1 * var(--kb, 0px)));
+  transition: transform 0.18s ease-out;
 }

@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <>
       <div dangerouslySetInnerHTML={{ __html: getPrototypeBody("zh") }} />
-      <Script src="/prototype/app.js?v=20260612-3" strategy="afterInteractive" />
+      <Script src="/prototype/app.js?v=20260612-4" strategy="afterInteractive" />
     </>
   );
 }

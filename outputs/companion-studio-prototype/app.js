@@ -125,20 +125,40 @@ const dictionary = {
 
 const t = dictionary[locale];
 
-// Keep layout pinned to the real visible area so the on-screen keyboard
-// shrinks the stage in place instead of pushing the whole page up.
+// Keyboard handling: lock the stage to the full (pre-keyboard) viewport height
+// so the girlfriend area never moves, and float the chat composer just above
+// the keyboard via --kb (keyboard height).
 (function trackViewportHeight() {
   const vv = window.visualViewport;
-  const apply = () => {
-    const h = vv ? vv.height : window.innerHeight;
-    document.documentElement.style.setProperty("--app-height", `${Math.round(h)}px`);
+  const root = document.documentElement;
+  let fullHeight = window.innerHeight;
+
+  const setFull = () => {
+    fullHeight = Math.max(fullHeight, window.innerHeight);
+    root.style.setProperty("--full-height", `${Math.round(fullHeight)}px`);
   };
-  apply();
+  const setKb = () => {
+    const visible = vv ? vv.height : window.innerHeight;
+    const kb = Math.max(0, Math.round(fullHeight - visible));
+    root.style.setProperty("--kb", `${kb}px`);
+    root.style.setProperty("--app-height", `${Math.round(visible)}px`);
+  };
+
+  setFull();
+  setKb();
   if (vv) {
-    vv.addEventListener("resize", apply);
-    vv.addEventListener("scroll", apply);
+    vv.addEventListener("resize", setKb);
+    vv.addEventListener("scroll", setKb);
   }
-  window.addEventListener("orientationchange", () => setTimeout(apply, 200));
+  window.addEventListener("orientationchange", () => {
+    // On rotation the real full height changes; reset baseline.
+    fullHeight = 0;
+    setTimeout(() => {
+      fullHeight = window.innerHeight;
+      setFull();
+      setKb();
+    }, 250);
+  });
 })();
 
 // ---------- state ----------
@@ -1285,6 +1305,9 @@ function resetUserState() {
 function switchView(view) {
   qsa(".view").forEach((item) => item.classList.toggle("is-visible", item.id === `view-${view}`));
   qsa("[data-view]").forEach((item) => item.classList.toggle("is-active", item.dataset.view === view));
+  // Lock scroll only on the home stage so the keyboard overlays instead of
+  // scrolling the page; allow scrolling on the profile page.
+  document.body.classList.toggle("gf-home-active", view === "home");
 }
 
 // ---------- auth ----------
@@ -1674,6 +1697,7 @@ if (supabaseClient) {
 }
 
 // boot
+document.body.classList.add("gf-home-active");
 if (supabaseClient) showAuthScreen("login");
 renderStage();
 updateAuthUi();
