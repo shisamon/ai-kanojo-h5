@@ -3518,6 +3518,43 @@ body.onboarding-active .customize-modal .customize-cancel {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.customize-modal .onboarding-account {
+  display: grid;
+  width: min(100%, 360px);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 7px 8px 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+
+.customize-modal .onboarding-account[hidden] {
+  display: none !important;
+}
+
+.customize-modal .onboarding-account strong {
+  overflow: hidden;
+  color: #fff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customize-modal .onboarding-account button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(49, 214, 200, 0.18);
+  color: var(--teal);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .customize-modal .person-grid {
   width: min(100%, 360px);
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -626,6 +626,13 @@ function updateCustomizeOnboardingUi() {
   if (!modal) return;
   modal.dataset.onboarding = onboardingActive ? "true" : "false";
   document.body.classList.toggle("onboarding-active", onboardingActive);
+  const account = qs("#onboardingAccount");
+  const accountName = qs("#onboardingAccountName");
+  if (account) account.hidden = !onboardingActive;
+  if (accountName) {
+    accountName.textContent =
+      profile?.display_name || profile?.username || session?.user?.email || (locale === "ja" ? "ログイン済み" : "已登录");
+  }
   const title = modal.querySelector(".modal-head h2");
   if (title) title.textContent = onboardingActive ? t.gfOnboardingTitle : locale === "ja" ? "彼女をカスタマイズ" : "定制女友";
   const hint = modal.querySelector(".modal-head span");
@@ -1453,6 +1460,17 @@ qsa("[data-close-settings]").forEach((button) => button.addEventListener("click"
 
 const profileAuthButtonEl = qs("#profileAuthButton");
 if (profileAuthButtonEl) profileAuthButtonEl.addEventListener("click", handleAuthButtonClick);
+
+const onboardingSwitchAccount = qs("#onboardingSwitchAccount");
+if (onboardingSwitchAccount) {
+  onboardingSwitchAccount.addEventListener("click", async () => {
+    onboardingActive = false;
+    updateCustomizeOnboardingUi();
+    closeDialog(qs("#customizeModal"));
+    if (supabaseClient) await supabaseClient.auth.signOut();
+    showAuthScreen("login");
+  });
+}
 
 const passwordModalEl = qs("#passwordModal");
 const changePasswordButton = qs("#changePasswordButton");
