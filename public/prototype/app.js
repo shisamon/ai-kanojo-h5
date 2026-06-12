@@ -57,6 +57,8 @@ const dictionary = {
     gfDeleteConfirm: (name) => `确定删除 ${name} 吗？`,
     noGirlfriend: "还没有女友，先定制一个吧",
     newGirlfriend: "新建",
+    addGirlfriend: "新增女友",
+    addGirlfriendHint: "定制新的陪伴对象",
     chatGreeting: (name) => `我是 ${name}，今天想我了吗？`,
     stageMoods: ["今天也在等你。", "点我一下，我会有反应哦。", "想聊天、拍视频，还是换一套形象？", "我会记住你选择的样子。"],
     stageOnline: "在线陪伴中",
@@ -106,6 +108,8 @@ const dictionary = {
     gfDeleteConfirm: (name) => `${name} を削除しますか？`,
     noGirlfriend: "まだ彼女がいません。カスタマイズしましょう",
     newGirlfriend: "新規",
+    addGirlfriend: "彼女を追加",
+    addGirlfriendHint: "新しい相手を作成",
     chatGreeting: (name) => `${name}だよ。今日も会いに来てくれたの？`,
     stageMoods: ["今日も待ってたよ。", "タップすると反応するよ。", "チャット、動画、カスタム。何をする？", "選んだ姿を覚えておくね。"],
     stageOnline: "オンライン",
@@ -573,7 +577,7 @@ function renderGfSwitcher() {
   const grid = qs("#gfSwitchGrid");
   if (!grid) return;
   const choices = girlfriends.length > 0 ? girlfriends : publicCharacters;
-  grid.innerHTML = choices
+  const cards = choices
     .map((gf) => {
       const affinity = getAffinity(gf);
       return `
@@ -585,6 +589,16 @@ function renderGfSwitcher() {
       `;
     })
     .join("");
+  const addCard = session
+    ? `
+        <button class="gf-switch-card gf-switch-add" data-add-gf type="button">
+          <span>＋</span>
+          <strong>${t.addGirlfriend}</strong>
+          <small>${t.addGirlfriendHint}</small>
+        </button>
+      `
+    : "";
+  grid.innerHTML = cards + addCard;
   grid.querySelectorAll("[data-switch-gf]").forEach((button) => {
     button.addEventListener("click", () => {
       const gf = choices.find((item) => item.id === button.dataset.switchGf);
@@ -594,6 +608,13 @@ function renderGfSwitcher() {
       showToast(t.gfSwitched(gf.name));
     });
   });
+  const addButton = grid.querySelector("[data-add-gf]");
+  if (addButton) {
+    addButton.addEventListener("click", () => {
+      closeDialog(qs("#girlfriendSwitchModal"));
+      openCustomize();
+    });
+  }
 }
 
 // ---------- customize ----------

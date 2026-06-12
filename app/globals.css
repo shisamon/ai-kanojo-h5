@@ -3048,6 +3048,32 @@ body.onboarding-active .customize-modal .customize-cancel {
   font-size: 11px;
 }
 
+.gf-switch-add {
+  min-height: 164px;
+  place-items: center;
+  text-align: center;
+  border-style: dashed;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(49, 214, 200, 0.18), transparent 42%),
+    rgba(255, 255, 255, 0.05);
+}
+
+.gf-switch-add span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(49, 214, 200, 0.16);
+  color: var(--teal);
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.gf-switch-add strong {
+  color: #fff;
+}
+
 .diamond-pill {
   min-height: 46px;
   gap: 6px;
