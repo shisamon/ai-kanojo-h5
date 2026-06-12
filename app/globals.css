@@ -3733,3 +3733,13 @@ body.onboarding-active .customize-modal .customize-cancel {
 .me-page .profile-hero + .membership-band {
   margin-top: 12px;
 }
+
+/* Single-girlfriend layout: top bar handles all nav; hide bottom tab bar to
+   avoid it peeking from behind the chat dock. */
+.gf-shell .sidebar {
+  display: none;
+}
+
+.gf-shell .game-stage {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
