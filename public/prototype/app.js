@@ -55,6 +55,7 @@ const dictionary = {
     gfOnboardingTitle: "选择你的第一位女友",
     gfOnboardingHint: "选择一个形象或上传图片，保存后进入陪伴首页。",
     gfSwitched: (name) => `已切换到 ${name}。`,
+    affinityLevelUp: (level) => `亲密度升级！Lv.${level}`,
     gfDeleted: "已删除该女友。",
     gfDeleteConfirm: (name) => `确定删除 ${name} 吗？`,
     noGirlfriend: "还没有女友，先定制一个吧",
@@ -107,6 +108,7 @@ const dictionary = {
     gfOnboardingTitle: "最初のAI彼女を選択",
     gfOnboardingHint: "形象を選ぶか画像をアップロードして、保存後にホームへ進みます。",
     gfSwitched: (name) => `${name} に切り替えました。`,
+    affinityLevelUp: (level) => `親密度がアップ！Lv.${level}`,
     gfDeleted: "削除しました。",
     gfDeleteConfirm: (name) => `${name} を削除しますか？`,
     noGirlfriend: "まだ彼女がいません。カスタマイズしましょう",
@@ -329,10 +331,24 @@ function hashValue(value) {
     .reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 9973, 17);
 }
 
+const AFFINITY_MAX_LEVEL = 10;
+const affinityLevelCost = (level) => level * 100; // Lv.n -> Lv.n+1 所需点数
+
+function affinityFromPoints(points) {
+  let level = 1;
+  let remaining = Math.max(0, Number(points) || 0);
+  while (level < AFFINITY_MAX_LEVEL && remaining >= affinityLevelCost(level)) {
+    remaining -= affinityLevelCost(level);
+    level += 1;
+  }
+  const need = affinityLevelCost(level);
+  const percent =
+    level >= AFFINITY_MAX_LEVEL ? 100 : Math.min(96, Math.round((remaining / need) * 100));
+  return { level, percent: Math.max(4, percent) };
+}
+
 function getAffinity(gf) {
-  const base = gf ? hashValue(`${gf.id}-${gf.name}`) : 0;
-  const level = 1 + (base % 5);
-  const percent = 24 + level * 14 + (base % 12);
+  const { level, percent } = affinityFromPoints(gf ? gf.affinity : 0);
   const palettes = [
     ["#ff3f5f", "#ff8a4c"],
     ["#ff7a3d", "#ffd166"],
@@ -340,8 +356,25 @@ function getAffinity(gf) {
     ["#31d6c8", "#73a7ff"],
     ["#9d7cff", "#ff4d9a"]
   ];
-  const [start, end] = palettes[level - 1] || palettes[0];
-  return { level, percent: Math.min(96, percent), start, end };
+  const [start, end] = palettes[Math.min(4, Math.floor((level - 1) / 2))];
+  return { level, percent, start, end };
+}
+
+async function grantAffinity(gf) {
+  if (!supabaseClient || !session || !gf || !isUuid(gf.id)) return;
+  try {
+    const { data } = await supabaseClient.rpc("add_affinity", { target_character: gf.id });
+    if (!data || typeof data.affinity !== "number") return;
+    const before = affinityFromPoints(gf.affinity).level;
+    gf.affinity = data.affinity;
+    const target = girlfriends.find((item) => item.id === gf.id);
+    if (target) target.affinity = data.affinity;
+    const after = affinityFromPoints(gf.affinity).level;
+    renderStage();
+    if (after > before) showToast(t.affinityLevelUp(after));
+  } catch (error) {
+    // Affinity is non-critical; ignore failures.
+  }
 }
 
 // ---------- data loaders ----------
@@ -411,7 +444,7 @@ async function loadGirlfriends() {
   if (!supabaseClient || !session) return;
   const { data } = await supabaseClient
     .from("characters")
-    .select("id,name,age,tag,image_url,created_at")
+    .select("id,name,age,tag,image_url,created_at,affinity")
     .eq("owner_id", session.user.id)
     .order("created_at", { ascending: false });
   girlfriends = (Array.isArray(data) ? data : []).map((row, index) => ({
@@ -419,6 +452,7 @@ async function loadGirlfriends() {
     name: row.name,
     age: row.age ?? "",
     tag: row.tag || "",
+    affinity: row.affinity || 0,
     image: row.image_url || makePortrait(index + 30, row.name, row.tag || "")
   }));
   const activeId = profile && profile.active_character_id;
@@ -845,6 +879,7 @@ async function sendStageChatMessage() {
   const transcript = getTranscript(subject);
   appendStageChatMessage("user", content);
   transcript.push({ role: "user", content });
+  grantAffinity(subject);
 
   const typing = appendStageChatMessage("character", "…");
   let reply = null;
@@ -958,6 +993,7 @@ async function sendChatMessage() {
         .then(() => {});
     }
   }
+  grantAffinity(gf);
 
   const typing = appendChatMessage("character", "…");
   let reply = null;

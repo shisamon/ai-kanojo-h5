@@ -3680,3 +3680,57 @@ body.onboarding-active .customize-modal .customize-cancel {
   min-height: 48px;
   border-radius: 14px;
 }
+
+/* Me page typography polish */
+.me-page .profile-hero > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.me-page .profile-hero .eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.me-page .profile-hero h1 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.me-page .profile-hero #profileId {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.me-page .membership-band span {
+  font-size: 12.5px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+.me-page .membership-band h2 {
+  margin: 2px 0 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.me-page .membership-band .primary-button {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.me-page > section + section,
+.me-page .profile-hero + .membership-band {
+  margin-top: 12px;
+}
