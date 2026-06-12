@@ -58,46 +58,66 @@
       </aside>
 
       <main class="workspace gf-workspace">
-        <section class="view is-visible gf-stage" id="view-home">
-          <img id="stageImage" class="stage-image" alt="彼女" />
-          <div class="stage-overlay"></div>
-          <div class="stage-top">
-            <div>
-              <strong id="stageName">AIAI</strong>
-              <span id="stageTag"></span>
-            </div>
+        <section class="view is-visible gf-stage game-stage" id="view-home">
+          <div class="game-sky"></div>
+          <div class="game-topbar">
+            <button class="player-pill" data-view="profile" aria-label="マイページを開く">
+              <img id="activeAvatarMini" alt="現在の彼女" />
+              <span>
+                <b id="stageName">AIAI</b>
+                <small id="stageTag">カスタム待ち</small>
+              </span>
+            </button>
+            <button class="diamond-pill" data-open-upgrade>
+              <span>◆</span>
+              <b id="topBalance">—</b>
+            </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
-            <p>まだ彼女がいません。カスタマイズしましょう</p>
+            <p>まずは自分だけのAI彼女を作りましょう</p>
           </div>
-          <div class="stage-actions">
-            <button id="actionChat"><span>💬</span><b>チャット</b></button>
-            <button id="actionVideo"><span>🎬</span><b>動画</b></button>
-            <button id="actionCustomize"><span>✨</span><b>カスタム</b></button>
+          <button class="character-button" id="stageTouch" type="button" aria-label="ふれあい">
+            <span class="character-aura"></span>
+            <img id="stageImage" class="stage-image" alt="彼女" />
+          </button>
+          <div class="affinity-pill">
+            <span>親密度</span>
+            <b id="stageAffinity">Lv.1</b>
+          </div>
+          <div class="stage-chat-dock">
+            <div class="stage-chat-messages" id="stageChatMessages"></div>
+            <div class="stage-chat-composer">
+              <input id="stageChatInput" type="text" placeholder="彼女に話しかけよう..." />
+              <button class="video-chip" id="stageVideoButton" type="button">動画</button>
+              <button class="send-chip" id="stageChatSend" type="button">送信</button>
+            </div>
           </div>
         </section>
 
         <section class="view" id="view-profile" aria-labelledby="profileTitle">
-          <div class="profile-layout logged-profile">
+          <div class="profile-layout logged-profile me-page">
             <section class="profile-hero">
               <img id="profileAvatar" alt="アバター" />
               <div>
+                <span class="eyebrow">マイ</span>
                 <h1 id="profileTitle">ゲスト</h1>
                 <span id="profileId">未ログイン</span>
               </div>
-              <button class="ghost-button" data-open-profile-edit>プロフィール編集</button>
               <button class="icon-button profile-settings-button" data-open-settings aria-label="設定">⋯</button>
             </section>
 
             <section class="membership-band">
               <div>
-                <h2>残高 <span id="coinBalance">—</span></h2>
+                <span>ダイヤ残高</span>
+                <h2><span id="coinBalance">—</span></h2>
               </div>
               <button class="primary-button" data-open-upgrade>チャージ</button>
             </section>
 
             <section class="profile-works">
-              <h2 class="gf-section-title">マイ彼女</h2>
+              <div class="section-title-row">
+                <h2 class="gf-section-title">彼女を切り替え</h2>
+              </div>
               <div class="gf-list" id="gfList"></div>
             </section>
 

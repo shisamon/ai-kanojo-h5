@@ -55,6 +55,9 @@ const dictionary = {
     noGirlfriend: "还没有女友，先定制一个吧",
     newGirlfriend: "新建",
     chatGreeting: (name) => `我是 ${name}，今天想我了吗？`,
+    stageMoods: ["今天也在等你。", "点我一下，我会有反应哦。", "想聊天、拍视频，还是换一套形象？", "我会记住你选择的样子。"],
+    stageOnline: "在线陪伴中",
+    stageCustomizeHint: "先定制我",
     prompt: (template, character) => `${character.name}，${template.name}风格，保持人物特征一致，生成短视频。`
   },
   ja: {
@@ -98,6 +101,9 @@ const dictionary = {
     noGirlfriend: "まだ彼女がいません。カスタマイズしましょう",
     newGirlfriend: "新規",
     chatGreeting: (name) => `${name}だよ。今日も会いに来てくれたの？`,
+    stageMoods: ["今日も待ってたよ。", "タップすると反応するよ。", "チャット、動画、カスタム。何をする？", "選んだ姿を覚えておくね。"],
+    stageOnline: "オンライン",
+    stageCustomizeHint: "まずカスタム",
     prompt: (template, character) => `${character.name}、${template.name}スタイル、人物の特徴を保った短い動画。`
   }
 };
@@ -118,6 +124,7 @@ let uploadedImage = "";
 let customizeSelection = null;
 let authScreenMode = "login";
 let chatBusy = false;
+let moodIndex = 0;
 const chatSessionIds = new Map();
 const chatTranscripts = new Map();
 const hydratedChats = new Set();
@@ -172,22 +179,69 @@ function makePortrait(seed, name, tag) {
   bg.addColorStop(0, colors[0]);
   bg.addColorStop(0.48, colors[1]);
   bg.addColorStop(1, colors[2]);
+  ctx.save();
   ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalAlpha = 0.42;
+  ctx.beginPath();
+  ctx.ellipse(260, 340, 178, 280, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
   for (let i = 0; i < 18; i += 1) {
     ctx.fillStyle = `rgba(255,255,255,${0.03 + rand() * 0.06})`;
     ctx.beginPath();
     ctx.arc(rand() * 520, rand() * 680, 20 + rand() * 80, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = "rgba(0,0,0,.33)";
-  ctx.fillRect(0, 568, 520, 112);
-  ctx.fillStyle = "#fff";
-  ctx.font = "800 36px system-ui, sans-serif";
-  ctx.fillText(name || "", 26, 622);
-  ctx.fillStyle = "rgba(255,255,255,.74)";
-  ctx.font = "600 20px system-ui, sans-serif";
-  ctx.fillText(tag || "", 28, 652);
+  ctx.translate(260, 88);
+  ctx.fillStyle = "rgba(255,255,255,.18)";
+  ctx.beginPath();
+  ctx.ellipse(0, 250, 146, 252, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = seed % 2 ? "#342033" : "#241b2f";
+  ctx.beginPath();
+  ctx.ellipse(0, 178, 100, 146, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffd2c5";
+  ctx.beginPath();
+  ctx.ellipse(0, 126, 72, 84, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = seed % 3 ? "#2b1b2d" : "#59402d";
+  ctx.beginPath();
+  ctx.arc(0, 94, 78, Math.PI * 0.96, Math.PI * 2.06);
+  ctx.lineTo(92, 246);
+  ctx.quadraticCurveTo(16, 224, -88, 250);
+  ctx.lineTo(-78, 118);
+  ctx.fill();
+  ctx.fillStyle = "#251720";
+  [-28, 30].forEach((x) => {
+    ctx.beginPath();
+    ctx.ellipse(x, 130, 8, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.strokeStyle = "rgba(131,54,72,.62)";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(0, 154, 18, 0.08, Math.PI - 0.08);
+  ctx.stroke();
+  const outfit = ctx.createLinearGradient(-88, 246, 88, 438);
+  outfit.addColorStop(0, colors[0]);
+  outfit.addColorStop(1, colors[1]);
+  ctx.fillStyle = outfit;
+  ctx.beginPath();
+  ctx.moveTo(-86, 284);
+  ctx.quadraticCurveTo(0, 228, 86, 284);
+  ctx.lineTo(122, 548);
+  ctx.lineTo(-122, 548);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,.24)";
+  ctx.beginPath();
+  ctx.moveTo(-32, 270);
+  ctx.lineTo(0, 326);
+  ctx.lineTo(34, 270);
+  ctx.quadraticCurveTo(0, 254, -32, 270);
+  ctx.fill();
+  ctx.restore();
   return canvas.toDataURL("image/png");
 }
 
@@ -245,16 +299,25 @@ async function loadPublicCharacters() {
       }));
     }
   } catch (error) {
+    const fallbackNames =
+      locale === "ja"
+        ? ["Mika", "Yui", "Rina", "Hana", "Sora", "Airi"]
+        : ["小夏", "梨奈", "遥香", "美咲", "若澜", "奈奈"];
+    const fallbackTags =
+      locale === "ja"
+        ? ["甘えん坊", "クール", "元気", "癒し系", "大人っぽい", "親友感"]
+        : ["甜美陪伴", "冷感姐姐", "元气少女", "温柔治愈", "成熟优雅", "邻家感"];
     publicCharacters = Array.from({ length: 6 }, (_, index) => ({
       id: `local-${index}`,
-      name: `Girl ${index + 1}`,
+      name: fallbackNames[index],
       age: "",
-      tag: "",
-      image: makePortrait(index + 8, `Girl ${index + 1}`, "")
+      tag: fallbackTags[index],
+      image: makePortrait(index + 8, fallbackNames[index], fallbackTags[index])
     }));
   }
   renderStage();
   renderCustomizeGrid();
+  renderGfList();
 }
 
 async function loadTemplates() {
@@ -342,11 +405,20 @@ function renderStage() {
   const stageName = qs("#stageName");
   const stageTag = qs("#stageTag");
   const stageEmpty = qs("#stageEmpty");
-  const subject = activeGirlfriend || publicCharacters[0] || null;
+  const avatarMini = qs("#activeAvatarMini");
+  const stageAffinity = qs("#stageAffinity");
+  const subject = getStageSubject();
   if (stageImage) stageImage.src = subject ? subject.image : makePortrait(3, "AIAI", "");
+  if (avatarMini) avatarMini.src = subject ? subject.image : makePortrait(3, "AIAI", "");
   if (stageName) stageName.textContent = subject ? subject.name : "AIAI";
-  if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : "";
-  if (stageEmpty) stageEmpty.hidden = !(session && girlfriends.length === 0);
+  if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : t.stageCustomizeHint;
+  if (stageAffinity) stageAffinity.textContent = activeGirlfriend ? "Lv.2" : "Lv.1";
+  if (stageEmpty) stageEmpty.hidden = Boolean(subject);
+  renderStageChatMessages();
+}
+
+function getStageSubject() {
+  return activeGirlfriend || publicCharacters[0] || null;
 }
 
 async function setActiveGirlfriend(gf) {
@@ -367,27 +439,27 @@ async function setActiveGirlfriend(gf) {
 function renderGfList() {
   const list = qs("#gfList");
   if (!list) return;
-  const cards = girlfriends
+  const choices = girlfriends.length > 0 ? girlfriends : publicCharacters;
+  const cards = choices
     .map(
       (gf) => `
       <div class="gf-card ${activeGirlfriend && gf.id === activeGirlfriend.id ? "is-active" : ""}" data-gf="${gf.id}">
         <img src="${gf.image}" alt="${gf.name}" />
         <strong>${gf.name}</strong>
-        <button class="gf-delete" data-gf-delete="${gf.id}" aria-label="delete">×</button>
+        ${girlfriends.some((item) => item.id === gf.id) ? `<button class="gf-delete" data-gf-delete="${gf.id}" aria-label="delete">×</button>` : ""}
       </div>
     `
     )
     .join("");
-  list.innerHTML =
-    cards +
-    `<button class="gf-card gf-new" id="gfNewButton"><span>＋</span><strong>${t.newGirlfriend}</strong></button>`;
+  list.innerHTML = cards || `<p class="legal">${t.noGirlfriend}</p>`;
 
   list.querySelectorAll("[data-gf]").forEach((card) => {
     card.addEventListener("click", (event) => {
       if (event.target.closest("[data-gf-delete]")) return;
-      const gf = girlfriends.find((item) => item.id === card.dataset.gf);
+      const gf = choices.find((item) => item.id === card.dataset.gf);
       if (gf) {
         setActiveGirlfriend(gf);
+        switchView("home");
         showToast(t.gfSwitched(gf.name));
       }
     });
@@ -398,7 +470,9 @@ function renderGfList() {
       const gf = girlfriends.find((item) => item.id === button.dataset.gfDelete);
       if (!gf) return;
       if (!window.confirm(t.gfDeleteConfirm(gf.name))) return;
-      await supabaseClient.from("characters").delete().eq("id", gf.id).eq("owner_id", session.user.id);
+      if (supabaseClient && session && isUuid(gf.id)) {
+        await supabaseClient.from("characters").delete().eq("id", gf.id).eq("owner_id", session.user.id);
+      }
       girlfriends = girlfriends.filter((item) => item.id !== gf.id);
       if (activeGirlfriend && activeGirlfriend.id === gf.id) {
         activeGirlfriend = girlfriends[0] || null;
@@ -409,8 +483,6 @@ function renderGfList() {
       showToast(t.gfDeleted);
     });
   });
-  const newButton = qs("#gfNewButton");
-  if (newButton) newButton.addEventListener("click", openCustomize);
 }
 
 // ---------- customize ----------
@@ -439,7 +511,6 @@ function renderCustomizeGrid() {
 }
 
 function openCustomize() {
-  if (!requireAuth()) return;
   customizeSelection = null;
   uploadedImage = "";
   const nameInput = qs("#gfNameInput");
@@ -453,7 +524,6 @@ function openCustomize() {
 }
 
 async function saveGirlfriend() {
-  if (!supabaseClient || !session) return;
   const errorEl = qs("#customizeError");
   const name = (qs("#gfNameInput")?.value || "").trim();
   if (!name) {
@@ -468,6 +538,21 @@ async function saveGirlfriend() {
   const saveButton = qs("#saveGirlfriendButton");
   if (saveButton) saveButton.disabled = true;
   try {
+    if (!supabaseClient || !session) {
+      const gf = {
+        id: `guest-${Date.now()}`,
+        name,
+        age: customizeSelection && customizeSelection.age ? customizeSelection.age : "",
+        tag: customizeSelection && customizeSelection.tag ? customizeSelection.tag : "custom",
+        image
+      };
+      girlfriends.unshift(gf);
+      await setActiveGirlfriend(gf);
+      closeDialog(qs("#customizeModal"));
+      switchView("home");
+      showToast(t.gfSaved);
+      return;
+    }
     const { data, error } = await supabaseClient
       .from("characters")
       .insert({
@@ -492,6 +577,7 @@ async function saveGirlfriend() {
     girlfriends.unshift(gf);
     await setActiveGirlfriend(gf);
     closeDialog(qs("#customizeModal"));
+    switchView("home");
     showToast(t.gfSaved);
   } catch (error) {
     if (errorEl) errorEl.textContent = error.message || String(error);
@@ -524,6 +610,66 @@ function renderChatMessages() {
   getTranscript(activeGirlfriend).forEach((message) =>
     appendChatMessage(message.role === "user" ? "user" : "character", message.content)
   );
+}
+
+function appendStageChatMessage(sender, content) {
+  const container = qs("#stageChatMessages");
+  if (!container) return null;
+  const div = document.createElement("div");
+  div.className = sender === "user" ? "stage-chat-message user" : "stage-chat-message";
+  div.textContent = content;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function renderStageChatMessages() {
+  const container = qs("#stageChatMessages");
+  const subject = getStageSubject();
+  if (!container || !subject) return;
+  container.innerHTML = `<div class="stage-chat-message">${t.chatGreeting(subject.name)}</div>`;
+  getTranscript(subject)
+    .slice(-4)
+    .forEach((message) => appendStageChatMessage(message.role === "user" ? "user" : "character", message.content));
+}
+
+async function sendStageChatMessage() {
+  const subject = getStageSubject();
+  if (chatBusy || !subject) return;
+  const input = qs("#stageChatInput");
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  input.value = "";
+  chatBusy = true;
+  const transcript = getTranscript(subject);
+  appendStageChatMessage("user", content);
+  transcript.push({ role: "user", content });
+
+  const typing = appendStageChatMessage("character", "…");
+  let reply = null;
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locale,
+        character: { name: subject.name, age: subject.age, tag: subject.tag },
+        messages: transcript.slice(-16)
+      })
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      if (payload && typeof payload.reply === "string" && payload.reply.trim()) reply = payload.reply.trim();
+    }
+  } catch (error) {
+    // use local fallback
+  }
+  if (typing) typing.remove();
+  const finalReply = reply || t.chatPlaceholderReply;
+  appendStageChatMessage("character", finalReply);
+  if (reply) transcript.push({ role: "assistant", content: reply });
+  chatBusy = false;
 }
 
 async function ensureChatSession(gf) {
@@ -574,7 +720,6 @@ async function hydrateChatMessages() {
 }
 
 function openChat() {
-  if (!requireAuth()) return;
   if (!activeGirlfriend) {
     openCustomize();
     return;
@@ -681,10 +826,6 @@ function updateVideoSummary() {
 
 function openVideo() {
   if (!requireAuth()) return;
-  if (!activeGirlfriend) {
-    openCustomize();
-    return;
-  }
   const previewState = qs("#previewState");
   if (previewState) previewState.textContent = t.ready;
   renderTemplateGrid();
@@ -704,7 +845,8 @@ async function generateVideo() {
 }
 
 async function runGenerate() {
-  if (!supabaseClient || !session || !activeGirlfriend || !currentTemplate) return;
+  const subject = getStageSubject();
+  if (!supabaseClient || !session || !subject || !currentTemplate) return;
   const cost = currentTemplate.cost;
   if (balance < cost) {
     closeDialog(qs("#videoModal"));
@@ -716,10 +858,9 @@ async function runGenerate() {
   if (previewState) previewState.textContent = t.generationRunning;
   if (generateButton) generateButton.disabled = true;
   const previewImage =
-    activeGirlfriend.image &&
-    (/^https?:\/\//i.test(activeGirlfriend.image) || activeGirlfriend.image.startsWith("data:image/"))
-      ? activeGirlfriend.image
-      : makePortrait(12, activeGirlfriend.name, activeGirlfriend.tag);
+    subject.image && (/^https?:\/\//i.test(subject.image) || subject.image.startsWith("data:image/"))
+      ? subject.image
+      : makePortrait(12, subject.name, subject.tag);
 
   try {
     const response = await fetch("/api/generate-video", {
@@ -732,14 +873,14 @@ async function runGenerate() {
         locale,
         mode: "video",
         cost,
-        prompt: t.prompt(currentTemplate, activeGirlfriend),
+        prompt: t.prompt(currentTemplate, subject),
         previewImage,
         character: {
-          id: activeGirlfriend.id,
-          name: activeGirlfriend.name,
-          age: activeGirlfriend.age,
-          tag: activeGirlfriend.tag,
-          image: activeGirlfriend.image
+          id: subject.id,
+          name: subject.name,
+          age: subject.age,
+          tag: subject.tag,
+          image: subject.image
         },
         template: {
           id: currentTemplate.id,
@@ -868,8 +1009,9 @@ function updateAuthUi() {
 
 function updateBalance() {
   const coinBalance = qs("#coinBalance");
-  if (!coinBalance) return;
-  coinBalance.textContent = session ? String(balance) : "—";
+  if (coinBalance) coinBalance.textContent = session ? String(balance) : "—";
+  const topBalance = qs("#topBalance");
+  if (topBalance) topBalance.textContent = session ? String(balance) : "充值";
 }
 
 function resetUserState() {
@@ -1010,19 +1152,31 @@ async function handleAuthButtonClick() {
 qsa("[data-view]").forEach((button) => {
   button.addEventListener("click", () => {
     const view = button.dataset.view;
-    if (view === "profile" && !requireAuth()) return;
     switchView(view);
   });
 });
 
-const actionChat = qs("#actionChat");
-if (actionChat) actionChat.addEventListener("click", openChat);
-const actionVideo = qs("#actionVideo");
-if (actionVideo) actionVideo.addEventListener("click", openVideo);
-const actionCustomize = qs("#actionCustomize");
-if (actionCustomize) actionCustomize.addEventListener("click", openCustomize);
+const stageVideoButton = qs("#stageVideoButton");
+if (stageVideoButton) stageVideoButton.addEventListener("click", openVideo);
+const stageChatSend = qs("#stageChatSend");
+if (stageChatSend) stageChatSend.addEventListener("click", sendStageChatMessage);
+const stageChatInput = qs("#stageChatInput");
+if (stageChatInput) {
+  stageChatInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") sendStageChatMessage();
+  });
+}
 const stageEmptyEl = qs("#stageEmpty");
 if (stageEmptyEl) stageEmptyEl.addEventListener("click", openCustomize);
+const stageTouch = qs("#stageTouch");
+if (stageTouch) {
+  stageTouch.addEventListener("click", () => {
+    moodIndex += 1;
+    appendStageChatMessage("character", t.stageMoods[moodIndex % t.stageMoods.length]);
+  });
+}
+const profileCreateGirlfriend = qs("#profileCreateGirlfriend");
+if (profileCreateGirlfriend) profileCreateGirlfriend.addEventListener("click", openCustomize);
 
 qsa("[data-close-chat]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#chatModal"))));
 qsa("[data-close-video]").forEach((button) => button.addEventListener("click", () => closeDialog(qs("#videoModal"))));

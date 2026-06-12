@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AIAI - 首页",
-  description: "首页、创作、消息与我的 H5 原型。"
+  title: "AIAI - AI 女友",
+  description: "定制 AI 女友、聊天陪伴与视频创作的移动 H5 原型。"
 };
 
 export default function RootLayout({

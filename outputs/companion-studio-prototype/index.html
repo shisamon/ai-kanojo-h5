@@ -58,46 +58,66 @@
       </aside>
 
       <main class="workspace gf-workspace">
-        <section class="view is-visible gf-stage" id="view-home">
-          <img id="stageImage" class="stage-image" alt="女友形象" />
-          <div class="stage-overlay"></div>
-          <div class="stage-top">
-            <div>
-              <strong id="stageName">AIAI</strong>
-              <span id="stageTag"></span>
-            </div>
+        <section class="view is-visible gf-stage game-stage" id="view-home">
+          <div class="game-sky"></div>
+          <div class="game-topbar">
+            <button class="player-pill" data-view="profile" aria-label="打开我的页面">
+              <img id="activeAvatarMini" alt="当前女友" />
+              <span>
+                <b id="stageName">AIAI</b>
+                <small id="stageTag">等待定制</small>
+              </span>
+            </button>
+            <button class="diamond-pill" data-open-upgrade>
+              <span>◆</span>
+              <b id="topBalance">—</b>
+            </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
-            <p>还没有女友，先定制一个吧</p>
+            <p>先定制一个属于你的电子女友</p>
           </div>
-          <div class="stage-actions">
-            <button id="actionChat"><span>💬</span><b>聊天</b></button>
-            <button id="actionVideo"><span>🎬</span><b>视频</b></button>
-            <button id="actionCustomize"><span>✨</span><b>定制</b></button>
+          <button class="character-button" id="stageTouch" type="button" aria-label="互动">
+            <span class="character-aura"></span>
+            <img id="stageImage" class="stage-image" alt="女友形象" />
+          </button>
+          <div class="affinity-pill">
+            <span>亲密度</span>
+            <b id="stageAffinity">Lv.1</b>
+          </div>
+          <div class="stage-chat-dock">
+            <div class="stage-chat-messages" id="stageChatMessages"></div>
+            <div class="stage-chat-composer">
+              <input id="stageChatInput" type="text" placeholder="跟她说点什么..." />
+              <button class="video-chip" id="stageVideoButton" type="button">视频</button>
+              <button class="send-chip" id="stageChatSend" type="button">发送</button>
+            </div>
           </div>
         </section>
 
         <section class="view" id="view-profile" aria-labelledby="profileTitle">
-          <div class="profile-layout logged-profile">
+          <div class="profile-layout logged-profile me-page">
             <section class="profile-hero">
               <img id="profileAvatar" alt="资料头像" />
               <div>
+                <span class="eyebrow">我的</span>
                 <h1 id="profileTitle">游客</h1>
                 <span id="profileId">未登录</span>
               </div>
-              <button class="ghost-button" data-open-profile-edit>编辑资料</button>
               <button class="icon-button profile-settings-button" data-open-settings aria-label="设置">⋯</button>
             </section>
 
             <section class="membership-band">
               <div>
-                <h2>余额 <span id="coinBalance">—</span></h2>
+                <span>钻石余额</span>
+                <h2><span id="coinBalance">—</span></h2>
               </div>
               <button class="primary-button" data-open-upgrade>充值</button>
             </section>
 
             <section class="profile-works">
-              <h2 class="gf-section-title">我的女友</h2>
+              <div class="section-title-row">
+                <h2 class="gf-section-title">切换女友</h2>
+              </div>
               <div class="gf-list" id="gfList"></div>
             </section>
 
