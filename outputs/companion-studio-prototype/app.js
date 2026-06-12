@@ -317,7 +317,15 @@ function getAffinity(gf) {
   const base = gf ? hashValue(`${gf.id}-${gf.name}`) : 0;
   const level = 1 + (base % 5);
   const percent = 24 + level * 14 + (base % 12);
-  return { level, percent: Math.min(96, percent) };
+  const palettes = [
+    ["#ff3f5f", "#ff8a4c"],
+    ["#ff7a3d", "#ffd166"],
+    ["#ffd166", "#b4e35d"],
+    ["#31d6c8", "#73a7ff"],
+    ["#9d7cff", "#ff4d9a"]
+  ];
+  const [start, end] = palettes[level - 1] || palettes[0];
+  return { level, percent: Math.min(96, percent), start, end };
 }
 
 // ---------- data loaders ----------
@@ -455,7 +463,11 @@ function renderStage() {
   if (stageName) stageName.textContent = subject ? subject.name : "AIAI";
   if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : t.stageCustomizeHint;
   if (relationshipLabel) relationshipLabel.textContent = `Lv.${affinity.level}`;
-  if (relationshipFill) relationshipFill.style.setProperty("--bond", `${affinity.percent}%`);
+  if (relationshipFill) {
+    relationshipFill.style.setProperty("--bond", `${affinity.percent}%`);
+    relationshipFill.style.setProperty("--bond-start", affinity.start);
+    relationshipFill.style.setProperty("--bond-end", affinity.end);
+  }
   if (stageEmpty) stageEmpty.hidden = Boolean(subject);
   renderStageChatMessages();
 }

@@ -2854,7 +2854,7 @@ body {
 .relationship-link {
   position: relative;
   display: grid;
-  gap: 4px;
+  gap: 5px;
   align-items: center;
   min-width: 0;
 }
@@ -2870,50 +2870,49 @@ body {
 .relationship-line {
   position: relative;
   display: block;
-  height: 4px;
+  height: 12px;
   overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.relationship-line::before,
-.relationship-line::after {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  width: 8px;
-  height: 8px;
-  content: "";
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 45%),
+    rgba(12, 14, 20, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.38),
+    0 0 18px rgba(0, 0, 0, 0.18);
 }
 
 .relationship-line::before {
-  left: 0;
-}
-
-.relationship-line::after {
-  right: 0;
+  position: absolute;
+  inset: 2px 3px auto;
+  z-index: 3;
+  height: 3px;
+  content: "";
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .relationship-line i {
   position: absolute;
   inset: 0 auto 0 0;
   width: var(--bond, 38%);
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--pink), var(--teal));
-  box-shadow: 0 0 18px rgba(49, 214, 200, 0.34);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 46%),
+    linear-gradient(90deg, var(--bond-start, #ff3f5f), var(--bond-end, #ff8a4c));
+  box-shadow: 0 0 16px rgba(255, 120, 100, 0.38);
   transition: width 0.28s ease;
 }
 
 .relationship-link b {
   justify-self: center;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.82);
+  padding: 1px 7px 2px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.26);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 10px;
+  line-height: 1.2;
 }
 
 .switcher-modal {
