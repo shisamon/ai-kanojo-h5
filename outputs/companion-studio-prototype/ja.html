@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIAI - ホーム</title>
+    <title>AIAI - AI彼女</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -42,139 +42,45 @@
       </div>
     </div>
 
-    <div class="app-shell">
+    <div class="app-shell gf-shell">
       <aside class="sidebar">
         <div class="brand">
           <div class="brand-mark">♡</div>
           <div>
             <strong>AIAI</strong>
-            <span>AI彼女</span>
+            <span>AI 彼女</span>
           </div>
         </div>
-
         <nav class="nav" aria-label="メインナビ">
-          <button class="nav-item is-active" data-view="explore"><span>ホーム</span></button>
-          <button class="nav-item" data-view="generate"><span>創作</span></button>
-          <button class="nav-item" data-view="chat"><span>メッセージ</span></button>
-          <button class="nav-item" data-view="profile"><span>私</span></button>
+          <button class="nav-item is-active" data-view="home"><span>彼女</span></button>
+          <button class="nav-item" data-view="profile"><span>マイ</span></button>
         </nav>
-
-        <div class="side-actions">
-          <button class="upgrade-button" data-open-upgrade>チャージ</button>
-          <button class="ghost-button" id="authButton">ログイン</button>
-        </div>
-
-        <p class="legal">
-          ログインすると、利用規約、プライバシーポリシー、苦情ポリシー、コンテンツ削除ポリシー、18 U.S.C. 2257 準拠声明、会社概要、返金・返品ポリシーに同意したものとみなされます。既定では、18歳以上であることを確認します。
-        </p>
       </aside>
 
-      <main class="workspace">
-
-        <section class="view" id="view-generate" aria-labelledby="generateTitle">
-          <div class="section-head generate-head">
+      <main class="workspace gf-workspace">
+        <section class="view is-visible gf-stage" id="view-home">
+          <img id="stageImage" class="stage-image" alt="彼女" />
+          <div class="stage-overlay"></div>
+          <div class="stage-top">
             <div>
-              <p class="eyebrow">動画創作</p>
-              <h1 id="generateTitle">創作</h1>
+              <strong id="stageName">AIAI</strong>
+              <span id="stageTag"></span>
             </div>
           </div>
-
-          <div class="create-flow">
-            <section class="create-step">
-              <div class="step-head">
-                <b>1</b>
-                <div>
-                  <strong>人物画像を選択</strong>
-                  <span>既存の人物を選ぶか、人物画像をアップロードします。</span>
-                </div>
-              </div>
-              <div class="person-grid" id="personGrid"></div>
-              <label class="upload-card" id="uploadCard">
-                <input id="personUploadInput" type="file" accept="image/*" />
-                <span>＋</span>
-                <strong>人物画像をアップロード</strong>
-                <small id="uploadHint">JPG / PNG 対応</small>
-              </label>
-            </section>
-
-            <section class="create-step">
-              <div class="step-head">
-                <b>2</b>
-                <div>
-                  <strong>スタイルを選択</strong>
-                  <span>現在の動画生成スタイルを選びます。</span>
-                </div>
-              </div>
-              <div class="style-grid" id="styleGrid"></div>
-            </section>
-
-            <section class="create-step generate-bar">
-              <div class="create-summary">
-                <div><span>人物</span><strong id="characterName"></strong></div>
-                <div><span>スタイル</span><strong id="poseName"></strong></div>
-                <div><span>消費</span><strong><span id="generateCost">96</span></strong></div>
-              </div>
-              <button class="primary-button" id="generateButton">動画を生成</button>
-              <div class="preview-state generate-state" id="previewState">準備完了</div>
-            </section>
+          <div class="stage-empty" id="stageEmpty" hidden>
+            <p>まだ彼女がいません。カスタマイズしましょう</p>
           </div>
-        </section>
-
-        <section class="view is-visible video-feed-view" id="view-explore" aria-label="ホーム">
-          <div class="share-grid" id="exploreGrid"></div>
-        </section>
-
-        <section class="view" id="view-chat" aria-labelledby="chatTitle">
-          <div class="chat-layout logged-chat-layout chat-list-mode" id="chatLayout">
-            <aside class="conversation-list">
-              <div class="section-head compact">
-                <div>
-                  <h1 id="chatTitle">メッセージ</h1>
-                </div>
-              </div>
-              <div id="conversationList"></div>
-            </aside>
-            <section class="chat-panel">
-              <div class="chat-header">
-                <button class="icon-button chat-back" id="backToConversations">‹</button>
-                <img id="chatAvatar" alt="チャット画像" />
-                <div>
-                  <strong id="chatName">Lina Hsu</strong>
-                  <span>@Ol's_Erotes 作成</span>
-                </div>
-              </div>
-              <div class="chat-messages" id="chatMessages"></div>
-              <div class="chat-quick-actions" id="chatQuickActions"></div>
-              <div class="chat-input">
-                <input type="text" placeholder="何かを書いて..." />
-                <button>➤</button>
-              </div>
-            </section>
-            <aside class="album-panel">
-              <img id="albumHero" alt="キャラクターアルバム" />
-              <div class="album-thumbs">
-                <img id="albumThumbOne" alt="サムネイル 1" />
-                <img id="albumThumbTwo" alt="サムネイル 2" />
-                <img id="albumThumbThree" alt="サムネイル 3" />
-              </div>
-              <strong id="albumName">Lina Hsu, 21</strong>
-              <span>@Ol's_Erotes 作成 ›</span>
-              <p>21歳の台湾出身キャラクター。レンタル部屋に現れ、あなたが依頼者だと知って動揺する物語設定。</p>
-              <button class="primary-button">非公開コンテンツを見る</button>
-              <div class="album-actions">
-                <button>再スタート</button>
-                <button>いいね</button>
-                <button>共有</button>
-                <button>削除</button>
-              </div>
-            </aside>
+          <div class="stage-actions">
+            <button id="actionChat"><span>💬</span><b>チャット</b></button>
+            <button id="actionVideo"><span>🎬</span><b>動画</b></button>
+            <button id="actionCustomize"><span>✨</span><b>カスタム</b></button>
           </div>
         </section>
 
         <section class="view" id="view-profile" aria-labelledby="profileTitle">
           <div class="profile-layout logged-profile">
             <section class="profile-hero">
-              <img id="profileAvatar" alt="プロフィール画像" />
+              <img id="profileAvatar" alt="アバター" />
               <div>
                 <h1 id="profileTitle">ゲスト</h1>
                 <span id="profileId">未ログイン</span>
@@ -182,42 +88,89 @@
               <button class="ghost-button" data-open-profile-edit>プロフィール編集</button>
               <button class="icon-button profile-settings-button" data-open-settings aria-label="設定">⋯</button>
             </section>
-            <div class="metric-grid">
-              <div><strong>0</strong><span>フォロワー ›</span></div>
-              <div><strong>0</strong><span>フォロー ›</span></div>
-            </div>
+
             <section class="membership-band">
               <div>
-                <h2>残高 <span id="coinBalance">570</span></h2>
+                <h2>残高 <span id="coinBalance">—</span></h2>
               </div>
               <button class="primary-button" data-open-upgrade>チャージ</button>
             </section>
+
             <section class="profile-works">
-              <div class="profile-works-tabs">
-                <button class="is-active" data-profile-tab="works">マイ作品</button>
-                <button data-profile-tab="likes">いいね済み</button>
-              </div>
+              <h2 class="gf-section-title">マイ彼女</h2>
+              <div class="gf-list" id="gfList"></div>
+            </section>
+
+            <section class="profile-works">
+              <h2 class="gf-section-title">マイ動画</h2>
               <div id="profileHistory"></div>
-              <div id="profileLikes" hidden></div>
             </section>
           </div>
         </section>
-
       </main>
     </div>
 
-    <dialog id="characterModal" class="modal">
+    <dialog id="chatModal" class="modal chat-modal">
       <div class="modal-head">
-        <div>
-          <h2>キャラクターを選択</h2>
-          <span>このテンプレートの参照キャラクターを選びます。</span>
+        <div class="chat-modal-head">
+          <img id="chatAvatar" alt="彼女" />
+          <h2 id="chatName">チャット</h2>
         </div>
-        <button class="icon-button" data-close-modal>×</button>
+        <button class="icon-button" data-close-chat>×</button>
       </div>
-      <div class="modal-grid" id="characterModalGrid"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input id="chatInputField" type="text" placeholder="彼女に話しかけよう..." />
+        <button id="chatSendButton">➤</button>
+      </div>
     </dialog>
 
-    <dialog id="upgradeModal" class="modal upgrade-modal">
+    <dialog id="videoModal" class="modal video-modal">
+      <div class="modal-head">
+        <div>
+          <h2>動画を生成</h2>
+          <span>動画スタイルを選択</span>
+        </div>
+        <button class="icon-button" data-close-video>×</button>
+      </div>
+      <div class="style-grid" id="styleGrid"></div>
+      <div class="generate-bar">
+        <div class="create-summary">
+          <div><span>スタイル</span><strong id="poseName"></strong></div>
+          <div><span>消費</span><strong><span id="generateCost">96</span></strong></div>
+        </div>
+        <button class="primary-button" id="generateButton">動画を生成</button>
+        <div class="preview-state generate-state" id="previewState">準備完了</div>
+      </div>
+    </dialog>
+
+    <dialog id="customizeModal" class="modal customize-modal">
+      <div class="modal-head">
+        <div>
+          <h2>彼女をカスタマイズ</h2>
+          <span>形象を選ぶか画像をアップロードして、名前をつけましょう</span>
+        </div>
+        <button class="icon-button" data-close-customize>×</button>
+      </div>
+      <div class="person-grid" id="personGrid"></div>
+      <label class="upload-card" id="uploadCard">
+        <input id="personUploadInput" type="file" accept="image/*" />
+        <span>＋</span>
+        <strong>画像をアップロード</strong>
+        <small id="uploadHint">JPG / PNG 対応</small>
+      </label>
+      <label class="field-block">
+        <span>彼女の名前</span>
+        <input id="gfNameInput" type="text" placeholder="名前をつけてください" />
+      </label>
+      <p class="legal" id="customizeError"></p>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-customize>キャンセル</button>
+        <button class="primary-button" id="saveGirlfriendButton">保存</button>
+      </div>
+    </dialog>
+
+    <dialog id="upgradeModal" class="modal upgrade-modal confirm-modal">
       <div class="modal-head">
         <div>
           <h2>チャージ</h2>
@@ -226,27 +179,26 @@
         <button class="icon-button" data-close-upgrade>×</button>
       </div>
       <div class="deal-strip">
-        <strong>支払い方法を選ぶと確認画面へ進みます。</strong>
-        <span>これはデモのため、実際の決済は発生しません。</span>
+        <strong>支払い方法を選択すると確認画面へ進みます。</strong>
+        <span>デモのため実際の決済は行われません。</span>
       </div>
       <div class="payment-grid">
-        <button class="payment-card" data-payment="WeChat Pay">
-          <span>WeChat</span>
-          <strong>WeChat Pay</strong>
+        <button class="payment-card" data-payment="クレジットカード">
+          <span>カード</span>
+          <strong>クレジットカード</strong>
         </button>
-        <button class="payment-card" data-payment="Alipay">
-          <span>Alipay</span>
-          <strong>Alipay</strong>
+        <button class="payment-card" data-payment="PayPay">
+          <span>PayPay</span>
+          <strong>PayPay</strong>
         </button>
       </div>
-      <p class="upgrade-note">支払い方法を選択すると、次の確認へ進みます。</p>
     </dialog>
 
     <dialog id="profileEditModal" class="modal confirm-modal">
       <div class="modal-head">
         <div>
           <h2>プロフィール編集</h2>
-          <span>ID は変更できません。ニックネームのみ変更できます。</span>
+          <span>IDは変更できません。ニックネームのみ変更可能です。</span>
         </div>
         <button class="icon-button" data-close-profile-edit>×</button>
       </div>
@@ -261,20 +213,6 @@
       <div class="confirm-actions">
         <button class="secondary-button" data-close-profile-edit>キャンセル</button>
         <button class="primary-button" data-save-profile>保存</button>
-      </div>
-    </dialog>
-
-    <dialog id="deleteConfirmModal" class="modal confirm-modal">
-      <div class="modal-head">
-        <div>
-          <h2>アカウント削除を確認しますか？</h2>
-          <span>確認後、アカウント削除リクエストを送信します。</span>
-        </div>
-        <button class="icon-button" data-close-delete>×</button>
-      </div>
-      <div class="confirm-actions">
-        <button class="secondary-button" data-close-delete>キャンセル</button>
-        <button class="primary-button" data-confirm-delete>削除を確認</button>
       </div>
     </dialog>
 
@@ -321,50 +259,19 @@
       </div>
     </dialog>
 
-    <dialog id="authModal" class="modal confirm-modal">
+    <dialog id="deleteConfirmModal" class="modal confirm-modal">
       <div class="modal-head">
         <div>
-          <h2 id="authModalTitle">ログイン</h2>
-          <span id="authModalSubtitle">メールアドレスでログイン。アカウントがなければ登録できます。</span>
+          <h2>アカウントを削除しますか？</h2>
+          <span>確認後、削除リクエストを送信します。</span>
         </div>
-        <button class="icon-button" data-close-auth>×</button>
+        <button class="icon-button" data-close-delete>×</button>
       </div>
-      <label class="field-block">
-        <span>メール</span>
-        <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" />
-      </label>
-      <label class="field-block">
-        <span>パスワード</span>
-        <input id="authPassword" type="password" autocomplete="current-password" placeholder="6文字以上" />
-      </label>
-      <p class="legal" id="authError"></p>
       <div class="confirm-actions">
-        <button class="secondary-button" id="authToggleMode">アカウント未登録？新規登録</button>
-        <button class="primary-button" id="authSubmit">ログイン</button>
+        <button class="secondary-button" data-close-delete>キャンセル</button>
+        <button class="primary-button" data-confirm-delete>削除を確認</button>
       </div>
     </dialog>
-
-    <dialog id="shareModal" class="modal share-modal">
-      <div class="modal-head">
-        <div>
-          <h2 id="shareModalTitle">作品を共有</h2>
-          <span id="shareModalSubtitle">共有先のチャットアプリを選択してください。</span>
-        </div>
-        <button class="icon-button" data-close-share>×</button>
-      </div>
-      <div class="share-platform-grid" id="sharePlatformGrid"></div>
-    </dialog>
-
-    <aside class="history-drawer" id="historyDrawer" aria-label="履歴ドロワー">
-      <div class="modal-head">
-        <div>
-          <h2>履歴</h2>
-          <span>最近創作した内容</span>
-        </div>
-        <button class="icon-button" id="closeHistory">×</button>
-      </div>
-      <div id="historyList"></div>
-    </aside>
 
     <div class="toast" id="toast"></div>
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIAI - 首页</title>
+    <title>AIAI - 电子女友</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -38,11 +38,11 @@
         </label>
         <p class="legal auth-error" id="authScreenError"></p>
         <button class="primary-button auth-submit" id="authScreenSubmit">登录</button>
-        <button class="ghost-link" id="authGuestLink">暂不登录，继续浏览 ›</button>
+        <button class="ghost-link" id="authGuestLink">暂不登录，先看看 ›</button>
       </div>
     </div>
 
-    <div class="app-shell">
+    <div class="app-shell gf-shell">
       <aside class="sidebar">
         <div class="brand">
           <div class="brand-mark">♡</div>
@@ -51,123 +51,29 @@
             <span>AI 女友</span>
           </div>
         </div>
-
         <nav class="nav" aria-label="主导航">
-          <button class="nav-item is-active" data-view="explore"><span>首页</span></button>
-          <button class="nav-item" data-view="generate"><span>创作</span></button>
-          <button class="nav-item" data-view="chat"><span>消息</span></button>
+          <button class="nav-item is-active" data-view="home"><span>女友</span></button>
           <button class="nav-item" data-view="profile"><span>我</span></button>
         </nav>
-
-        <div class="side-actions">
-          <button class="upgrade-button" data-open-upgrade>充值</button>
-          <button class="ghost-button" id="authButton">登录</button>
-        </div>
-
-        <p class="legal">
-          登录即表示你同意我们的服务条款、隐私政策、投诉政策、内容移除政策、18 U.S.C. 2257 合规声明、关于我们、退款与退货政策。默认情况下，你确认自己已年满 18 岁。
-        </p>
       </aside>
 
-      <main class="workspace">
-
-        <section class="view" id="view-generate" aria-labelledby="generateTitle">
-          <div class="section-head generate-head">
+      <main class="workspace gf-workspace">
+        <section class="view is-visible gf-stage" id="view-home">
+          <img id="stageImage" class="stage-image" alt="女友形象" />
+          <div class="stage-overlay"></div>
+          <div class="stage-top">
             <div>
-              <p class="eyebrow">视频创作</p>
-              <h1 id="generateTitle">创作</h1>
+              <strong id="stageName">AIAI</strong>
+              <span id="stageTag"></span>
             </div>
           </div>
-
-          <div class="create-flow">
-            <section class="create-step">
-              <div class="step-head">
-                <b>1</b>
-                <div>
-                  <strong>选择人物图片</strong>
-                  <span>选择已有人物，或上传一张人物图片。</span>
-                </div>
-              </div>
-              <div class="person-grid" id="personGrid"></div>
-              <label class="upload-card" id="uploadCard">
-                <input id="personUploadInput" type="file" accept="image/*" />
-                <span>＋</span>
-                <strong>上传人物图片</strong>
-                <small id="uploadHint">支持 JPG / PNG</small>
-              </label>
-            </section>
-
-            <section class="create-step">
-              <div class="step-head">
-                <b>2</b>
-                <div>
-                  <strong>选择风格</strong>
-                  <span>选择当前视频生成风格。</span>
-                </div>
-              </div>
-              <div class="style-grid" id="styleGrid"></div>
-            </section>
-
-            <section class="create-step generate-bar">
-              <div class="create-summary">
-                <div><span>人物</span><strong id="characterName"></strong></div>
-                <div><span>风格</span><strong id="poseName"></strong></div>
-                <div><span>消耗</span><strong><span id="generateCost">96</span></strong></div>
-              </div>
-              <button class="primary-button" id="generateButton">生成视频</button>
-              <div class="preview-state generate-state" id="previewState">准备就绪</div>
-            </section>
+          <div class="stage-empty" id="stageEmpty" hidden>
+            <p>还没有女友，先定制一个吧</p>
           </div>
-        </section>
-
-        <section class="view is-visible video-feed-view" id="view-explore" aria-label="首页">
-          <div class="share-grid" id="exploreGrid"></div>
-        </section>
-
-        <section class="view" id="view-chat" aria-labelledby="chatTitle">
-          <div class="chat-layout logged-chat-layout chat-list-mode" id="chatLayout">
-            <aside class="conversation-list">
-              <div class="section-head compact">
-                <div>
-                  <h1 id="chatTitle">消息</h1>
-                </div>
-              </div>
-              <div id="conversationList"></div>
-            </aside>
-            <section class="chat-panel">
-              <div class="chat-header">
-                <button class="icon-button chat-back" id="backToConversations">‹</button>
-                <img id="chatAvatar" alt="聊天头像" />
-                <div>
-                  <strong id="chatName">Lina Hsu</strong>
-                  <span>@Ol's_Erotes 创作</span>
-                </div>
-              </div>
-              <div class="chat-messages" id="chatMessages"></div>
-              <div class="chat-quick-actions" id="chatQuickActions"></div>
-              <div class="chat-input">
-                <input type="text" placeholder="写点什么..." />
-                <button>➤</button>
-              </div>
-            </section>
-            <aside class="album-panel">
-              <img id="albumHero" alt="角色相册" />
-              <div class="album-thumbs">
-                <img id="albumThumbOne" alt="缩略图 1" />
-                <img id="albumThumbTwo" alt="缩略图 2" />
-                <img id="albumThumbThree" alt="缩略图 3" />
-              </div>
-              <strong id="albumName">Lina Hsu, 21</strong>
-              <span>@Ol's_Erotes 创作 ›</span>
-              <p>21 岁的台湾角色。她来到你的出租屋，发现你就是委托人后陷入慌乱。</p>
-              <button class="primary-button">查看私密内容</button>
-              <div class="album-actions">
-                <button>重新开始</button>
-                <button>点赞</button>
-                <button>分享</button>
-                <button>删除</button>
-              </div>
-            </aside>
+          <div class="stage-actions">
+            <button id="actionChat"><span>💬</span><b>聊天</b></button>
+            <button id="actionVideo"><span>🎬</span><b>视频</b></button>
+            <button id="actionCustomize"><span>✨</span><b>定制</b></button>
           </div>
         </section>
 
@@ -182,42 +88,89 @@
               <button class="ghost-button" data-open-profile-edit>编辑资料</button>
               <button class="icon-button profile-settings-button" data-open-settings aria-label="设置">⋯</button>
             </section>
-            <div class="metric-grid">
-              <div><strong>0</strong><span>粉丝 ›</span></div>
-              <div><strong>0</strong><span>关注 ›</span></div>
-            </div>
+
             <section class="membership-band">
               <div>
-                <h2>余额 <span id="coinBalance">570</span></h2>
+                <h2>余额 <span id="coinBalance">—</span></h2>
               </div>
               <button class="primary-button" data-open-upgrade>充值</button>
             </section>
+
             <section class="profile-works">
-              <div class="profile-works-tabs">
-                <button class="is-active" data-profile-tab="works">我的创作</button>
-                <button data-profile-tab="likes">我的点赞</button>
-              </div>
+              <h2 class="gf-section-title">我的女友</h2>
+              <div class="gf-list" id="gfList"></div>
+            </section>
+
+            <section class="profile-works">
+              <h2 class="gf-section-title">我的视频</h2>
               <div id="profileHistory"></div>
-              <div id="profileLikes" hidden></div>
             </section>
           </div>
         </section>
-
       </main>
     </div>
 
-    <dialog id="characterModal" class="modal">
+    <dialog id="chatModal" class="modal chat-modal">
       <div class="modal-head">
-        <div>
-          <h2>选择角色</h2>
-          <span>为这个模板选择一个角色。</span>
+        <div class="chat-modal-head">
+          <img id="chatAvatar" alt="女友头像" />
+          <h2 id="chatName">聊天</h2>
         </div>
-        <button class="icon-button" data-close-modal>×</button>
+        <button class="icon-button" data-close-chat>×</button>
       </div>
-      <div class="modal-grid" id="characterModalGrid"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input">
+        <input id="chatInputField" type="text" placeholder="跟她说点什么..." />
+        <button id="chatSendButton">➤</button>
+      </div>
     </dialog>
 
-    <dialog id="upgradeModal" class="modal upgrade-modal">
+    <dialog id="videoModal" class="modal video-modal">
+      <div class="modal-head">
+        <div>
+          <h2>生成视频</h2>
+          <span>为她选择一个视频风格</span>
+        </div>
+        <button class="icon-button" data-close-video>×</button>
+      </div>
+      <div class="style-grid" id="styleGrid"></div>
+      <div class="generate-bar">
+        <div class="create-summary">
+          <div><span>风格</span><strong id="poseName"></strong></div>
+          <div><span>消耗</span><strong><span id="generateCost">96</span></strong></div>
+        </div>
+        <button class="primary-button" id="generateButton">生成视频</button>
+        <div class="preview-state generate-state" id="previewState">准备就绪</div>
+      </div>
+    </dialog>
+
+    <dialog id="customizeModal" class="modal customize-modal">
+      <div class="modal-head">
+        <div>
+          <h2>定制女友</h2>
+          <span>选择形象或上传图片，给她起个名字</span>
+        </div>
+        <button class="icon-button" data-close-customize>×</button>
+      </div>
+      <div class="person-grid" id="personGrid"></div>
+      <label class="upload-card" id="uploadCard">
+        <input id="personUploadInput" type="file" accept="image/*" />
+        <span>＋</span>
+        <strong>上传形象图片</strong>
+        <small id="uploadHint">支持 JPG / PNG</small>
+      </label>
+      <label class="field-block">
+        <span>她的名字</span>
+        <input id="gfNameInput" type="text" placeholder="给她起个名字" />
+      </label>
+      <p class="legal" id="customizeError"></p>
+      <div class="confirm-actions">
+        <button class="secondary-button" data-close-customize>取消</button>
+        <button class="primary-button" id="saveGirlfriendButton">保存</button>
+      </div>
+    </dialog>
+
+    <dialog id="upgradeModal" class="modal upgrade-modal confirm-modal">
       <div class="modal-head">
         <div>
           <h2>充值</h2>
@@ -239,7 +192,6 @@
           <strong>支付宝</strong>
         </button>
       </div>
-      <p class="upgrade-note">选择支付方式后进入下一步确认。</p>
     </dialog>
 
     <dialog id="profileEditModal" class="modal confirm-modal">
@@ -261,20 +213,6 @@
       <div class="confirm-actions">
         <button class="secondary-button" data-close-profile-edit>取消</button>
         <button class="primary-button" data-save-profile>保存</button>
-      </div>
-    </dialog>
-
-    <dialog id="deleteConfirmModal" class="modal confirm-modal">
-      <div class="modal-head">
-        <div>
-          <h2>确认删除账户？</h2>
-          <span>确认后将提交账户删除请求。</span>
-        </div>
-        <button class="icon-button" data-close-delete>×</button>
-      </div>
-      <div class="confirm-actions">
-        <button class="secondary-button" data-close-delete>取消</button>
-        <button class="primary-button" data-confirm-delete>确认删除</button>
       </div>
     </dialog>
 
@@ -321,50 +259,19 @@
       </div>
     </dialog>
 
-    <dialog id="authModal" class="modal confirm-modal">
+    <dialog id="deleteConfirmModal" class="modal confirm-modal">
       <div class="modal-head">
         <div>
-          <h2 id="authModalTitle">登录</h2>
-          <span id="authModalSubtitle">使用邮箱登录，没有账号可直接注册。</span>
+          <h2>确认删除账户？</h2>
+          <span>确认后将提交账户删除请求。</span>
         </div>
-        <button class="icon-button" data-close-auth>×</button>
+        <button class="icon-button" data-close-delete>×</button>
       </div>
-      <label class="field-block">
-        <span>邮箱</span>
-        <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" />
-      </label>
-      <label class="field-block">
-        <span>密码</span>
-        <input id="authPassword" type="password" autocomplete="current-password" placeholder="至少 6 位" />
-      </label>
-      <p class="legal" id="authError"></p>
       <div class="confirm-actions">
-        <button class="secondary-button" id="authToggleMode">没有账号？注册</button>
-        <button class="primary-button" id="authSubmit">登录</button>
+        <button class="secondary-button" data-close-delete>取消</button>
+        <button class="primary-button" data-confirm-delete>确认删除</button>
       </div>
     </dialog>
-
-    <dialog id="shareModal" class="modal share-modal">
-      <div class="modal-head">
-        <div>
-          <h2 id="shareModalTitle">分享作品</h2>
-          <span id="shareModalSubtitle">选择要分享的聊天软件。</span>
-        </div>
-        <button class="icon-button" data-close-share>×</button>
-      </div>
-      <div class="share-platform-grid" id="sharePlatformGrid"></div>
-    </dialog>
-
-    <aside class="history-drawer" id="historyDrawer" aria-label="历史抽屉">
-      <div class="modal-head">
-        <div>
-          <h2>历史</h2>
-          <span>最近创作的内容</span>
-        </div>
-        <button class="icon-button" id="closeHistory">×</button>
-      </div>
-      <div id="historyList"></div>
-    </aside>
 
     <div class="toast" id="toast"></div>
 
