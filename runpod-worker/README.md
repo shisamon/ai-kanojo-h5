@@ -1,4 +1,4 @@
-# AIAI RunPod Worker
+# soulmate RunPod Worker
 
 This is the first Serverless worker for `/api/generate-video`.
 

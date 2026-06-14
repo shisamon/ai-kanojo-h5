@@ -2,7 +2,7 @@ import Script from "next/script";
 import { getPrototypeBody } from "@/lib/prototype-html";
 
 export const metadata = {
-  title: "AIAI - ホーム"
+  title: "soulmate"
 };
 
 export default function JapanesePage() {
@@ -12,7 +12,7 @@ export default function JapanesePage() {
         {"document.documentElement.lang='ja';"}
       </Script>
       <div dangerouslySetInnerHTML={{ __html: getPrototypeBody("ja") }} />
-      <Script src="/prototype/app.js?v=20260615-4" strategy="afterInteractive" />
+      <Script src="/prototype/app.js?v=20260615-5" strategy="afterInteractive" />
     </>
   );
 }

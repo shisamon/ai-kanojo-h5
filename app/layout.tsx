@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AIAI - AI 女友",
-  description: "定制 AI 女友、聊天陪伴与视频创作的移动 H5 原型。",
+  title: "soulmate",
+  description: "定制 soulmate、聊天陪伴与视频创作的移动 H5 原型。",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "AIAI" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "soulmate" },
   icons: { apple: "/icons/apple-touch-icon.png" }
 };
 

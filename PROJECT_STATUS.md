@@ -1,4 +1,4 @@
-# AIAI 项目状态（2026-06-11）
+# soulmate 项目状态（2026-06-11）
 
 H5 原型：https://ai-kanojo-h5.vercel.app ｜ 仓库：github.com/shisamon/ai-kanojo-h5 ｜ Supabase 项目：ai-kanojo-h5 (ilsytudubuvxojrhvgui)
 

@@ -37,7 +37,7 @@ const dictionary = {
     authRegisterFailed: "注册失败，请稍后再试。",
     authSignedOut: "已退出登录。",
     authRequired: "请先登录。",
-    authGateRequired: "请先登录或注册，之后就可以创建你的电子女友。",
+    authGateRequired: "请先登录或注册，之后就可以创建你的 soulmate。",
     usernamePlaceholder: "用户名（6-20 位字母或数字）",
     loginPlaceholder: "用户名",
     usernameRule: "用户名需为 6-20 位英文字母或数字。",
@@ -49,18 +49,18 @@ const dictionary = {
     guestName: "游客",
     chatPlaceholderReply: "（角色回复将在接入对话模型后上线）",
     uploadedReady: "已选择上传图片。",
-    gfNameRequired: "先给她起个名字。",
+    gfNameRequired: "先给 soulmate 起个名字。",
     gfImageRequired: "选择一个形象或上传图片。",
-    gfSaved: "你的女友已创建。",
-    gfOnboardingTitle: "选择你的第一位女友",
+    gfSaved: "你的 soulmate 已创建。",
+    gfOnboardingTitle: "选择你的第一位 soulmate",
     gfOnboardingHint: "选择一个形象或上传图片，保存后进入陪伴首页。",
     gfSwitched: (name) => `已切换到 ${name}。`,
     affinityLevelUp: (level) => `亲密度升级！Lv.${level}`,
-    gfDeleted: "已删除该女友。",
+    gfDeleted: "已删除该 soulmate。",
     gfDeleteConfirm: (name) => `确定删除 ${name} 吗？`,
-    noGirlfriend: "还没有女友，先定制一个吧",
+    noGirlfriend: "还没有 soulmate，先定制一个吧",
     newGirlfriend: "新建",
-    addGirlfriend: "新增女友",
+    addGirlfriend: "新增 soulmate",
     addGirlfriendHint: "定制新的陪伴对象",
     chatGreeting: (name) => `我是 ${name}，今天想我了吗？`,
     stageMoods: ["今天也在等你。", "点我一下，我会有反应哦。", "想聊天、拍视频，还是换一套形象？", "我会记住你选择的样子。"],
@@ -90,7 +90,7 @@ const dictionary = {
     authRegisterFailed: "登録に失敗しました。時間をおいて再試行してください。",
     authSignedOut: "ログアウトしました。",
     authRequired: "先にログインしてください。",
-    authGateRequired: "ログインまたは登録後、AI彼女を作成できます。",
+    authGateRequired: "ログインまたは登録後、soulmateを作成できます。",
     usernamePlaceholder: "ユーザー名（英数字6-20文字）",
     loginPlaceholder: "ユーザー名",
     usernameRule: "ユーザー名は英数字6-20文字にしてください。",
@@ -104,16 +104,16 @@ const dictionary = {
     uploadedReady: "アップロード画像を選択しました。",
     gfNameRequired: "先に名前をつけてください。",
     gfImageRequired: "形象を選ぶか画像をアップロードしてください。",
-    gfSaved: "彼女を作成しました。",
-    gfOnboardingTitle: "最初のAI彼女を選択",
+    gfSaved: "soulmateを作成しました。",
+    gfOnboardingTitle: "最初のsoulmateを選択",
     gfOnboardingHint: "形象を選ぶか画像をアップロードして、保存後にホームへ進みます。",
     gfSwitched: (name) => `${name} に切り替えました。`,
     affinityLevelUp: (level) => `親密度がアップ！Lv.${level}`,
-    gfDeleted: "削除しました。",
+    gfDeleted: "soulmateを削除しました。",
     gfDeleteConfirm: (name) => `${name} を削除しますか？`,
-    noGirlfriend: "まだ彼女がいません。カスタマイズしましょう",
+    noGirlfriend: "まだsoulmateがいません。カスタマイズしましょう",
     newGirlfriend: "新規",
-    addGirlfriend: "彼女を追加",
+    addGirlfriend: "soulmateを追加",
     addGirlfriendHint: "新しい相手を作成",
     chatGreeting: (name) => `${name}だよ。今日も会いに来てくれたの？`,
     stageMoods: ["今日も待ってたよ。", "タップすると反応するよ。", "チャット、動画、カスタム。何をする？", "選んだ姿を覚えておくね。"],
@@ -614,10 +614,10 @@ function renderStage() {
   const relationshipFill = qs("#relationshipFill");
   const subject = getStageSubject();
   const affinity = getAffinity(subject);
-  if (stageImage) stageImage.src = subject ? subject.image : makePortrait(3, "AIAI", "");
-  if (avatarMini) avatarMini.src = subject ? subject.image : makePortrait(3, "AIAI", "");
+  if (stageImage) stageImage.src = subject ? subject.image : makePortrait(3, "soulmate", "");
+  if (avatarMini) avatarMini.src = subject ? subject.image : makePortrait(3, "soulmate", "");
   if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
-  if (stageName) stageName.textContent = subject ? subject.name : "AIAI";
+  if (stageName) stageName.textContent = subject ? subject.name : "soulmate";
   if (stageTag) stageTag.textContent = subject && subject.tag ? subject.tag : t.stageCustomizeHint;
   if (relationshipLabel) relationshipLabel.textContent = `Lv.${affinity.level}`;
   if (relationshipFill) {
@@ -780,7 +780,7 @@ function updateCustomizeOnboardingUi() {
       profile?.display_name || profile?.username || session?.user?.email || (locale === "ja" ? "ログイン済み" : "已登录");
   }
   const title = modal.querySelector(".modal-head h2");
-  if (title) title.textContent = onboardingActive ? t.gfOnboardingTitle : locale === "ja" ? "彼女をカスタマイズ" : "定制女友";
+  if (title) title.textContent = onboardingActive ? t.gfOnboardingTitle : locale === "ja" ? "soulmateをカスタマイズ" : "定制 soulmate";
   const hint = modal.querySelector(".modal-head span");
   if (hint) {
     hint.textContent = onboardingActive
@@ -790,7 +790,7 @@ function updateCustomizeOnboardingUi() {
         : "选择形象或上传图片，给她起个名字";
   }
   const save = qs("#saveGirlfriendButton");
-  if (save) save.textContent = onboardingActive ? (locale === "ja" ? "彼女と始める" : "开始陪伴") : locale === "ja" ? "保存" : "保存";
+  if (save) save.textContent = onboardingActive ? (locale === "ja" ? "soulmateと始める" : "开始陪伴") : locale === "ja" ? "保存" : "保存";
 }
 
 function openCustomize(options = {}) {

@@ -1,7 +1,7 @@
 {
-  "name": "AIAI - AI 女友",
-  "short_name": "AIAI",
-  "description": "定制 AI 女友、聊天陪伴与视频创作。",
+  "name": "soulmate",
+  "short_name": "soulmate",
+  "description": "定制 soulmate、聊天陪伴与视频创作。",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

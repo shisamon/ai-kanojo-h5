@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIAI - AI彼女</title>
+    <title>soulmate</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -12,8 +12,8 @@
         <div class="brand auth-brand">
           <div class="brand-mark">♡</div>
           <div>
-            <strong>AIAI</strong>
-            <span>AI 彼女</span>
+            <strong>soulmate</strong>
+            <span>AI soulmate</span>
           </div>
         </div>
         <div class="auth-tabs">
@@ -38,7 +38,7 @@
         </label>
         <p class="legal auth-error" id="authScreenError"></p>
         <button class="primary-button auth-submit" id="authScreenSubmit">ログイン</button>
-        <p class="auth-note">登録後、最初のAI彼女を選んでカスタマイズします。</p>
+        <p class="auth-note">登録後、最初のsoulmateを選んでカスタマイズします。</p>
       </div>
     </div>
 
@@ -47,12 +47,12 @@
         <div class="brand">
           <div class="brand-mark">♡</div>
           <div>
-            <strong>AIAI</strong>
-            <span>AI 彼女</span>
+            <strong>soulmate</strong>
+            <span>AI soulmate</span>
           </div>
         </div>
         <nav class="nav" aria-label="メインナビ">
-          <button class="nav-item is-active" data-view="home"><span>彼女</span></button>
+          <button class="nav-item is-active" data-view="home"><span>soulmate</span></button>
           <button class="nav-item" data-view="profile"><span>マイ</span></button>
         </nav>
       </aside>
@@ -61,10 +61,10 @@
         <section class="view is-visible gf-stage game-stage" id="view-home">
           <div class="game-sky"></div>
           <div class="game-topbar">
-            <button class="player-pill" id="stageGirlfriendButton" aria-label="彼女を切り替え">
-              <img id="activeAvatarMini" alt="現在の彼女" />
+            <button class="player-pill" id="stageGirlfriendButton" aria-label="soulmateを切り替え">
+              <img id="activeAvatarMini" alt="現在のsoulmate" />
               <span>
-                <b id="stageName">AIAI</b>
+                <b id="stageName">soulmate</b>
                 <small id="stageTag">カスタム待ち</small>
               </span>
             </button>
@@ -82,16 +82,16 @@
             </button>
           </div>
           <div class="stage-empty" id="stageEmpty" hidden>
-            <p>まずは自分だけのAI彼女を作りましょう</p>
+            <p>まずは自分だけのsoulmateを作りましょう</p>
           </div>
           <button class="character-button" id="stageTouch" type="button" aria-label="ふれあい">
             <span class="character-aura"></span>
-            <img id="stageImage" class="stage-image" alt="彼女" />
+            <img id="stageImage" class="stage-image" alt="soulmate" />
           </button>
           <div class="stage-chat-dock">
             <div class="stage-chat-messages" id="stageChatMessages"></div>
             <div class="stage-chat-composer">
-              <input id="stageChatInput" type="text" placeholder="彼女に話しかけよう..." />
+              <input id="stageChatInput" type="text" placeholder="soulmateに話しかけよう..." />
               <button class="send-chip" id="stageChatSend" type="button">送信</button>
             </div>
           </div>
@@ -126,13 +126,13 @@
     <dialog id="chatModal" class="modal chat-modal">
       <div class="modal-head">
         <div class="chat-modal-head">
-          <img id="chatAvatar" alt="彼女" />
+          <img id="chatAvatar" alt="soulmate" />
           <h2 id="chatName">チャット</h2>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input">
-        <input id="chatInputField" type="text" placeholder="彼女に話しかけよう..." />
+        <input id="chatInputField" type="text" placeholder="soulmateに話しかけよう..." />
         <button id="chatSendButton">➤</button>
       </div>
     </dialog>
@@ -158,7 +158,7 @@
     <dialog id="girlfriendSwitchModal" class="modal switcher-modal">
       <div class="modal-head">
         <div>
-          <h2>彼女を切り替え</h2>
+          <h2>soulmateを切り替え</h2>
         </div>
       </div>
       <div class="gf-switch-grid" id="gfSwitchGrid"></div>
@@ -167,7 +167,7 @@
     <dialog id="customizeModal" class="modal customize-modal">
       <div class="modal-head">
         <div>
-          <h2>彼女をカスタマイズ</h2>
+          <h2>soulmateをカスタマイズ</h2>
           <span>形象を選ぶか画像をアップロードして、名前をつけましょう</span>
         </div>
       </div>
@@ -184,7 +184,7 @@
         <small id="uploadHint">JPG / PNG 対応</small>
       </label>
       <label class="field-block">
-        <span>彼女の名前</span>
+        <span>soulmateの名前</span>
         <input id="gfNameInput" type="text" placeholder="名前をつけてください" />
       </label>
       <p class="legal" id="customizeError"></p>

@@ -1,6 +1,6 @@
 // Minimal service worker: enables PWA install. Network-first, no aggressive caching
 // so app/API updates always reach the user.
-const VERSION = "aiai-sw-v1";
+const VERSION = "soulmate-sw-v1";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));

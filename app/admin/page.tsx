@@ -374,7 +374,7 @@ export default function AdminPage() {
         <div style={{ ...sectionCard, width: "min(420px, 100%)", display: "grid", gap: 14 }}>
           <div>
             <p style={{ ...muted, margin: "0 0 6px" }}>运营入口</p>
-            <h1 style={{ margin: 0, fontSize: 28 }}>AIAI 管理后台</h1>
+            <h1 style={{ margin: 0, fontSize: 28 }}>soulmate 管理后台</h1>
           </div>
           <input
             style={inputStyle}
@@ -441,7 +441,7 @@ export default function AdminPage() {
           }}
         >
           <div>
-            <p style={{ ...muted, margin: "0 0 6px" }}>AIAI Console</p>
+            <p style={{ ...muted, margin: "0 0 6px" }}>soulmate Console</p>
             <h1 style={{ margin: 0, fontSize: 28 }}>运营总览</h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "flex-end" }}>
@@ -459,7 +459,7 @@ export default function AdminPage() {
             [
               ["overview", "总览"],
               ["users", "用户统计"],
-              ["characters", "女友资产"],
+              ["characters", "soulmate 资产"],
               ["works", "创作记录"]
             ] as const
           ).map(([key, label]) => (
@@ -564,7 +564,7 @@ function Overview({ stats, maxSignups, onRefresh }: { stats: Stats; maxSignups: 
   const jobSuccessRate = stats.jobs ? Math.round((stats.completedJobs / stats.jobs) * 100) : 0;
   const metrics = [
     ["注册用户", stats.users, "用户池规模"],
-    ["AI 女友", stats.characters, `${stats.publicCharacters} 公开 / ${stats.privateCharacters} 私密`],
+    ["soulmate", stats.characters, `${stats.publicCharacters} 公开 / ${stats.privateCharacters} 私密`],
     ["聊天会话", stats.chatSessions, `${stats.chatMessages} 条消息`],
     ["创作总数", stats.works, `${stats.publicWorks} 公开 / ${stats.privateWorks} 私密`],
     ["生成任务", stats.jobs, `${jobSuccessRate}% 完成率`],
@@ -709,7 +709,7 @@ function UsersTab({
     <div style={{ display: "grid", gap: 12 }}>
       <Toolbar
         title="用户统计"
-        note="看每个用户的钻石、聊天、创作和女友数量。"
+        note="看每个用户的钻石、聊天、创作和 soulmate 数量。"
         value={search}
         placeholder="搜索邮箱或昵称"
         setValue={setSearch}
@@ -721,7 +721,7 @@ function UsersTab({
             <tr>
               <th style={thStyle}>用户</th>
               <th style={thStyle}>余额</th>
-              <th style={thStyle}>女友</th>
+              <th style={thStyle}>soulmate</th>
               <th style={thStyle}>聊天</th>
               <th style={thStyle}>创作</th>
               <th style={thStyle}>消耗/发放</th>
@@ -799,10 +799,10 @@ function CharactersTab({
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <Toolbar
-        title="女友资产"
-        note="查看用户创建或使用的 AI 女友形象，以及它们带来的聊天和创作。"
+        title="soulmate 资产"
+        note="查看用户创建或使用的 soulmate 形象，以及它们带来的聊天和创作。"
         value={search}
-        placeholder="搜索女友名或标签"
+        placeholder="搜索 soulmate 名或标签"
         setValue={setSearch}
         onSearch={onSearch}
       />
@@ -850,7 +850,7 @@ function CharactersTab({
           </div>
         ))}
       </div>
-      {characters.length === 0 && <EmptyState label="暂无女友数据" />}
+      {characters.length === 0 && <EmptyState label="暂无 soulmate 数据" />}
       <Pager page={page} total={total} onChange={onPage} />
     </div>
   );
