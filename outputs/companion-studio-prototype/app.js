@@ -140,14 +140,25 @@ const t = dictionary[locale];
     return kb > 90 || (composerFocused && mobileLike);
   };
 
+  const keepStageAtTop = () => {
+    if (!document.body.classList.contains("gf-keyboard-active")) return;
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+    setTimeout(() => window.scrollTo(0, 0), 80);
+  };
+
   const updateKeyboardFrame = (kb) => {
     const home = document.getElementById("view-home");
-    if (home) home.classList.toggle("kb-open", shouldUseKeyboardFrame(kb));
+    const active = shouldUseKeyboardFrame(kb);
+    if (home) home.classList.toggle("kb-open", active);
+    document.body.classList.toggle("gf-keyboard-active", active);
+    if (active) keepStageAtTop();
   };
   const openKeyboardFrame = () => {
     composerFocused = true;
     const home = document.getElementById("view-home");
     if (home) home.classList.add("kb-open");
+    document.body.classList.add("gf-keyboard-active");
+    keepStageAtTop();
     setKb();
   };
   const isStageInput = (target) => target?.id === "stageChatInput";

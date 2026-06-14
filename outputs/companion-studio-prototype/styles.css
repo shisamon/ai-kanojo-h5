@@ -31,6 +31,19 @@ body {
   color: var(--text);
 }
 
+body.gf-home-active {
+  overflow: hidden;
+  height: 100dvh;
+}
+
+body.gf-keyboard-active {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: var(--app-height, 100dvh);
+  overflow: hidden;
+}
+
 button,
 input,
 select,
@@ -3400,14 +3413,26 @@ body {
   height: var(--full-height, 100dvh);
 }
 
+body.gf-keyboard-active .gf-workspace .game-stage,
+body.gf-keyboard-active .gf-workspace .view.game-stage {
+  min-height: var(--app-height, 100dvh);
+  height: var(--app-height, 100dvh);
+}
+
 .stage-chat-dock {
   transform: translateY(calc(-1 * var(--kb, 0px)));
   transition: transform 0.18s ease-out;
 }
 
+body.gf-keyboard-active .stage-chat-dock {
+  transform: none;
+}
+
 .game-stage.kb-open,
 .game-stage:has(#stageChatInput:focus) {
   grid-template-rows: auto minmax(126px, 1fr) auto;
+  padding-top: calc(10px + env(safe-area-inset-top));
+  padding-bottom: 8px;
 }
 
 .game-stage.kb-open .character-button,
