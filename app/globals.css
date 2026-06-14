@@ -3772,21 +3772,50 @@ body.onboarding-active .customize-modal .customize-cancel {
 
 /* Keyboard open: re-frame the girlfriend as a face-only landscape crop so she
    fills the short space above the keyboard instead of being cut at the waist. */
-.game-stage.kb-open .character-button {
-  align-self: center;
-  width: min(94vw, 460px);
-  height: auto;
-  max-height: calc(var(--app-height, 100dvh) - 168px);
-  aspect-ratio: 5 / 4;
-  margin: 0 auto;
+.game-stage.kb-open,
+.game-stage:has(#stageChatInput:focus) {
+  grid-template-rows: auto minmax(126px, 1fr) auto;
 }
 
-.game-stage.kb-open .stage-image {
+.game-stage.kb-open .character-button,
+.game-stage:has(#stageChatInput:focus) .character-button {
+  align-self: start;
+  width: min(94vw, 430px);
+  height: min(27svh, 176px);
+  min-height: 118px;
+  max-height: min(176px, calc(var(--app-height, 100dvh) - 170px));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin: clamp(8px, 2svh, 16px) auto 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: rgba(10, 12, 18, 0.34);
+  animation: none;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+}
+
+.game-stage.kb-open .stage-image,
+.game-stage:has(#stageChatInput:focus) .stage-image {
   object-fit: cover;
-  object-position: center 16%;
-  border-radius: 22px;
+  object-position: center 18%;
+  border-radius: inherit;
+  transform: scale(1.18);
+  transform-origin: center 18%;
 }
 
-.game-stage.kb-open .character-aura {
+.game-stage.kb-open .character-aura,
+.game-stage:has(#stageChatInput:focus) .character-aura {
   opacity: 0;
+}
+
+.game-stage.kb-open .stage-chat-messages,
+.game-stage:has(#stageChatInput:focus) .stage-chat-messages {
+  min-height: 48px;
+  max-height: 82px;
+}
+
+.game-stage.kb-open .stage-chat-dock,
+.game-stage:has(#stageChatInput:focus) .stage-chat-dock {
+  gap: 8px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
 }

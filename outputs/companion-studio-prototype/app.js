@@ -127,11 +127,30 @@ const t = dictionary[locale];
 
 // Keyboard handling: lock the stage to the full (pre-keyboard) viewport height
 // so the girlfriend area never moves, and float the chat composer just above
-// the keyboard via --kb (keyboard height).
+// the keyboard via --kb (keyboard height). On mobile, focusing the composer
+// immediately switches the girlfriend into a face-only landscape crop.
 (function trackViewportHeight() {
   const vv = window.visualViewport;
   const root = document.documentElement;
   let fullHeight = window.innerHeight;
+  let composerFocused = false;
+
+  const shouldUseKeyboardFrame = (kb) => {
+    const mobileLike = window.innerWidth <= 720 || (window.navigator?.maxTouchPoints ?? 0) > 0;
+    return kb > 90 || (composerFocused && mobileLike);
+  };
+
+  const updateKeyboardFrame = (kb) => {
+    const home = document.getElementById("view-home");
+    if (home) home.classList.toggle("kb-open", shouldUseKeyboardFrame(kb));
+  };
+  const openKeyboardFrame = () => {
+    composerFocused = true;
+    const home = document.getElementById("view-home");
+    if (home) home.classList.add("kb-open");
+    setKb();
+  };
+  const isStageInput = (target) => target?.id === "stageChatInput";
 
   const setFull = () => {
     fullHeight = Math.max(fullHeight, window.innerHeight);
@@ -142,13 +161,31 @@ const t = dictionary[locale];
     const kb = Math.max(0, Math.round(fullHeight - visible));
     root.style.setProperty("--kb", `${kb}px`);
     root.style.setProperty("--app-height", `${Math.round(visible)}px`);
-    // Keyboard open -> crop the girlfriend to a face-only landscape framing.
-    const home = document.getElementById("view-home");
-    if (home) home.classList.toggle("kb-open", kb > 90);
+    updateKeyboardFrame(kb);
   };
 
   setFull();
   setKb();
+  document.addEventListener("pointerdown", (event) => {
+    if (isStageInput(event.target)) openKeyboardFrame();
+  });
+  document.addEventListener("click", (event) => {
+    if (isStageInput(event.target)) openKeyboardFrame();
+  });
+  document.addEventListener("input", (event) => {
+    if (isStageInput(event.target)) openKeyboardFrame();
+  });
+  document.addEventListener("focusin", (event) => {
+    if (event.target?.id === "stageChatInput") {
+      openKeyboardFrame();
+    }
+  });
+  document.addEventListener("focusout", (event) => {
+    if (event.target?.id === "stageChatInput") {
+      composerFocused = false;
+      setTimeout(setKb, 120);
+    }
+  });
   if (vv) {
     vv.addEventListener("resize", setKb);
     vv.addEventListener("scroll", setKb);
