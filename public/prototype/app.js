@@ -161,6 +161,7 @@ const t = dictionary[locale];
     keepStageAtTop();
     setKb();
   };
+  window.keepStageKeyboardOpen = openKeyboardFrame;
   const isStageInput = (target) => target?.id === "stageChatInput";
 
   const setFull = () => {
@@ -960,8 +961,11 @@ async function sendStageChatMessage() {
   const input = qs("#stageChatInput");
   if (!input) return;
   const content = input.value.trim();
+  window.keepStageKeyboardOpen?.();
+  input.focus({ preventScroll: true });
   if (!content) return;
   input.value = "";
+  input.focus({ preventScroll: true });
   chatBusy = true;
   const transcript = getTranscript(subject);
   appendStageChatMessage("user", content);
@@ -992,6 +996,8 @@ async function sendStageChatMessage() {
   appendStageChatMessage("character", finalReply);
   if (reply) transcript.push({ role: "assistant", content: reply });
   chatBusy = false;
+  window.keepStageKeyboardOpen?.();
+  input.focus({ preventScroll: true });
 }
 
 async function ensureChatSession(gf) {
@@ -1513,12 +1519,34 @@ if (stageGirlfriendButton) {
 qsa("[data-close-switcher]").forEach((button) =>
   button.addEventListener("click", () => closeDialog(qs("#girlfriendSwitchModal")))
 );
-const stageChatSend = qs("#stageChatSend");
-if (stageChatSend) stageChatSend.addEventListener("click", sendStageChatMessage);
 const stageChatInput = qs("#stageChatInput");
+const stageChatSend = qs("#stageChatSend");
+if (stageChatSend) {
+  let sendHandledAt = 0;
+  stageChatSend.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    window.keepStageKeyboardOpen?.();
+    stageChatInput?.focus({ preventScroll: true });
+  });
+  stageChatSend.addEventListener("pointerup", (event) => {
+    event.preventDefault();
+    sendHandledAt = Date.now();
+    sendStageChatMessage();
+  });
+  stageChatSend.addEventListener("click", (event) => {
+    if (Date.now() - sendHandledAt < 500) {
+      event.preventDefault();
+      return;
+    }
+    sendStageChatMessage();
+  });
+}
 if (stageChatInput) {
   stageChatInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") sendStageChatMessage();
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sendStageChatMessage();
+    }
   });
 }
 const stageEmptyEl = qs("#stageEmpty");
