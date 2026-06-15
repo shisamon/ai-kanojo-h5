@@ -787,7 +787,7 @@ function updateCustomizeOnboardingUi() {
       ? t.gfOnboardingHint
       : locale === "ja"
         ? "形象を選ぶか画像をアップロードして、名前をつけましょう"
-        : "选择形象或上传图片，给她起个名字";
+        : "选择形象或上传图片，给 soulmate 起个名字";
   }
   const save = qs("#saveGirlfriendButton");
   if (save) save.textContent = onboardingActive ? (locale === "ja" ? "soulmateと始める" : "开始陪伴") : locale === "ja" ? "保存" : "保存";
@@ -950,6 +950,7 @@ function setStageAvatarState(state = "idle", duration = 0) {
   if (!stageTouch) return;
   stageTouch.classList.remove("is-thinking", "is-speaking", "is-touched");
   if (state !== "idle") stageTouch.classList.add(`is-${state}`);
+  stageTouch.dispatchEvent(new CustomEvent("avatar-state", { detail: { state, duration } }));
   if (duration > 0) {
     window.clearTimeout(stageTouch._stateTimer);
     stageTouch._stateTimer = window.setTimeout(() => setStageAvatarState("idle"), duration);

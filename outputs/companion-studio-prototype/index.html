@@ -94,6 +94,7 @@
             <span class="avatar-node avatar-node-one"></span>
             <span class="avatar-node avatar-node-two"></span>
             <span class="avatar-node avatar-node-three"></span>
+            <canvas class="avatar-canvas" id="avatarCanvas" aria-label="3D 男性 soulmate"></canvas>
             <span class="avatar-core" id="stageImage" aria-label="soulmate 能量体"></span>
             <span class="avatar-voice" aria-hidden="true">
               <i></i><i></i><i></i><i></i>
@@ -103,7 +104,7 @@
           <div class="stage-chat-dock">
             <div class="stage-chat-messages" id="stageChatMessages"></div>
             <div class="stage-chat-composer">
-              <input id="stageChatInput" type="text" placeholder="跟她说点什么..." />
+              <input id="stageChatInput" type="text" placeholder="跟 soulmate 说点什么..." />
               <button class="send-chip" id="stageChatSend" type="button">发送</button>
             </div>
           </div>
@@ -144,7 +145,7 @@
       </div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input">
-        <input id="chatInputField" type="text" placeholder="跟她说点什么..." />
+        <input id="chatInputField" type="text" placeholder="跟 soulmate 说点什么..." />
         <button id="chatSendButton">➤</button>
       </div>
     </dialog>
@@ -153,7 +154,7 @@
       <div class="modal-head">
         <div>
           <h2>生成视频</h2>
-          <span>为她选择一个视频风格</span>
+          <span>为 soulmate 选择一个视频风格</span>
         </div>
       </div>
       <div class="style-grid" id="styleGrid"></div>
@@ -180,7 +181,7 @@
       <div class="modal-head">
         <div>
           <h2>定制 soulmate</h2>
-          <span>选择形象或上传图片，给她起个名字</span>
+          <span>选择形象或上传图片，给 soulmate 起个名字</span>
         </div>
       </div>
       <div class="onboarding-account" id="onboardingAccount" hidden>
@@ -197,7 +198,7 @@
       </label>
       <label class="field-block">
         <span>soulmate 的名字</span>
-        <input id="gfNameInput" type="text" placeholder="给她起个名字" />
+        <input id="gfNameInput" type="text" placeholder="给 soulmate 起个名字" />
       </label>
       <p class="legal" id="customizeError"></p>
       <div class="confirm-actions">
@@ -299,6 +300,7 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="app.js"></script>
-  </body>
+  <script type="module" src="/prototype/avatar-stage.js?v=20260615-9"></script>
+  <script src="/prototype/app.js?v=20260615-9"></script>
+</body>
 </html>

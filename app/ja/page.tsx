@@ -1,4 +1,3 @@
-import Script from "next/script";
 import { getPrototypeBody } from "@/lib/prototype-html";
 
 export const metadata = {
@@ -8,11 +7,8 @@ export const metadata = {
 export default function JapanesePage() {
   return (
     <>
-      <Script id="set-ja-lang" strategy="afterInteractive">
-        {"document.documentElement.lang='ja';"}
-      </Script>
+      <script dangerouslySetInnerHTML={{ __html: "document.documentElement.lang='ja';" }} />
       <div dangerouslySetInnerHTML={{ __html: getPrototypeBody("ja") }} />
-      <Script src="/prototype/app.js?v=20260615-8" strategy="afterInteractive" />
     </>
   );
 }
