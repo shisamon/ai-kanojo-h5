@@ -3345,6 +3345,12 @@ body.onboarding-active .customize-modal .customize-cancel {
   animation: avatarTalk 0.72s ease-in-out infinite;
 }
 
+.avatar-stage.has-real-model .avatar-core {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .avatar-stage.is-touched {
   animation: avatarReact 0.52s ease-out, avatarFloat 5.4s ease-in-out infinite 0.52s;
 }

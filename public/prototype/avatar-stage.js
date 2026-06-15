@@ -1,8 +1,10 @@
 import * as THREE from "/prototype/vendor/three.module.js";
+import { GLTFLoader } from "/prototype/vendor/loaders/GLTFLoader.js";
 
 const canvas = document.querySelector("#avatarCanvas");
 const stage = document.querySelector("#stageTouch");
 const fallback = document.querySelector("#stageImage");
+const MODEL_URL = "/prototype/models/award-presenter.glb";
 
 if (canvas && stage) {
   const renderer = new THREE.WebGLRenderer({
@@ -21,10 +23,12 @@ if (canvas && stage) {
   const root = new THREE.Group();
   const body = new THREE.Group();
   const head = new THREE.Group();
+  const realModel = new THREE.Group();
   const breathGroup = new THREE.Group();
   breathGroup.add(root);
   scene.add(breathGroup);
-  root.add(body, head);
+  root.add(body, head, realModel);
+  realModel.visible = false;
 
   const materials = {
     skin: new THREE.MeshStandardMaterial({ color: 0xf0b28f, roughness: 0.62, metalness: 0.02 }),
@@ -125,6 +129,44 @@ if (canvas && stage) {
   tealLight.position.set(0, 0.3, 2.3);
   scene.add(tealLight);
 
+  let usingRealModel = false;
+  const loader = new GLTFLoader();
+  loader.load(
+    MODEL_URL,
+    (gltf) => {
+      const source = gltf.scene;
+      source.traverse((child) => {
+        if (!child.isMesh) return;
+        child.frustumCulled = false;
+        child.castShadow = false;
+        child.receiveShadow = false;
+        if (child.material) child.material.side = THREE.DoubleSide;
+      });
+
+      const box = new THREE.Box3().setFromObject(source);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      if (!size.y) return;
+
+      const normalized = new THREE.Group();
+      source.position.set(-center.x, -box.min.y, -center.z);
+      normalized.scale.setScalar(3.25 / size.y);
+      normalized.add(source);
+      realModel.add(normalized);
+      realModel.visible = true;
+      usingRealModel = true;
+      canvas.dataset.avatarModel = "real";
+      stage.classList.add("has-real-model");
+      lastWidth = 0;
+      resize();
+    },
+    undefined,
+    () => {
+      canvas.dataset.avatarModel = "fallback";
+      stage.classList.remove("has-real-model");
+    }
+  );
+
   let currentState = "idle";
   let reactUntil = 0;
   let lastWidth = 0;
@@ -140,8 +182,9 @@ if (canvas && stage) {
     lastHeight = height;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    camera.position.z = width > height * 1.45 ? 5.45 : 6.1;
-    camera.position.y = width > height * 1.45 ? 1.12 : 1.45;
+    const compact = width > height * 1.45;
+    camera.position.z = compact ? (usingRealModel ? 3.05 : 5.45) : usingRealModel ? 7 : 6.1;
+    camera.position.y = compact ? (usingRealModel ? 2.02 : 1.12) : usingRealModel ? 1.2 : 1.45;
     camera.updateProjectionMatrix();
   }
 
@@ -174,16 +217,25 @@ if (canvas && stage) {
     const compact = lastWidth > lastHeight * 1.45;
 
     resize();
-    body.visible = !compact;
-    baseRing.visible = !compact;
-    haloRing.visible = !compact;
+    body.visible = !usingRealModel && !compact;
+    head.visible = !usingRealModel;
+    realModel.visible = usingRealModel;
+    baseRing.visible = !usingRealModel && !compact;
+    haloRing.visible = !usingRealModel && !compact;
     particles.forEach((dot) => {
-      dot.visible = !compact;
+      dot.visible = !usingRealModel && !compact;
     });
     breathGroup.scale.y = 1 + Math.sin(elapsed * 2.1) * 0.018;
     root.rotation.y = Math.sin(elapsed * 0.55) * 0.12 + (isReacting ? Math.sin(elapsed * 12) * 0.035 : 0);
-    root.position.y = compact ? -0.86 : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
-    root.scale.setScalar(compact ? 1.14 : 1);
+    realModel.rotation.y = -Math.PI / 2 + Math.sin(elapsed * 0.42) * 0.045;
+    root.position.y = usingRealModel
+      ? compact
+        ? -4.28
+        : -1.62 + Math.sin(elapsed * 1.5) * 0.025
+      : compact
+        ? -0.86
+        : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
+    root.scale.setScalar(usingRealModel ? (compact ? 2 : 1) : compact ? 1.14 : 1);
     head.rotation.y = Math.sin(elapsed * 0.82) * 0.08;
     head.rotation.x = Math.sin(elapsed * 0.7) * 0.035 + (isThinking ? -0.045 : 0);
     body.rotation.z = Math.sin(elapsed * 0.64) * 0.018;
@@ -213,7 +265,7 @@ if (canvas && stage) {
       dot.scale.setScalar(0.022 * pulse * (isThinking ? 1.3 : 1));
     });
 
-    camera.lookAt(0, compact ? 0.78 : 0.86, 0);
+    camera.lookAt(0, usingRealModel ? (compact ? 1.58 : 0.35) : compact ? 0.78 : 0.86, 0);
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
