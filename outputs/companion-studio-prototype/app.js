@@ -614,7 +614,7 @@ function renderStage() {
   const relationshipFill = qs("#relationshipFill");
   const subject = getStageSubject();
   const affinity = getAffinity(subject);
-  if (stageImage) stageImage.src = subject ? subject.image : makePortrait(3, "soulmate", "");
+  if (stageImage) stageImage.style.setProperty("--avatar-hue", `${subject ? Math.abs(String(subject.id).length * 29) % 360 : 318}deg`);
   if (avatarMini) avatarMini.src = subject ? subject.image : makePortrait(3, "soulmate", "");
   if (userAvatarMini) userAvatarMini.src = makeUserAvatar(profile?.display_name || profile?.username || t.guestName);
   if (stageName) stageName.textContent = subject ? subject.name : "soulmate";
@@ -1567,9 +1567,7 @@ if (stageEmptyEl) stageEmptyEl.addEventListener("click", openCustomize);
 const stageTouch = qs("#stageTouch");
 if (stageTouch) {
   stageTouch.addEventListener("click", () => {
-    moodIndex += 1;
-    setStageAvatarState("speaking", 1200);
-    appendStageChatMessage("character", t.stageMoods[moodIndex % t.stageMoods.length]);
+    setStageAvatarState("speaking", 900);
   });
 }
 const profileCreateGirlfriend = qs("#profileCreateGirlfriend");

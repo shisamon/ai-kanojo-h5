@@ -3335,7 +3335,7 @@ body.onboarding-active .customize-modal .customize-cancel {
   opacity: 1;
 }
 
-.avatar-stage.is-speaking .stage-image {
+.avatar-stage.is-speaking .avatar-core {
   animation: avatarTalk 0.72s ease-in-out infinite;
 }
 
@@ -3453,6 +3453,53 @@ body.onboarding-active .customize-modal .customize-cancel {
   filter: drop-shadow(0 28px 34px rgba(0, 0, 0, 0.42));
   transform-origin: center bottom;
   animation: avatarBreathe 4.6s ease-in-out infinite;
+}
+
+.avatar-core {
+  position: relative;
+  z-index: 4;
+  display: block;
+  width: min(42vw, 168px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 46% 54% 48% 52%;
+  background:
+    radial-gradient(circle at 48% 34%, rgba(255, 255, 255, 0.96) 0 7%, transparent 8%),
+    radial-gradient(circle at 38% 42%, rgba(143, 255, 245, 0.92), transparent 20%),
+    radial-gradient(circle at 62% 58%, rgba(255, 77, 154, 0.78), transparent 28%),
+    conic-gradient(from 140deg, rgba(49, 214, 200, 0.86), rgba(255, 77, 154, 0.86), rgba(115, 167, 255, 0.76), rgba(49, 214, 200, 0.86));
+  box-shadow:
+    0 0 34px rgba(49, 214, 200, 0.3),
+    0 0 66px rgba(255, 77, 154, 0.22),
+    inset 0 0 28px rgba(255, 255, 255, 0.18);
+  filter: saturate(1.16);
+  transform-origin: center;
+  animation: avatarCore 5s ease-in-out infinite;
+}
+
+.avatar-core::before,
+.avatar-core::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.avatar-core::before {
+  inset: 16%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 48%;
+  background:
+    linear-gradient(115deg, transparent 0 42%, rgba(255, 255, 255, 0.34) 48%, transparent 55%),
+    radial-gradient(circle at 50% 50%, rgba(7, 8, 13, 0.18), transparent 62%);
+  animation: avatarCoreSpin 9s linear infinite;
+}
+
+.avatar-core::after {
+  inset: 36% 21%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(7, 8, 13, 0.4), rgba(255, 255, 255, 0.42), rgba(7, 8, 13, 0.36));
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.26);
+  opacity: 0.72;
 }
 
 .stage-dialogue {
@@ -4048,6 +4095,11 @@ body.gf-keyboard-active .stage-chat-dock {
   transform-origin: center 18%;
 }
 
+.game-stage.kb-open .avatar-core,
+.game-stage:has(#stageChatInput:focus) .avatar-core {
+  width: min(34vw, 132px);
+}
+
 .game-stage.kb-open .character-aura,
 .game-stage:has(#stageChatInput:focus) .character-aura {
   opacity: 0;
@@ -4167,6 +4219,28 @@ body.gf-keyboard-active .stage-chat-dock {
   }
   50% {
     height: 22px;
+  }
+}
+
+@keyframes avatarCore {
+  0%,
+  100% {
+    border-radius: 46% 54% 48% 52%;
+    transform: scale(1);
+  }
+  33% {
+    border-radius: 54% 46% 55% 45%;
+    transform: scale(1.035) rotate(1deg);
+  }
+  66% {
+    border-radius: 50% 50% 43% 57%;
+    transform: scale(0.985) rotate(-1deg);
+  }
+}
+
+@keyframes avatarCoreSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
