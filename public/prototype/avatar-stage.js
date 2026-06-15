@@ -140,8 +140,8 @@ if (canvas && stage) {
     lastHeight = height;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    camera.position.z = width > height * 1.45 ? 6.8 : 6.1;
-    camera.position.y = width > height * 1.45 ? 1.42 : 1.45;
+    camera.position.z = width > height * 1.45 ? 5.45 : 6.1;
+    camera.position.y = width > height * 1.45 ? 1.12 : 1.45;
     camera.updateProjectionMatrix();
   }
 
@@ -174,10 +174,16 @@ if (canvas && stage) {
     const compact = lastWidth > lastHeight * 1.45;
 
     resize();
+    body.visible = !compact;
+    baseRing.visible = !compact;
+    haloRing.visible = !compact;
+    particles.forEach((dot) => {
+      dot.visible = !compact;
+    });
     breathGroup.scale.y = 1 + Math.sin(elapsed * 2.1) * 0.018;
     root.rotation.y = Math.sin(elapsed * 0.55) * 0.12 + (isReacting ? Math.sin(elapsed * 12) * 0.035 : 0);
-    root.position.y = compact ? -0.28 : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
-    root.scale.setScalar(compact ? 0.88 : 1);
+    root.position.y = compact ? -0.86 : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
+    root.scale.setScalar(compact ? 1.14 : 1);
     head.rotation.y = Math.sin(elapsed * 0.82) * 0.08;
     head.rotation.x = Math.sin(elapsed * 0.7) * 0.035 + (isThinking ? -0.045 : 0);
     body.rotation.z = Math.sin(elapsed * 0.64) * 0.018;
@@ -207,7 +213,7 @@ if (canvas && stage) {
       dot.scale.setScalar(0.022 * pulse * (isThinking ? 1.3 : 1));
     });
 
-    camera.lookAt(0, compact ? 0.92 : 0.86, 0);
+    camera.lookAt(0, compact ? 0.78 : 0.86, 0);
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
