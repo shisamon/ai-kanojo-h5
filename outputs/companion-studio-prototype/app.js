@@ -1008,7 +1008,7 @@ async function sendStageChatMessage() {
   appendStageChatMessage("character", finalReply);
   if (reply) transcript.push({ role: "assistant", content: reply });
   chatBusy = false;
-  setStageAvatarState("speaking", 1600);
+  setStageAvatarState("speaking", 3000);
   window.keepStageKeyboardOpen?.();
   input.focus({ preventScroll: true });
 }
@@ -1568,7 +1568,7 @@ const stageTouch = qs("#stageTouch");
 if (stageTouch) {
   stageTouch.addEventListener("click", () => {
     moodIndex += 1;
-    setStageAvatarState("touched", 560);
+    setStageAvatarState("speaking", 1200);
     appendStageChatMessage("character", t.stageMoods[moodIndex % t.stageMoods.length]);
   });
 }

@@ -3132,29 +3132,31 @@ body.onboarding-active .customize-modal .customize-cancel {
 .avatar-stage::before {
   position: absolute;
   z-index: 0;
-  width: 68%;
-  height: 88%;
+  width: 86%;
+  height: 92%;
   content: "";
-  border-radius: 48% 48% 30% 30%;
+  border: 1px solid rgba(49, 214, 200, 0.22);
+  border-radius: 44% 44% 30% 30%;
   background:
     radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.16), transparent 26%),
-    linear-gradient(180deg, rgba(255, 77, 154, 0.16), rgba(49, 214, 200, 0.1));
+    linear-gradient(180deg, rgba(255, 77, 154, 0.2), rgba(49, 214, 200, 0.14));
   filter: blur(12px);
-  opacity: 0.78;
+  opacity: 0.92;
   animation: avatarPulse 4.8s ease-in-out infinite;
 }
 
 .avatar-stage::after {
   position: absolute;
-  z-index: 4;
-  inset: 7% 11% 12%;
+  z-index: 5;
+  inset: 5% 7% 10%;
   content: "";
-  border-radius: 46% 46% 32% 32%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 40% 40% 28% 28%;
   background:
-    linear-gradient(105deg, transparent 0 38%, rgba(255, 255, 255, 0.22) 46%, transparent 54%),
+    linear-gradient(105deg, transparent 0 38%, rgba(255, 255, 255, 0.34) 46%, transparent 54%),
     radial-gradient(circle at 52% 25%, rgba(255, 255, 255, 0.1), transparent 26%);
   mix-blend-mode: screen;
-  opacity: 0.2;
+  opacity: 0.36;
   pointer-events: none;
   transform: translateX(-18%);
   animation: avatarGlimmer 6.2s ease-in-out infinite;
@@ -3162,26 +3164,32 @@ body.onboarding-active .customize-modal .customize-cancel {
 
 .avatar-orbit,
 .avatar-presence,
+.avatar-scan,
+.avatar-node,
+.avatar-voice,
 .avatar-shadow {
   position: absolute;
   pointer-events: none;
 }
 
 .avatar-orbit {
-  z-index: 1;
-  width: 78%;
-  height: 78%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 2;
+  width: 94%;
+  height: 88%;
+  border: 2px solid rgba(255, 255, 255, 0.16);
   border-radius: 50%;
-  opacity: 0.48;
+  opacity: 0.78;
   transform: rotate(-12deg) scaleX(0.68);
   animation: avatarOrbit 10s linear infinite;
+  box-shadow:
+    0 0 22px rgba(49, 214, 200, 0.2),
+    inset 0 0 18px rgba(255, 77, 154, 0.1);
 }
 
 .avatar-orbit-two {
-  width: 62%;
-  height: 62%;
-  border-color: rgba(49, 214, 200, 0.22);
+  width: 78%;
+  height: 72%;
+  border-color: rgba(49, 214, 200, 0.42);
   animation-duration: 13s;
   animation-direction: reverse;
 }
@@ -3193,7 +3201,7 @@ body.onboarding-active .customize-modal .customize-cancel {
   border-radius: 50%;
   background: radial-gradient(circle at 50% 50%, rgba(255, 77, 154, 0.28), transparent 64%);
   filter: blur(22px);
-  opacity: 0.38;
+  opacity: 0.58;
   animation: avatarPresence 3.6s ease-in-out infinite;
 }
 
@@ -3203,6 +3211,96 @@ body.onboarding-active .customize-modal .customize-cancel {
   bottom: 7%;
   background: radial-gradient(circle at 50% 50%, rgba(49, 214, 200, 0.18), transparent 70%);
   opacity: 0.5;
+}
+
+.avatar-scan {
+  z-index: 6;
+  inset: 8% 11% 13%;
+  overflow: hidden;
+  border-radius: 36% 36% 24% 24%;
+  opacity: 0.42;
+}
+
+.avatar-scan::before {
+  position: absolute;
+  inset: -80% 0 auto;
+  height: 62%;
+  content: "";
+  background: linear-gradient(180deg, transparent, rgba(49, 214, 200, 0.3), transparent);
+  animation: avatarScan 3.8s ease-in-out infinite;
+}
+
+.avatar-node {
+  z-index: 7;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8ffff5;
+  box-shadow: 0 0 14px rgba(49, 214, 200, 0.85);
+  animation: avatarNode 3.2s ease-in-out infinite;
+}
+
+.avatar-node-one {
+  top: 18%;
+  left: 18%;
+}
+
+.avatar-node-two {
+  top: 31%;
+  right: 13%;
+  width: 7px;
+  height: 7px;
+  background: #ff8abc;
+  box-shadow: 0 0 14px rgba(255, 77, 154, 0.82);
+  animation-delay: -1.2s;
+}
+
+.avatar-node-three {
+  right: 22%;
+  bottom: 19%;
+  width: 6px;
+  height: 6px;
+  animation-delay: -2s;
+}
+
+.avatar-voice {
+  z-index: 8;
+  right: 13%;
+  bottom: 13%;
+  display: grid;
+  grid-template-columns: repeat(4, 4px);
+  gap: 3px;
+  align-items: end;
+  height: 30px;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(7, 8, 13, 0.52);
+  backdrop-filter: blur(10px);
+  opacity: 0.44;
+  transform: translateY(4px);
+}
+
+.avatar-voice i {
+  display: block;
+  width: 4px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8ffff5, #ff4d9a);
+  transform-origin: center bottom;
+  animation: avatarVoice 1.2s ease-in-out infinite;
+}
+
+.avatar-voice i:nth-child(2) {
+  animation-delay: -0.2s;
+}
+
+.avatar-voice i:nth-child(3) {
+  animation-delay: -0.42s;
+}
+
+.avatar-voice i:nth-child(4) {
+  animation-delay: -0.64s;
 }
 
 .avatar-shadow {
@@ -3222,10 +3320,19 @@ body.onboarding-active .customize-modal .customize-cancel {
   animation-duration: 1.1s;
 }
 
+.avatar-stage.is-thinking .avatar-scan,
+.avatar-stage.is-speaking .avatar-scan {
+  opacity: 0.78;
+}
+
 .avatar-stage.is-speaking .avatar-orbit {
   border-color: rgba(255, 77, 154, 0.34);
-  opacity: 0.72;
+  opacity: 0.92;
   animation-duration: 3.8s;
+}
+
+.avatar-stage.is-speaking .avatar-voice {
+  opacity: 1;
 }
 
 .avatar-stage.is-speaking .stage-image {
@@ -4028,6 +4135,38 @@ body.gf-keyboard-active .stage-chat-dock {
   50% {
     opacity: 0.36;
     transform: scaleX(0.86);
+  }
+}
+
+@keyframes avatarScan {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(280%);
+  }
+}
+
+@keyframes avatarNode {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -8px, 0) scale(1.15);
+  }
+}
+
+@keyframes avatarVoice {
+  0%,
+  100% {
+    height: 7px;
+  }
+  50% {
+    height: 22px;
   }
 }
 
