@@ -12,7 +12,7 @@ export default function JapanesePage() {
         {"document.documentElement.lang='ja';"}
       </Script>
       <div dangerouslySetInnerHTML={{ __html: getPrototypeBody("ja") }} />
-      <Script src="/prototype/app.js?v=20260615-5" strategy="afterInteractive" />
+      <Script src="/prototype/app.js?v=20260615-6" strategy="afterInteractive" />
     </>
   );
 }

@@ -945,6 +945,17 @@ function appendStageChatMessage(sender, content) {
   return div;
 }
 
+function setStageAvatarState(state = "idle", duration = 0) {
+  const stageTouch = qs("#stageTouch");
+  if (!stageTouch) return;
+  stageTouch.classList.remove("is-thinking", "is-speaking", "is-touched");
+  if (state !== "idle") stageTouch.classList.add(`is-${state}`);
+  if (duration > 0) {
+    window.clearTimeout(stageTouch._stateTimer);
+    stageTouch._stateTimer = window.setTimeout(() => setStageAvatarState("idle"), duration);
+  }
+}
+
 function renderStageChatMessages() {
   const container = qs("#stageChatMessages");
   const subject = getStageSubject();
@@ -972,6 +983,7 @@ async function sendStageChatMessage() {
   transcript.push({ role: "user", content });
   grantAffinity(subject);
 
+  setStageAvatarState("thinking");
   const typing = appendStageChatMessage("character", "…");
   let reply = null;
   try {
@@ -996,6 +1008,7 @@ async function sendStageChatMessage() {
   appendStageChatMessage("character", finalReply);
   if (reply) transcript.push({ role: "assistant", content: reply });
   chatBusy = false;
+  setStageAvatarState("speaking", 1600);
   window.keepStageKeyboardOpen?.();
   input.focus({ preventScroll: true });
 }
@@ -1555,6 +1568,7 @@ const stageTouch = qs("#stageTouch");
 if (stageTouch) {
   stageTouch.addEventListener("click", () => {
     moodIndex += 1;
+    setStageAvatarState("touched", 560);
     appendStageChatMessage("character", t.stageMoods[moodIndex % t.stageMoods.length]);
   });
 }
