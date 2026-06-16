@@ -4,7 +4,7 @@ import { GLTFLoader } from "/prototype/vendor/loaders/GLTFLoader.js";
 const canvas = document.querySelector("#avatarCanvas");
 const stage = document.querySelector("#stageTouch");
 const fallback = document.querySelector("#stageImage");
-const MODEL_URL = "/prototype/models/award-presenter.glb";
+const MODEL_URL = "/prototype/models/human-figure.glb";
 
 if (canvas && stage) {
   const renderer = new THREE.WebGLRenderer({
@@ -183,8 +183,8 @@ if (canvas && stage) {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     const compact = width > height * 1.45;
-    camera.position.z = compact ? (usingRealModel ? 3.05 : 5.45) : usingRealModel ? 7 : 6.1;
-    camera.position.y = compact ? (usingRealModel ? 2.02 : 1.12) : usingRealModel ? 1.2 : 1.45;
+    camera.position.z = compact ? (usingRealModel ? 3.7 : 5.45) : usingRealModel ? 7 : 6.1;
+    camera.position.y = compact ? (usingRealModel ? 1.58 : 1.12) : usingRealModel ? 1.2 : 1.45;
     camera.updateProjectionMatrix();
   }
 
@@ -230,12 +230,12 @@ if (canvas && stage) {
     realModel.rotation.y = -Math.PI / 2 + Math.sin(elapsed * 0.42) * 0.045;
     root.position.y = usingRealModel
       ? compact
-        ? -4.28
+        ? -2.72
         : -1.62 + Math.sin(elapsed * 1.5) * 0.025
       : compact
         ? -0.86
         : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
-    root.scale.setScalar(usingRealModel ? (compact ? 2 : 1) : compact ? 1.14 : 1);
+    root.scale.setScalar(usingRealModel ? (compact ? 1.42 : 1) : compact ? 1.14 : 1);
     head.rotation.y = Math.sin(elapsed * 0.82) * 0.08;
     head.rotation.x = Math.sin(elapsed * 0.7) * 0.035 + (isThinking ? -0.045 : 0);
     body.rotation.z = Math.sin(elapsed * 0.64) * 0.018;
@@ -265,7 +265,7 @@ if (canvas && stage) {
       dot.scale.setScalar(0.022 * pulse * (isThinking ? 1.3 : 1));
     });
 
-    camera.lookAt(0, usingRealModel ? (compact ? 1.58 : 0.35) : compact ? 0.78 : 0.86, 0);
+    camera.lookAt(0, usingRealModel ? (compact ? 1.12 : 0.35) : compact ? 0.78 : 0.86, 0);
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
