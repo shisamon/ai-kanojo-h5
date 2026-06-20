@@ -1,6 +1,6 @@
 # soulmate Studio Prototype
 
-This is the deployable Next.js version of the Chinese/Japanese prototype.
+This is the deployable Next.js version of the Simplified Chinese soulmate prototype.
 
 ## Run Locally
 
@@ -13,7 +13,7 @@ Open `http://localhost:3000`.
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and fill in Supabase keys when the Supabase project is ready.
+Copy `.env.example` to `.env.local` and fill in Supabase keys when the Supabase project is ready. For real chat replies and avatar actions, add `DEEPSEEK_API_KEY`.
 
 ```bash
 cp .env.example .env.local

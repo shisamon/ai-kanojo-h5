@@ -1,4 +1,4 @@
-const locale = document.documentElement.lang.startsWith("ja") || location.pathname.startsWith("/ja") ? "ja" : "zh";
+const locale = "zh";
 
 const supabaseClient =
   window.supabase && window.__SUPABASE_URL__ && window.__SUPABASE_ANON_KEY__
@@ -957,6 +957,10 @@ function setStageAvatarState(state = "idle", duration = 0) {
   }
 }
 
+function playStageAvatarAction(action = "wave") {
+  document.dispatchEvent(new CustomEvent("avatar-action", { detail: { action } }));
+}
+
 function renderStageChatMessages() {
   const container = qs("#stageChatMessages");
   const subject = getStageSubject();
@@ -987,6 +991,7 @@ async function sendStageChatMessage() {
   setStageAvatarState("thinking");
   const typing = appendStageChatMessage("character", "…");
   let reply = null;
+  let action = "wave";
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -1000,6 +1005,7 @@ async function sendStageChatMessage() {
     if (response.ok) {
       const payload = await response.json();
       if (payload && typeof payload.reply === "string" && payload.reply.trim()) reply = payload.reply.trim();
+      if (payload && typeof payload.action === "string") action = payload.action;
     }
   } catch (error) {
     // use local fallback
@@ -1010,6 +1016,7 @@ async function sendStageChatMessage() {
   if (reply) transcript.push({ role: "assistant", content: reply });
   chatBusy = false;
   setStageAvatarState("speaking", 3000);
+  playStageAvatarAction(action);
   window.keepStageKeyboardOpen?.();
   input.focus({ preventScroll: true });
 }
@@ -1104,6 +1111,7 @@ async function sendChatMessage() {
 
   const typing = appendChatMessage("character", "…");
   let reply = null;
+  let action = "wave";
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
@@ -1117,6 +1125,7 @@ async function sendChatMessage() {
     if (response.ok) {
       const payload = await response.json();
       if (payload && typeof payload.reply === "string" && payload.reply.trim()) reply = payload.reply.trim();
+      if (payload && typeof payload.action === "string") action = payload.action;
     }
   } catch (error) {
     // fall through to placeholder
@@ -1133,6 +1142,7 @@ async function sendChatMessage() {
         .then(() => {});
     }
   }
+  playStageAvatarAction(action);
   chatBusy = false;
 }
 

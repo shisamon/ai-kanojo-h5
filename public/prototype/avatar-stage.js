@@ -246,6 +246,9 @@ if (canvas && stage) {
   document.querySelectorAll("[data-avatar-action]").forEach((button) => {
     button.addEventListener("click", () => playAvatarCommand(button.dataset.avatarAction));
   });
+  document.addEventListener("avatar-action", (event) => {
+    playAvatarCommand(event.detail?.action);
+  });
 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(stage);

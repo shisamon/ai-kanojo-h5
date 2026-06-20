@@ -1,11 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-type Locale = "zh" | "ja";
+type Locale = "zh";
 
 const sourceFiles: Record<Locale, string> = {
-  zh: "index.html",
-  ja: "ja.html"
+  zh: "index.html"
 };
 
 export function getPrototypeBody(locale: Locale) {
@@ -20,6 +19,5 @@ export function getPrototypeBody(locale: Locale) {
 
   return body
     .replace(/<script src="app\.js"><\/script>/, "")
-    .replaceAll('href="index.html"', 'href="/"')
-    .replaceAll('href="ja.html"', 'href="/ja"');
+    .replaceAll('href="index.html"', 'href="/"');
 }
