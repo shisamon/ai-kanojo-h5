@@ -288,12 +288,12 @@ if (canvas && stage) {
     realModel.rotation.y = Math.sin(elapsed * 0.42) * 0.045;
     root.position.y = usingRealModel
       ? compact
-        ? -2.72
-        : -1.62 + Math.sin(elapsed * 1.5) * 0.025
+        ? -2.15
+        : -1.02 + Math.sin(elapsed * 1.5) * 0.025
       : compact
         ? -0.86
         : -0.08 + Math.sin(elapsed * 1.5) * 0.025;
-    root.scale.setScalar(usingRealModel ? (compact ? 1.42 : 1) : compact ? 1.14 : 1);
+    root.scale.setScalar(usingRealModel ? (compact ? 1.2 : 0.68) : compact ? 1.14 : 1);
     head.rotation.y = Math.sin(elapsed * 0.82) * 0.08;
     head.rotation.x = Math.sin(elapsed * 0.7) * 0.035 + (isThinking ? -0.045 : 0);
     body.rotation.z = Math.sin(elapsed * 0.64) * 0.018;
