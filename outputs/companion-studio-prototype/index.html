@@ -103,6 +103,14 @@
           </button>
           <div class="stage-chat-dock">
             <div class="stage-chat-messages" id="stageChatMessages"></div>
+            <div class="stage-action-row" aria-label="动作指令">
+              <button type="button" data-avatar-action="wave">挥手</button>
+              <button type="button" data-avatar-action="yes">点头</button>
+              <button type="button" data-avatar-action="no">摇头</button>
+              <button type="button" data-avatar-action="dance">跳舞</button>
+              <button type="button" data-avatar-action="jump">跳一下</button>
+              <button type="button" data-avatar-action="thumbs">点赞</button>
+            </div>
             <div class="stage-chat-composer">
               <input id="stageChatInput" type="text" placeholder="跟 soulmate 说点什么..." />
               <button class="send-chip" id="stageChatSend" type="button">发送</button>
@@ -300,7 +308,7 @@
 
     <div class="toast" id="toast"></div>
 
-  <script type="module" src="/prototype/avatar-stage.js?v=20260616-1"></script>
-  <script src="/prototype/app.js?v=20260616-1"></script>
+  <script type="module" src="/prototype/avatar-stage.js?v=20260620-1"></script>
+  <script src="/prototype/app.js?v=20260620-1"></script>
 </body>
 </html>

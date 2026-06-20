@@ -103,6 +103,14 @@
           </button>
           <div class="stage-chat-dock">
             <div class="stage-chat-messages" id="stageChatMessages"></div>
+            <div class="stage-action-row" aria-label="アクション">
+              <button type="button" data-avatar-action="wave">手を振る</button>
+              <button type="button" data-avatar-action="yes">うなずく</button>
+              <button type="button" data-avatar-action="no">首を振る</button>
+              <button type="button" data-avatar-action="dance">踊る</button>
+              <button type="button" data-avatar-action="jump">ジャンプ</button>
+              <button type="button" data-avatar-action="thumbs">いいね</button>
+            </div>
             <div class="stage-chat-composer">
               <input id="stageChatInput" type="text" placeholder="soulmateに話しかけよう..." />
               <button class="send-chip" id="stageChatSend" type="button">送信</button>
@@ -300,7 +308,7 @@
 
     <div class="toast" id="toast"></div>
 
-  <script type="module" src="/prototype/avatar-stage.js?v=20260616-1"></script>
-  <script src="/prototype/app.js?v=20260616-1"></script>
+  <script type="module" src="/prototype/avatar-stage.js?v=20260620-1"></script>
+  <script src="/prototype/app.js?v=20260620-1"></script>
 </body>
 </html>

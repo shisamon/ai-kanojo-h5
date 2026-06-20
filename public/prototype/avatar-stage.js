@@ -4,7 +4,7 @@ import { GLTFLoader } from "/prototype/vendor/loaders/GLTFLoader.js";
 const canvas = document.querySelector("#avatarCanvas");
 const stage = document.querySelector("#stageTouch");
 const fallback = document.querySelector("#stageImage");
-const MODEL_URL = "/prototype/models/human-figure.glb";
+const MODEL_URL = "/prototype/models/interactive-base.glb";
 
 if (canvas && stage) {
   const renderer = new THREE.WebGLRenderer({
@@ -130,6 +130,44 @@ if (canvas && stage) {
   scene.add(tealLight);
 
   let usingRealModel = false;
+  let mixer = null;
+  let activeAction = null;
+  let queuedIdleAt = 0;
+  const actionMap = new Map();
+  const commandClips = {
+    wave: "Wave",
+    yes: "Yes",
+    no: "No",
+    dance: "Dance",
+    jump: "Jump",
+    thumbs: "ThumbsUp",
+    punch: "Punch",
+    idle: "Idle"
+  };
+
+  function playClip(name = "Idle", options = {}) {
+    const nextAction = actionMap.get(name) || actionMap.get("Idle");
+    if (!nextAction || nextAction === activeAction) return;
+    const loop = options.loop || (name === "Idle" ? THREE.LoopRepeat : THREE.LoopOnce);
+    nextAction.reset();
+    nextAction.setLoop(loop, loop === THREE.LoopOnce ? 1 : Infinity);
+    nextAction.clampWhenFinished = loop === THREE.LoopOnce;
+    nextAction.enabled = true;
+    nextAction.setEffectiveTimeScale(1);
+    nextAction.setEffectiveWeight(1);
+    if (activeAction) nextAction.crossFadeFrom(activeAction, options.fade ?? 0.18, false);
+    nextAction.play();
+    activeAction = nextAction;
+  }
+
+  function playAvatarCommand(command = "idle") {
+    const clip = commandClips[command] || "Idle";
+    const isIdle = clip === "Idle";
+    playClip(clip, { loop: isIdle ? THREE.LoopRepeat : THREE.LoopOnce });
+    queuedIdleAt = isIdle ? 0 : performance.now() + (clip === "Dance" ? 4200 : 1800);
+    setState(command === "dance" ? "speaking" : "touched", 900);
+  }
+
   const loader = new GLTFLoader();
   loader.load(
     MODEL_URL,
@@ -153,9 +191,15 @@ if (canvas && stage) {
       normalized.scale.setScalar(3.25 / size.y);
       normalized.add(source);
       realModel.add(normalized);
+      mixer = new THREE.AnimationMixer(normalized);
+      gltf.animations.forEach((clip) => {
+        actionMap.set(clip.name, mixer.clipAction(clip));
+      });
+      playClip("Idle", { fade: 0 });
       realModel.visible = true;
       usingRealModel = true;
       canvas.dataset.avatarModel = "real";
+      canvas.dataset.avatarAnimations = gltf.animations.map((clip) => clip.name).join(",");
       stage.classList.add("has-real-model");
       lastWidth = 0;
       resize();
@@ -197,6 +241,10 @@ if (canvas && stage) {
   stage.addEventListener("pointerdown", () => {
     reactUntil = performance.now() + 720;
     currentState = "touched";
+    playAvatarCommand("wave");
+  });
+  document.querySelectorAll("[data-avatar-action]").forEach((button) => {
+    button.addEventListener("click", () => playAvatarCommand(button.dataset.avatarAction));
   });
 
   const resizeObserver = new ResizeObserver(resize);
@@ -209,12 +257,19 @@ if (canvas && stage) {
   canvas.classList.add("is-ready");
 
   function animate() {
-    const elapsed = clock.getElapsedTime();
+    const delta = Math.min(clock.getDelta(), 0.05);
+    const elapsed = clock.elapsedTime;
     const now = performance.now();
     const isReacting = now < reactUntil;
     const isSpeaking = currentState === "speaking" || (isReacting && currentState === "touched");
     const isThinking = currentState === "thinking";
     const compact = lastWidth > lastHeight * 1.45;
+
+    if (mixer) mixer.update(delta);
+    if (queuedIdleAt && now > queuedIdleAt) {
+      queuedIdleAt = 0;
+      playClip("Idle");
+    }
 
     resize();
     body.visible = !usingRealModel && !compact;
@@ -227,7 +282,7 @@ if (canvas && stage) {
     });
     breathGroup.scale.y = 1 + Math.sin(elapsed * 2.1) * 0.018;
     root.rotation.y = Math.sin(elapsed * 0.55) * 0.12 + (isReacting ? Math.sin(elapsed * 12) * 0.035 : 0);
-    realModel.rotation.y = -Math.PI / 2 + Math.sin(elapsed * 0.42) * 0.045;
+    realModel.rotation.y = Math.sin(elapsed * 0.42) * 0.045;
     root.position.y = usingRealModel
       ? compact
         ? -2.72

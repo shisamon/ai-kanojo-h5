@@ -3382,6 +3382,37 @@ body.onboarding-active .customize-modal .customize-cancel {
   display: none;
 }
 
+.stage-action-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 2px 2px;
+  scrollbar-width: none;
+}
+
+.stage-action-row::-webkit-scrollbar {
+  display: none;
+}
+
+.stage-action-row button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.86);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stage-action-row button:active {
+  transform: translateY(1px) scale(0.98);
+  border-color: rgba(255, 77, 154, 0.42);
+  background: rgba(255, 77, 154, 0.18);
+}
+
 .stage-chat-message {
   width: fit-content;
   max-width: 82%;
